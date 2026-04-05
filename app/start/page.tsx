@@ -242,7 +242,7 @@ export default function StartPage() {
             {/* Choice */}
             {currentStep.inputType === 'choice' && (
               <ChatChoices
-                choices={currentStep.choices || []}
+                choices={(currentStep.choicesFn ? currentStep.choicesFn(answers) : currentStep.choices) || []}
                 onSelect={handleAnswer}
               />
             )}
@@ -250,7 +250,7 @@ export default function StartPage() {
             {/* Ranked Choice */}
             {currentStep.inputType === 'ranked-choice' && (
               <ChatRankedChoices
-                choices={currentStep.choices || []}
+                choices={(currentStep.choicesFn ? currentStep.choicesFn(answers) : currentStep.choices) || []}
                 onSubmit={handleAnswer}
               />
             )}

@@ -35,7 +35,6 @@ export default function SearchPreviewPage() {
     { label: '성격', value: data.ideal_personality || '-', field: 'ideal_personality', editable: true },
     { label: '직업', value: data.ideal_job || '-', field: 'ideal_job', editable: true },
     { label: '종교', value: data.ideal_religion || '-', field: 'ideal_religion', editable: true },
-    { label: '정치 성향', value: data.ideal_politics || '-', field: 'ideal_politics', editable: true },
     { label: '절대 안 되는 것', value: data.ideal_dealbreaker || '-', field: 'ideal_dealbreaker', editable: true },
   ];
 
@@ -149,7 +148,7 @@ export default function SearchPreviewPage() {
           <p className="text-xs text-sto-muted leading-relaxed">
             🧠 <span className="text-white">AI가 추가로 반영하는 것들:</span> 너의 MBTI ({data.mbti || '미입력'}),
             가치관 ({data.values_love}, {data.values_life}),
-            종교 ({data.religion}), 정치 성향 ({data.politics}).
+            종교 ({data.religion}).
             이건 직접 매칭 점수에 반영되지만 상대에게는 안 보여.
           </p>
         </div>

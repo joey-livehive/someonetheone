@@ -10,6 +10,7 @@ export interface ChatStep {
   messages: string[]; // AI가 보내는 메시지들 (연속으로)
   inputType: 'choice' | 'ranked-choice' | 'text' | 'textarea' | 'photo' | 'phone' | 'date' | 'none';
   choices?: string[];
+  choicesFn?: (answers: Record<string, any>) => string[];
   placeholder?: string;
   field: string; // 저장할 필드명
   reactions?: Record<string, string[]> | string[]; // 답변 후 호응 멘트 (키별 or 공통)

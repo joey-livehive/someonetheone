@@ -6,47 +6,13 @@ import { useRouter } from 'next/navigation';
 interface CardData {
   name: string;
   gender: string;
-  birthdate: string;
+  age: string;
   height: string;
   job: string;
-  mbti: string;
-  hobby: string;
-  charm: string;
+  personality: string;
   photo: string | null;
 }
 
-function getAge(birthdate: string): number {
-  const birth = new Date(birthdate);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-  return age;
-}
-
-function getZodiac(birthdate: string): string {
-  const month = new Date(birthdate).getMonth() + 1;
-  const day = new Date(birthdate).getDate();
-  const signs = [
-    { sign: '♑ 염소자리', end: [1, 19] },
-    { sign: '♒ 물병자리', end: [2, 18] },
-    { sign: '♓ 물고기자리', end: [3, 20] },
-    { sign: '♈ 양자리', end: [4, 19] },
-    { sign: '♉ 황소자리', end: [5, 20] },
-    { sign: '♊ 쌍둥이자리', end: [6, 21] },
-    { sign: '♋ 게자리', end: [7, 22] },
-    { sign: '♌ 사자자리', end: [8, 22] },
-    { sign: '♍ 처녀자리', end: [9, 22] },
-    { sign: '♎ 천칭자리', end: [10, 23] },
-    { sign: '♏ 전갈자리', end: [11, 22] },
-    { sign: '♐ 궁수자리', end: [12, 21] },
-    { sign: '♑ 염소자리', end: [12, 31] },
-  ];
-  for (const { sign, end } of signs) {
-    if (month < end[0] || (month === end[0] && day <= end[1])) return sign;
-  }
-  return '♑ 염소자리';
-}
 
 export default function MyCardPage() {
   const router = useRouter();
@@ -106,8 +72,6 @@ export default function MyCardPage() {
     setAiWarning(null);
   }
 
-  const age = data.birthdate ? getAge(data.birthdate) : '?';
-  const zodiac = data.birthdate ? getZodiac(data.birthdate) : '';
   const hasPhoto = data.photo && data.photo !== '__skipped__';
 
   return (
@@ -124,71 +88,56 @@ export default function MyCardPage() {
         {/* Card */}
         <div className="rounded-2xl bg-sto-surface border border-sto-border overflow-hidden">
           {/* Photo area */}
-          <div className="relative h-48 bg-gradient-to-br from-sto-primary/20 to-sto-accent/10 flex items-center justify-center">
+          <div className="relative bg-gradient-to-br from-sto-primary/20 to-sto-accent/10">
             {hasPhoto ? (
-              <>
+              <div>
                 <img
                   src={data.photo!}
                   alt="프로필"
-                  className="w-full h-full object-cover blur-lg"
+                  className="w-full h-64 object-cover"
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                  <div className="text-center">
-                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#8B5CF6" strokeWidth={1.5} className="mx-auto mb-2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <p className="text-sm text-white/80">외모는 앱에서만 공개</p>
-                    <p className="text-xs text-white/50 mt-1">매칭된 사람만 볼 수 있어</p>
-                  </div>
-                </div>
-              </>
+                <p className="text-xs text-sto-muted text-center py-2">
+                  🔒 매칭된 사람만 볼 수 있어
+                </p>
+              </div>
             ) : (
-              <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-sto-bg mx-auto mb-3 flex items-center justify-center text-3xl">
-                  {data.gender === '남자' ? '🙋‍♂️' : '🙋‍♀️'}
+              <div className="h-48 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-20 h-20 rounded-full bg-sto-bg mx-auto mb-3 flex items-center justify-center text-3xl">
+                    {data.gender === '남자' ? '🙋‍♂️' : '🙋‍♀️'}
+                  </div>
+                  <p className="text-sm text-sto-muted">사진 미���록</p>
                 </div>
-                <p className="text-sm text-sto-muted">사진 미등록</p>
               </div>
             )}
           </div>
 
           {/* Info */}
           <div className="p-5 space-y-4">
-            {/* Name & basic */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold">{data.name}</h2>
-                <p className="text-sm text-sto-muted">{age}세 · {zodiac}</p>
-              </div>
-              {data.mbti && data.mbti !== '몰라' && (
-                <span className="px-3 py-1 rounded-full bg-sto-primary/10 text-sto-primary text-sm font-medium">
-                  {data.mbti}
-                </span>
-              )}
-            </div>
+            {/* Name */}
+            <h2 className="text-xl font-bold">{data.name}</h2>
 
             {/* Editable fields */}
             <div className="space-y-3">
               <EditableRow
+                label="나이"
+                value={data.age ? `${data.age}세` : '미입력'}
+                onEdit={() => startEdit('age', data.age)}
+              />
+              <EditableRow
                 label="키"
-                value={data.height}
+                value={data.height ? `${data.height}cm` : '미입력'}
                 onEdit={() => startEdit('height', data.height)}
               />
               <EditableRow
                 label="직업"
-                value={data.job}
+                value={data.job || '미입력'}
                 onEdit={() => startEdit('job', data.job)}
               />
               <EditableRow
-                label="취미"
-                value={data.hobby}
-                onEdit={() => startEdit('hobby', data.hobby)}
-              />
-              <EditableRow
-                label="매력 포인트"
-                value={data.charm}
-                onEdit={() => startEdit('charm', data.charm)}
+                label="성격"
+                value={data.personality || '미입력'}
+                onEdit={() => startEdit('personality', data.personality || '')}
               />
             </div>
           </div>

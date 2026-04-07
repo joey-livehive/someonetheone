@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /* ─── Scroll-based background color ─── */
@@ -577,7 +578,7 @@ export default function LandingPage() {
           <div className="max-w-xs mx-auto mt-12 glass-warm rounded-2xl overflow-hidden border border-[#F7CA5D]/20">
             <div className="relative">
               <div className="bg-[#F7CA5D]/80 text-center py-1.5 text-xs font-semibold text-[#FEFBF4] tracking-wide">자기소개 카드</div>
-              <img src="/images/card-example.png" alt="소개 카드 예시" className="w-full h-64 object-cover" style={{ objectPosition: '50% 30%' }} />
+              <Image src="/images/card-example.png" alt="소개 카드 예시" width={320} height={256} className="w-full h-64 object-cover" style={{ objectPosition: '50% 30%' }} />
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="px-4 py-2 rounded-lg bg-[#33220A]/60 backdrop-blur-sm text-xs text-[#FEFBF4]/80">🔒 매칭된 사람만 당신의 사진을 볼 수 있어요.</span>
               </div>
@@ -624,7 +625,7 @@ export default function LandingPage() {
               떨리는 마음, 읽씹 걱정 — 전부 AI가 감당할게.
             </p>
             <div className="mt-8 max-w-xs mx-auto">
-              <img src="/images/ai-dm-example.png" alt="AI DM 예시" className="w-full rounded-2xl border border-white/10" />
+              <Image src="/images/ai-dm-example.png" alt="AI DM 예시" width={320} height={320} className="w-full rounded-2xl border border-white/10" />
             </div>
           </div>
 

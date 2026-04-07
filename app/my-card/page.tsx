@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface CardData {
   name: string;
@@ -23,9 +24,13 @@ export default function MyCardPage() {
   const [aiWarning, setAiWarning] = useState<string | null>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem('sto_onboarding');
-    if (raw) {
-      setData(JSON.parse(raw));
+    try {
+      const raw = localStorage.getItem('sto_onboarding');
+      if (raw) {
+        setData(JSON.parse(raw));
+      }
+    } catch (e) {
+      console.warn('onboarding 데이터 파싱 실패:', e);
     }
   }, []);
 
@@ -91,10 +96,13 @@ export default function MyCardPage() {
           <div className="relative bg-gradient-to-br from-sto-primary/20 to-sto-accent/10">
             {hasPhoto ? (
               <div>
-                <img
+                <Image
                   src={data.photo!}
                   alt="프로필"
+                  width={400}
+                  height={256}
                   className="w-full h-64 object-cover"
+                  unoptimized
                 />
                 <p className="text-xs text-sto-muted text-center py-2">
                   🔒 매칭된 사람만 볼 수 있어

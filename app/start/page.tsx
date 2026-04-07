@@ -136,7 +136,11 @@ export default function StartPage() {
 
     // 마지막 스텝이면 저장하고 이동
     if (nextIndex >= CHAT_STEPS.length) {
-      localStorage.setItem('sto_onboarding', JSON.stringify(newAnswers));
+      try {
+        localStorage.setItem('sto_onboarding', JSON.stringify(newAnswers));
+      } catch (e) {
+        console.warn('localStorage 저장 실패 (용량 초과 가능):', e);
+      }
       await new Promise((r) => setTimeout(r, 500));
       router.push('/my-card');
       return;

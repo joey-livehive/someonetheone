@@ -279,6 +279,7 @@ export default function ResultsPage() {
   }
 
   function handlePay() {
+    console.warn('[someonetheone] 결제 로직 미구현 — 프로토타입 프론트 only 처리');
     if (selectedCard !== null) {
       setUnlockedCards((prev) => new Set([...prev, selectedCard]));
     }

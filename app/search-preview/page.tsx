@@ -17,8 +17,12 @@ export default function SearchPreviewPage() {
   const [editValue, setEditValue] = useState('');
 
   useEffect(() => {
-    const raw = localStorage.getItem('sto_onboarding');
-    if (raw) setData(JSON.parse(raw));
+    try {
+      const raw = localStorage.getItem('sto_onboarding');
+      if (raw) setData(JSON.parse(raw));
+    } catch (e) {
+      console.warn('onboarding 데이터 파싱 실패:', e);
+    }
   }, []);
 
   if (!data) {

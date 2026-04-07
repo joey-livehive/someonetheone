@@ -6,12 +6,12 @@ const config: Config = {
     extend: {
       colors: {
         sto: {
-          bg: '#0A0A0F',
-          surface: '#16161F',
-          card: '#1E1E2A',
-          border: '#2A2A3A',
-          text: '#FFFFFF',
-          muted: '#8888AA',
+          bg: '#FEFBF4',
+          surface: '#F5EFE3',
+          card: '#FFF8EC',
+          border: '#E0D5C1',
+          text: '#2C1D07',
+          muted: '#8B7D6B',
           primary: '#8B5CF6',
           'primary-light': '#A78BFA',
           accent: '#06F5C0',
@@ -20,7 +20,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['"Pretendard"', 'system-ui', 'sans-serif'],
+        sans: ['"A2Z"', 'system-ui', 'sans-serif'],
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

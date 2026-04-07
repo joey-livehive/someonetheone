@@ -5,13 +5,28 @@
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-Thin.otf') format('opentype'); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-ExtraLight.otf') format('opentype'); font-weight: 200; font-style: normal; font-display: swap; }
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-Light.otf') format('opentype'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-Medium.otf') format('opentype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-SemiBold.otf') format('opentype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-Bold.otf') format('opentype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-ExtraBold.otf') format('opentype'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'A2Z'; src: url('/fonts/A2Z-Black.otf') format('opentype'); font-weight: 900; font-style: normal; font-display: swap; }
+
+@font-face { font-family: 'PP Editorial Old'; src: url('/fonts/PPEditorialOld-Ultralight.otf') format('opentype'); font-weight: 200; font-style: normal; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('/fonts/PPEditorialOld-UltralightItalic.otf') format('opentype'); font-weight: 200; font-style: italic; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('/fonts/PPEditorialOld-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('/fonts/PPEditorialOld-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('/fonts/PPEditorialOld-Ultrabold.otf') format('opentype'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'PP Editorial Old'; src: url('/fonts/PPEditorialOld-UltraboldItalic.otf') format('opentype'); font-weight: 800; font-style: italic; font-display: swap; }
 
 :root {
-  --sto-bg: #0A0A0F;
-  --sto-surface: #16161F;
-  --sto-primary: #8B5CF6;
-  --sto-accent: #06F5C0;
+  --sto-bg: #FEFBF4;
+  --sto-surface: #F5EFE3;
+  --sto-primary: #F7CA5D;
+  --sto-accent: #FDA046;
 }
 
 * {
@@ -20,7 +35,7 @@
 
 body {
   background-color: var(--sto-bg);
-  color: #FFFFFF;
+  color: #2C1D07;
   overflow-x: hidden;
 }
 
@@ -32,7 +47,7 @@ body {
   background: var(--sto-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2A3A;
+  background: #D0C5B3;
   border-radius: 2px;
 }
 
@@ -44,48 +59,15 @@ body {
   background-clip: text;
 }
 
-/* Holographic gradient text */
-.text-holo {
-  background: linear-gradient(
-    90deg,
-    #8B5CF6 0%,
-    #06F5C0 25%,
-    #F472B6 50%,
-    #8B5CF6 75%,
-    #06F5C0 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: holoShift 4s linear infinite;
-}
-
-@keyframes holoShift {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
 /* Glass card */
 .glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
-    0 20px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-.glass-strong {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-    inset 0 0 20px 0 rgba(139, 92, 246, 0.03),
-    0 25px 60px -15px rgba(0, 0, 0, 0.6);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
+    0 4px 20px -4px rgba(0, 0, 0, 0.08);
 }
 
 /* Glass with colored tint */
@@ -93,48 +75,25 @@ body {
   background: rgba(139, 92, 246, 0.06);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.15);
   box-shadow:
-    inset 0 1px 0 0 rgba(139, 92, 246, 0.1),
-    0 20px 50px -12px rgba(139, 92, 246, 0.15);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+    0 4px 20px -4px rgba(139, 92, 246, 0.1);
 }
 
-.glass-mint {
-  background: rgba(6, 245, 192, 0.04);
+.glass-warm {
+  background: rgba(247, 202, 93, 0.08);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(6, 245, 192, 0.1);
+  border: 1px solid rgba(247, 202, 93, 0.2);
   box-shadow:
-    inset 0 1px 0 0 rgba(6, 245, 192, 0.08),
-    0 20px 50px -12px rgba(6, 245, 192, 0.1);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+    0 4px 20px -4px rgba(247, 202, 93, 0.15);
 }
 
 /* 3D perspective container */
 .perspective-1000 {
   perspective: 1000px;
-}
-
-/* AI grid background */
-.ai-grid {
-  background-image:
-    linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-
-/* Neural dot */
-.neural-dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: rgba(139, 92, 246, 0.4);
-  box-shadow: 0 0 6px rgba(139, 92, 246, 0.3);
-}
-
-/* Glowing border */
-.glow-border {
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
 }
 
 /* Blur overlay for locked cards */
@@ -154,25 +113,54 @@ body {
   animation: scan 2s linear infinite;
 }
 
-/* CTA button 3D press */
-.btn-3d {
-  transform: translateY(0);
-  box-shadow:
-    0 4px 15px rgba(139, 92, 246, 0.4),
-    0 0 40px rgba(139, 92, 246, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.15s ease;
+/* Gold gradient CTA */
+.btn-gold {
+  background: linear-gradient(90deg, #F4CD93 0%, #F7CA5D 51%, #F29D4B 100%);
+  background-size: 200% 100%;
+  animation: goldShift 3s ease-in-out infinite;
 }
-.btn-3d:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 25px rgba(139, 92, 246, 0.5),
-    0 0 60px rgba(139, 92, 246, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+@keyframes goldShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
-.btn-3d:active {
-  transform: translateY(1px);
-  box-shadow:
-    0 2px 8px rgba(139, 92, 246, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+/* Traveling glow on line */
+.animate-travel-glow {
+  animation: travelGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes travelGlow {
+  0% { left: -12px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: calc(100% - 12px); opacity: 0; }
+}
+
+/* Vertical traveling glow */
+.animate-travel-glow-v {
+  animation: travelGlowV 2.5s ease-in-out infinite;
+}
+
+@keyframes travelGlowV {
+  0% { top: -20px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: calc(100% - 20px); opacity: 0; }
+}
+
+@keyframes source-spotlight {
+  0% { transform: scale(0.95); opacity: 0.35; }
+  10% { transform: scale(1.2); opacity: 1; }
+  20% { transform: scale(1.2); opacity: 1; }
+  35% { transform: scale(0.95); opacity: 0.35; }
+  100% { transform: scale(0.95); opacity: 0.35; }
+}
+
+@keyframes scan-ring {
+  0% { transform: scale(1); opacity: 0; }
+  10% { transform: scale(1.05); opacity: 0.5; }
+  35% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
 }

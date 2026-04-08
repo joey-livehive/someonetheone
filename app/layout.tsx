@@ -1,13 +1,6 @@
 import type { Metadata } from 'next';
-import { Nanum_Pen_Script, Gaegu } from 'next/font/google';
+import { Gaegu } from 'next/font/google';
 import './globals.css';
-
-const nanumPen = Nanum_Pen_Script({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-nanum-pen',
-  display: 'swap',
-});
 
 const gaegu = Gaegu({
   subsets: ['latin'],
@@ -28,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${nanumPen.variable} ${gaegu.variable}`}>
+    <html lang="ko" className={gaegu.variable}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>

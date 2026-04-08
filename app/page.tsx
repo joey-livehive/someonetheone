@@ -69,10 +69,10 @@ const CARD_LABELS = [
 
 const SOURCE_PLACES = [
   { label: 'Instagram', icon: 'instagram', isSvg: true },
-  { label: '동네 카페', icon: '☕' },
-  { label: '헬스장', icon: '🏋️' },
-  { label: '독서모임', icon: '📚' },
   { label: 'LinkedIn', icon: 'linkedin', isSvg: true },
+  { label: '교보문고', icon: '📚' },
+  { label: '헬스장', icon: '🏋️' },
+  { label: '지구', icon: '🌏' },
 ];
 
 function PlaceIcon({ icon, isSvg }: { icon: string; isSvg?: boolean }) {
@@ -503,14 +503,16 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#F7CA5D', lineHeight: '135%' }}>
-              소개팅 앱은 그만.
+              소개팅앱엔
               <br />
-              <span style={{ color: '#FEFBF4' }}>AI가 직접 데려올게.</span>
+              <span style={{ color: '#FEFBF4' }}>그런 사람 없잖아.</span>
             </h2>
-            <p className="max-w-lg mx-auto" style={{ color: '#FEFBF4' }}>
-              인스타, 오프라인, 커뮤니티... 어디에 있든 상관없어.
+            <p className="max-w-lg mx-auto leading-relaxed" style={{ color: '#FEFBF4' }}>
+              우리는 거기 말고 다른 데를 봐.
               <br />
-              너한테 맞는 사람을 찾아서 연결해줄게.
+              인스타그램, 링크드인, 교보문고, 헬스장,
+              <br />
+              그리고 <span style={{ color: '#F7CA5D', fontWeight: 600 }}>지구</span>.
             </p>
 
             {/* Vertical gradient line with glow ball */}
@@ -607,44 +609,66 @@ export default function LandingPage() {
       </section>
 
 
-      {/* ━━━ How we connect ━━━ */}
+      {/* ━━━ Promise — 네 편이야 ━━━ */}
       <section className="relative py-24 px-6">
         <div className="max-w-3xl mx-auto">
-          {/* 1. AI가 대신 연락 */}
-          <div className="text-center mb-20">
+          <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#F7CA5D', lineHeight: '135%' }}>
-              부끄러움은
+              그리고, 난
               <br />
-              <span style={{ color: '#FEFBF4' }}>AI 몫이야</span>
+              <span style={{ color: '#FEFBF4' }}>끝까지 네 편이야.</span>
             </h2>
-            <p className="text-[#E8DCCA] max-w-lg mx-auto leading-relaxed">
-              AI가 먼저 말 걸고, 거절당해도 창피한 건 AI야.
-              <br />
-              상대가 관심 보이면 그때 너한테 연결해줄게.
-              <br />
-              떨리는 마음, 읽씹 걱정 — 전부 AI가 감당할게.
+            <p className="text-[#E8DCCA] max-w-md mx-auto mt-4 leading-relaxed">
+              네 사람을 찾는 일은, 네 것이어야 하니까.
             </p>
-            <div className="mt-8 max-w-xs mx-auto">
-              <Image src="/images/ai-dm-example.png" alt="AI DM 예시" width={320} height={320} className="w-full rounded-2xl border border-white/10" />
-            </div>
           </div>
 
-          {/* 오프라인 만남 세팅 */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#F7CA5D', lineHeight: '135%' }}>
-              자연스러운 우연을
-              <br />
-              <span style={{ color: '#FEFBF4' }}>만들어줄게</span>
-            </h2>
-            <p className="text-[#E8DCCA] max-w-lg mx-auto leading-relaxed">
-              억지 만남 말고, 운명처럼 마주치게 해줄게.
-              <br />
-              너만을 위해 존재하는 소개팅 친구처럼,
-              <br />
-              상대의 취향, 장소, 타이밍까지 파악해서
-              <br />
-              자연스러운 만남을 만들어줄게.
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {[
+              {
+                label: '비밀',
+                title: '네 정보는 누구에게도 보여주지 않아',
+                desc: '보여줘야 할 땐, 너한테 먼저 물어볼게.',
+              },
+              {
+                label: '첫 연락은 내가',
+                title: '너 대신 말 걸어볼게',
+                desc: '조심스럽게, 그렇지만 확실하게.',
+              },
+              {
+                label: '먼저 알아볼게',
+                title: '그 사람을 미리 살펴볼게',
+                desc: '좋은 점, 특별한 점, 네가 알아둬야 할 점까지.',
+              },
+              {
+                label: '네 기준이 곧 내 기준',
+                title: '네가 원하는 사람을 찾아올게',
+                desc: '외모든, 성격이든, 무엇이든.',
+              },
+            ].map((promise) => (
+              <div
+                key={promise.label}
+                className="rounded-2xl p-6"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(255,251,242,0.08) 0%, rgba(255,245,224,0.08) 100%)',
+                  border: '1px solid rgba(253,160,70,0.25)',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+                }}
+              >
+                <span
+                  className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3"
+                  style={{ background: 'rgba(247,202,93,0.15)', color: '#F7CA5D' }}
+                >
+                  {promise.label}
+                </span>
+                <h3 className="text-lg font-bold mb-2" style={{ color: '#FEFBF4', lineHeight: '140%' }}>
+                  {promise.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: '#E8DCCA' }}>
+                  {promise.desc}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

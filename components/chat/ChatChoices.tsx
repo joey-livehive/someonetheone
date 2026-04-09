@@ -12,7 +12,7 @@ export default function ChatChoices({ choices, onSelect }: Props) {
         <button
           key={choice}
           onClick={() => onSelect(choice)}
-          className="px-4 py-2.5 rounded-full border border-sto-border bg-sto-surface text-sm font-medium text-white hover:border-sto-primary hover:bg-sto-primary/10 active:scale-95 transition-all duration-200"
+          className="px-4 py-2.5 rounded-full border border-sto-border bg-sto-surface text-sm font-medium text-sto-text hover:border-sto-primary hover:bg-sto-primary/10 active:scale-95 transition-all duration-200"
         >
           {choice}
         </button>

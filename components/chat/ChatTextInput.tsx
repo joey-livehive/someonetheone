@@ -32,7 +32,7 @@ export default function ChatTextInput({ placeholder, multiline, type = 'text', o
   }
 
   const sharedClass =
-    'w-full bg-sto-surface border border-sto-border rounded-xl px-4 py-3 text-white placeholder-sto-muted/50 focus:outline-none focus:border-sto-primary text-[15px] transition-colors';
+    'w-full bg-sto-surface border border-sto-border rounded-xl px-4 py-3 text-sto-text placeholder-sto-muted/50 focus:outline-none focus:border-sto-primary text-[15px] transition-colors';
 
   return (
     <div className="flex items-end gap-2 animate-fade-in">

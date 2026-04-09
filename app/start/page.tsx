@@ -194,7 +194,7 @@ export default function StartPage() {
       {canUndo && (
         <button
           onClick={handleUndo}
-          className="fixed top-4 left-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sto-surface/80 backdrop-blur border border-sto-border text-sm text-sto-muted hover:text-white transition-colors"
+          className="fixed top-4 left-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sto-surface/80 backdrop-blur border border-sto-border text-sm text-sto-muted hover:text-sto-text transition-colors"
         >
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />

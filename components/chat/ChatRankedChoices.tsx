@@ -39,8 +39,8 @@ export default function ChatRankedChoices({ choices, onSubmit }: Props) {
               onClick={() => toggle(choice)}
               className={`px-4 py-2.5 rounded-full border text-sm font-medium transition-all duration-200 active:scale-95 ${
                 isSelected
-                  ? 'border-sto-primary bg-sto-primary/20 text-white'
-                  : 'border-sto-border bg-sto-surface text-white hover:border-sto-primary hover:bg-sto-primary/10'
+                  ? 'border-sto-primary bg-sto-primary/20 text-sto-text'
+                  : 'border-sto-border bg-sto-surface text-sto-text hover:border-sto-primary hover:bg-sto-primary/10'
               }`}
             >
               {isSelected && (

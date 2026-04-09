@@ -150,7 +150,7 @@ export default function SearchPreviewPage() {
         {/* Hidden criteria note */}
         <div className="p-4 rounded-xl bg-sto-bg border border-sto-border mb-6">
           <p className="text-xs text-sto-muted leading-relaxed">
-            🧠 <span className="text-white">AI가 추가로 반영하는 것들:</span> 너의 MBTI ({data.mbti || '미입력'}),
+            🧠 <span className="text-sto-text">AI가 추가로 반영하는 것들:</span> 너의 MBTI ({data.mbti || '미입력'}),
             가치관 ({data.values_love}, {data.values_life}),
             종교 ({data.religion}).
             이건 직접 매칭 점수에 반영되지만 상대에게는 안 보여.
@@ -159,20 +159,20 @@ export default function SearchPreviewPage() {
 
         {/* Edit Modal */}
         {editing && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-sto-text/40 backdrop-blur-sm">
             <div className="w-full max-w-md mx-4 mb-4 sm:mb-0 p-6 rounded-2xl bg-sto-surface border border-sto-border animate-slide-up">
               <h3 className="text-lg font-bold mb-4">수정하기</h3>
               <input
                 type="text"
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="w-full p-3 rounded-xl bg-sto-bg border border-sto-border text-white focus:outline-none focus:border-sto-primary"
+                className="w-full p-3 rounded-xl bg-sto-bg border border-sto-border text-sto-text focus:outline-none focus:border-sto-primary"
                 autoFocus
               />
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={saveEdit}
-                  className="flex-1 py-3 rounded-xl bg-sto-primary text-white font-semibold"
+                  className="flex-1 py-3 rounded-xl bg-sto-primary text-sto-text font-semibold"
                 >
                   저장
                 </button>
@@ -192,7 +192,7 @@ export default function SearchPreviewPage() {
           <div className="max-w-md mx-auto space-y-2">
             <button
               onClick={handleStartSearch}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-sto-primary to-sto-accent text-white font-semibold text-lg transition-all active:scale-[0.98] animate-glow"
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-sto-primary to-sto-accent text-sto-text font-semibold text-lg transition-all active:scale-[0.98] animate-glow"
             >
               이대로 찾아줘! 🔍
             </button>

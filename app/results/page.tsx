@@ -248,7 +248,7 @@ function MatchCardComponent({
             <p className="text-sm text-sto-muted mb-4">프로필 카드를 열어봐</p>
             <button
               onClick={onUnlock}
-              className="px-6 py-3 rounded-xl bg-sto-primary hover:bg-sto-primary-light text-white font-semibold transition-colors"
+              className="px-6 py-3 rounded-xl bg-sto-primary hover:bg-sto-primary-light text-sto-text font-semibold transition-colors"
             >
               카드 열기 — ₩1,900
             </button>
@@ -361,7 +361,7 @@ export default function ResultsPage() {
               </p>
             </div>
 
-            <button className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold transition-all active:scale-[0.98]">
+            <button className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-sto-text font-semibold transition-all active:scale-[0.98]">
               오프라인 탐색 시작 — ₩9,900
             </button>
             <p className="text-xs text-sto-muted mt-2">
@@ -387,7 +387,7 @@ export default function ResultsPage() {
           </div>
           <button
             onClick={() => setUnlockedCards(new Set(ONLINE_CARDS.map((c) => c.id)))}
-            className="w-full py-4 rounded-xl bg-sto-primary hover:bg-sto-primary-light text-white font-semibold transition-colors"
+            className="w-full py-4 rounded-xl bg-sto-primary hover:bg-sto-primary-light text-sto-text font-semibold transition-colors"
           >
             전체 카드 열기
           </button>
@@ -398,7 +398,7 @@ export default function ResultsPage() {
       {unlockedCards.size > 0 && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-sto-bg via-sto-bg to-transparent">
           <div className="max-w-lg mx-auto">
-            <button className="w-full py-4 rounded-xl bg-gradient-to-r from-sto-primary to-sto-accent text-white font-semibold text-lg transition-all active:scale-[0.98]">
+            <button className="w-full py-4 rounded-xl bg-gradient-to-r from-sto-primary to-sto-accent text-sto-text font-semibold text-lg transition-all active:scale-[0.98]">
               이 사람과 연결하기 →
             </button>
           </div>
@@ -407,7 +407,7 @@ export default function ResultsPage() {
 
       {/* Payment Modal */}
       {showPayment && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-sto-text/40 backdrop-blur-sm">
           <div className="w-full max-w-md mx-4 mb-4 sm:mb-0 p-6 rounded-2xl bg-sto-surface border border-sto-border animate-slide-up">
             <h3 className="text-xl font-bold mb-2">카드 열기</h3>
             <p className="text-sm text-sto-muted mb-6">
@@ -416,13 +416,13 @@ export default function ResultsPage() {
             <div className="space-y-3 mb-6">
               <button
                 onClick={handlePay}
-                className="w-full py-4 rounded-xl bg-sto-primary hover:bg-sto-primary-light text-white font-semibold transition-colors"
+                className="w-full py-4 rounded-xl bg-sto-primary hover:bg-sto-primary-light text-sto-text font-semibold transition-colors"
               >
                 ₩1,900 결제하기
               </button>
               <button
                 onClick={() => setShowPayment(false)}
-                className="w-full py-3 rounded-xl text-sto-muted hover:text-white transition-colors"
+                className="w-full py-3 rounded-xl text-sto-muted hover:text-sto-text transition-colors"
               >
                 닫기
               </button>

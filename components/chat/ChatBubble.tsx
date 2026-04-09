@@ -34,7 +34,7 @@ export default function ChatBubble({ role, children, animate = true }: Props) {
       <div
         className={`max-w-[80%] rounded-2xl text-[15px] leading-relaxed overflow-hidden ${
           isAi
-            ? 'bg-sto-surface text-white rounded-tl-md'
+            ? 'bg-sto-surface text-sto-text rounded-tl-md'
             : 'bg-sto-primary text-white rounded-tr-md'
         }`}
       >

@@ -160,14 +160,14 @@ export default function MyCardPage() {
 
         {/* Edit Modal */}
         {editing && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-sto-text/40 backdrop-blur-sm">
             <div className="w-full max-w-md mx-4 mb-4 sm:mb-0 p-6 rounded-2xl bg-sto-surface border border-sto-border animate-slide-up">
               <h3 className="text-lg font-bold mb-4">수정하기</h3>
               <input
                 type="text"
                 value={editValue}
                 onChange={(e) => { setEditValue(e.target.value); setAiWarning(null); }}
-                className="w-full p-3 rounded-xl bg-sto-bg border border-sto-border text-white focus:outline-none focus:border-sto-primary"
+                className="w-full p-3 rounded-xl bg-sto-bg border border-sto-border text-sto-text focus:outline-none focus:border-sto-primary"
                 autoFocus
               />
               {aiWarning && (
@@ -190,7 +190,7 @@ export default function MyCardPage() {
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={saveEdit}
-                  className="flex-1 py-3 rounded-xl bg-sto-primary text-white font-semibold"
+                  className="flex-1 py-3 rounded-xl bg-sto-primary text-sto-text font-semibold"
                 >
                   저장
                 </button>
@@ -210,7 +210,7 @@ export default function MyCardPage() {
           <div className="max-w-md mx-auto">
             <button
               onClick={() => router.push('/search-preview')}
-              className="w-full py-4 rounded-xl bg-sto-primary hover:bg-sto-primary-light text-white font-semibold text-lg transition-colors"
+              className="w-full py-4 rounded-xl bg-sto-primary hover:bg-sto-primary-light text-sto-text font-semibold text-lg transition-colors"
             >
               좋아, 이대로 갈게 →
             </button>

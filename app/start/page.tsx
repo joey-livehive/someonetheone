@@ -1,8 +1,17 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { trackCompleteRegistration, trackSubmitApplication } from '../../lib/tracking';
+import {
+  trackPageView,
+  trackAnswer,
+  trackPicky,
+  trackCompleteRegistration,
+  trackPhoto,
+  trackMessage,
+  trackSubmitApplication,
+  setGuestUid as setTrackingGuestUid,
+} from '../../lib/tracking';
 
 const C = {
   bg: '#FEFBF4',
@@ -206,11 +215,14 @@ export default function StartPage() {
 
   const questions = phase === 'detail' ? DETAIL_QUESTIONS : INTRO_QUESTIONS;
 
+  useEffect(() => { trackPageView('start'); }, []);
+
   // 설문 시작 시 guest 생성
   async function ensureGuest(): Promise<string> {
     if (guestUid) return guestUid;
     const data = await api('/start', { method: 'POST' });
     setGuestUid(data.guest_uid);
+    setTrackingGuestUid(data.guest_uid);
     return data.guest_uid;
   }
 
@@ -223,6 +235,7 @@ export default function StartPage() {
       method: 'PATCH',
       body: JSON.stringify({ question: q.title.replace('\n', ' '), answer: value }),
     }).catch(() => {});
+    trackAnswer(q.title.replace('\n', ' '), value, phase);
 
     if (phase === 'intro') {
       setIntroAnswers((prev) => [...prev, value]);
@@ -272,6 +285,7 @@ export default function StartPage() {
         body: JSON.stringify({ question: '까다로운 기준', answer: picky.trim() }),
       }).catch(() => {});
     }
+    trackPicky(picky.trim());
     setPhase('email');
   }
 
@@ -311,6 +325,7 @@ export default function StartPage() {
         body: JSON.stringify({ photo_data: photo }),
       }).catch(() => {});
     }
+    trackPhoto();
     setPhase('message');
   }
 
@@ -321,6 +336,7 @@ export default function StartPage() {
         body: JSON.stringify({ question: '나한테 하고 싶은 말', answer: message.trim() }),
       }).catch(() => {});
     }
+    trackMessage(!!message.trim());
     trackSubmitApplication();
     setPhase('done');
   }

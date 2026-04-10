@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { trackLead } from '../lib/tracking';
+import { trackLead, trackPageView } from '../lib/tracking';
 
 /* ─── Design tokens ─── */
 
@@ -215,6 +215,8 @@ function FloatingTag({
 /* ─── Main ─── */
 
 export default function LandingPage() {
+  useEffect(() => { trackPageView('landing'); }, []);
+
   return (
     <main className="relative" style={{ backgroundColor: C.bg }}>
       {/* ━━━ Bottom fixed bar ━━━ */}

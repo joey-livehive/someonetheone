@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { trackLead } from '../lib/tracking';
 
 /* ─── Design tokens ─── */
 
@@ -22,6 +23,7 @@ function CtaButton({ children, className = '' }: { children: React.ReactNode; cl
   return (
     <Link
       href="/start"
+      onClick={trackLead}
       className={`inline-flex items-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base hover:-translate-y-0.5 transition-transform ${className}`}
       style={{ background: C.gold, color: C.ink, border: `2px solid ${C.ink}`, boxShadow: `4px 4px 0 ${C.ink}` }}
     >
@@ -223,6 +225,7 @@ export default function LandingPage() {
           </span>
           <Link
             href="/start"
+            onClick={trackLead}
             className="inline-flex items-center justify-center min-w-[160px] px-14 py-3 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
             style={{ color: C.ink, background: C.gold, border: `2px solid ${C.ink}`, boxShadow: `4px 4px 0 ${C.ink}` }}
           >
@@ -319,6 +322,7 @@ export default function LandingPage() {
           </p>
           <Link
             href="/start"
+            onClick={trackLead}
             className="inline-flex items-center px-10 py-4 rounded-full font-bold text-lg hover:-translate-y-0.5 transition-transform"
             style={{ color: C.ink, background: C.gold, border: `2px solid ${C.gold}`, boxShadow: `5px 5px 0 ${C.ink}` }}
           >

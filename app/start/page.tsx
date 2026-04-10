@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
+import { trackCompleteRegistration, trackSubmitApplication } from '../../lib/tracking';
 
 const C = {
   bg: '#FEFBF4',
@@ -282,6 +283,7 @@ export default function StartPage() {
       method: 'PATCH',
       body: JSON.stringify({ email: email.trim() }),
     }).catch(() => {});
+    trackCompleteRegistration(email.trim());
     setPhase('bridge');
   }
 
@@ -319,6 +321,7 @@ export default function StartPage() {
         body: JSON.stringify({ question: '나한테 하고 싶은 말', answer: message.trim() }),
       }).catch(() => {});
     }
+    trackSubmitApplication();
     setPhase('done');
   }
 

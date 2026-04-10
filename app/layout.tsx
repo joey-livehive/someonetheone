@@ -10,12 +10,20 @@ const gaegu = Gaegu({
 });
 
 export const metadata: Metadata = {
-  title: 'someonetheone — 네가 원하는 그 사람은 소개팅 앱에 없어',
-  description: '소개팅 앱에 없는 그 사람, AI가 어디서든 찾아줄게. 네가 자고 있을 때도.',
+  title: 'someonetheone — 네 사람, 내가 찾아줄게',
+  description: '원하는 사람이 어디있든 다 찾아주는 AI',
   openGraph: {
-    title: 'someonetheone — 네가 원하는 그 사람은 소개팅 앱에 없어',
-    description: '소개팅 앱에 없는 그 사람, AI가 어디서든 찾아줄게.',
+    title: 'someonetheone — 네 사람, 내가 찾아줄게',
+    description: '원하는 사람이 어디있든 다 찾아주는 AI',
     siteName: 'someonetheone',
+    url: 'https://someonetheone.publicvoid.im',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'someonetheone — 네 사람, 내가 찾아줄게',
+    description: '원하는 사람이 어디있든 다 찾아주는 AI',
+    images: ['/og-image.png'],
   },
 };
 

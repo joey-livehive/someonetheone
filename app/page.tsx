@@ -215,21 +215,21 @@ function FloatingTag({
 export default function LandingPage() {
   return (
     <main className="relative" style={{ backgroundColor: C.bg }}>
-      {/* ━━━ Nav ━━━ */}
-      <nav className="sticky top-0 z-50" style={{ backgroundColor: C.bg, borderBottom: `1.5px solid ${C.ink}`, padding: '14px 22px' }}>
+      {/* ━━━ Bottom fixed bar ━━━ */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-5 pb-6 pt-6" style={{ background: `linear-gradient(transparent, ${C.bg} 25%)` }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <span className="text-xl font-bold tracking-tight" style={{ color: C.ink, fontFamily: "'PP Editorial Old', serif" }}>
             someonetheone
           </span>
           <Link
             href="/start"
-            className="inline-flex items-center px-5 py-2 rounded-full font-semibold text-sm hover:-translate-y-0.5 transition-transform"
-            style={{ color: C.ink, background: C.gold, border: `1.5px solid ${C.ink}`, boxShadow: `3px 3px 0 ${C.ink}` }}
+            className="inline-flex items-center justify-center min-w-[160px] px-14 py-3 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
+            style={{ color: C.ink, background: C.gold, border: `2px solid ${C.ink}`, boxShadow: `4px 4px 0 ${C.ink}` }}
           >
             시작하기
           </Link>
         </div>
-      </nav>
+      </div>
 
       {/* ━━━ Hero — Places scroll animation ━━━ */}
       <PlacesScrollSection />
@@ -328,7 +328,7 @@ export default function LandingPage() {
       </section>
 
       {/* ━━━ Footer ━━━ */}
-      <footer className="py-10 px-6" style={{ background: C.dark, borderTop: `1px solid rgba(254,249,236,0.1)` }}>
+      <footer className="py-10 pb-24 px-6" style={{ background: C.dark, borderTop: `1px solid rgba(254,249,236,0.1)` }}>
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-semibold" style={{ color: C.bg, fontFamily: "'PP Editorial Old', serif" }}>
             someonetheone

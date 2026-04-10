@@ -20,12 +20,42 @@ interface Question {
 const INTRO_QUESTIONS: Question[] = [
   {
     title: '어떤 사람이\n끌려?',
-    subtitle: '첫인상에서 제일 중요한 거',
+    subtitle: '생각하지 말고, 바로 골라봐',
     options: [
-      { label: '눈빛이 따뜻한 사람', value: 'warm_eyes' },
-      { label: '웃을 때 예쁜 사람', value: 'nice_smile' },
-      { label: '분위기가 좋은 사람', value: 'good_vibe' },
-      { label: '깔끔한 사람', value: 'clean_look' },
+      { label: "'외모'가 수려한 사람", value: 'appearance' },
+      { label: "'분위기' 좋은 사람", value: 'vibe' },
+      { label: "'성격'이 좋은 사람", value: 'personality' },
+      { label: "유능한 '능력'을 가진 사람", value: 'competence' },
+    ],
+  },
+  {
+    title: '나이는\n어느 정도?',
+    subtitle: '상대방 선호 나이대',
+    options: [
+      { label: '나보다 어린 사람', value: 'younger' },
+      { label: '동갑이 좋아', value: 'same_age' },
+      { label: '나보다 많은 사람', value: 'older' },
+      { label: '상관없어', value: 'any_age' },
+    ],
+  },
+  {
+    title: '키는\n어느 정도?',
+    subtitle: '',
+    options: [
+      { label: '작은 편이 좋아', value: 'short' },
+      { label: '비슷하면 좋겠어', value: 'similar' },
+      { label: '큰 편이 좋아', value: 'tall' },
+      { label: '상관없어', value: 'any_height' },
+    ],
+  },
+  {
+    title: '체형은\n어때?',
+    subtitle: '',
+    options: [
+      { label: '마른 편', value: 'slim' },
+      { label: '보통', value: 'average' },
+      { label: '근육질', value: 'muscular' },
+      { label: '상관없어', value: 'any_body' },
     ],
   },
   {
@@ -39,13 +69,42 @@ const INTRO_QUESTIONS: Question[] = [
     ],
   },
   {
+    title: '연락\n스타일은?',
+    subtitle: '상대방한테 바라는 거',
+    options: [
+      { label: '수시로 연락했으면', value: 'frequent' },
+      { label: '아침저녁 한 번씩', value: 'twice_daily' },
+      { label: '하루에 한 번이면 충분해', value: 'once_daily' },
+      { label: '연락 빈도는 상관없어', value: 'any_frequency' },
+    ],
+  },
+  {
+    title: '종교는\n중요해?',
+    subtitle: '',
+    options: [
+      { label: '같은 종교였으면', value: 'same_religion' },
+      { label: '종교 없는 사람이 좋아', value: 'no_religion' },
+      { label: '상관없어', value: 'any_religion' },
+    ],
+  },
+  {
     title: '이건 좀\n아닌 것 같아',
     subtitle: '절대 안 되는 거 하나',
     options: [
-      { label: '연락 안 되는 사람', value: 'no_reply' },
-      { label: '약속 잘 안 지키는 사람', value: 'no_promise' },
-      { label: '관심이 없는 사람', value: 'no_interest' },
-      { label: '거짓말하는 사람', value: 'liar' },
+      { label: '많이 바쁜 사람', value: 'too_busy' },
+      { label: '취미 없는 사람', value: 'no_hobby' },
+      { label: '친구 자주 만나는 사람', value: 'too_social' },
+      { label: '흡연하는 사람', value: 'smoker' },
+    ],
+  },
+  {
+    title: '첫 만남은\n어떤 게 좋아?',
+    subtitle: '',
+    options: [
+      { label: '카페에서 가볍게', value: 'cafe' },
+      { label: '밥 먹으면서', value: 'meal' },
+      { label: '산책하면서', value: 'walk' },
+      { label: '뭐든 좋아', value: 'anything' },
     ],
   },
 ];
@@ -109,36 +168,6 @@ const DETAIL_QUESTIONS: Question[] = [
     ],
   },
   {
-    title: '상대방\n나이는?',
-    subtitle: '선호하는 나이대',
-    options: [
-      { label: '나보다 어린 사람', value: 'younger' },
-      { label: '동갑이 좋아', value: 'same_age' },
-      { label: '나보다 많은 사람', value: 'older' },
-      { label: '상관없어', value: 'any_age' },
-    ],
-  },
-  {
-    title: '키는\n어느 정도?',
-    subtitle: '상대방 선호 키',
-    options: [
-      { label: '작은 편이 좋아', value: 'short' },
-      { label: '비슷하면 좋겠어', value: 'similar' },
-      { label: '큰 편이 좋아', value: 'tall' },
-      { label: '상관없어', value: 'any_height' },
-    ],
-  },
-  {
-    title: '첫 만남은\n어떤 게 좋아?',
-    subtitle: '',
-    options: [
-      { label: '카페에서 가볍게', value: 'cafe' },
-      { label: '밥 먹으면서', value: 'meal' },
-      { label: '산책하면서', value: 'walk' },
-      { label: '뭐든 좋아', value: 'anything' },
-    ],
-  },
-  {
     title: '지금 연애\n준비됐어?',
     subtitle: '솔직하게',
     options: [
@@ -149,8 +178,19 @@ const DETAIL_QUESTIONS: Question[] = [
   },
 ];
 
-// phase: 'intro' → 'email' → 'bridge' → 'detail' → 'photo' → 'done'
-type Phase = 'intro' | 'email' | 'bridge' | 'detail' | 'photo' | 'done';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// phase: 'intro' → 'picky' → 'email' → 'bridge' → 'detail' → 'photo' → 'message' → 'done'
+type Phase = 'intro' | 'picky' | 'email' | 'bridge' | 'detail' | 'photo' | 'message' | 'done';
+
+async function api(path: string, options?: RequestInit) {
+  const res = await fetch(`${API_BASE}/theone/survey${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  return res.json();
+}
 
 export default function StartPage() {
   const [phase, setPhase] = useState<Phase>('intro');
@@ -158,16 +198,36 @@ export default function StartPage() {
   const [introAnswers, setIntroAnswers] = useState<string[]>([]);
   const [detailAnswers, setDetailAnswers] = useState<string[]>([]);
   const [email, setEmail] = useState('');
+  const [picky, setPicky] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
+  const [message, setMessage] = useState('');
+  const [guestUid, setGuestUid] = useState<string | null>(null);
 
   const questions = phase === 'detail' ? DETAIL_QUESTIONS : INTRO_QUESTIONS;
 
-  function handleSelect(value: string) {
+  // 설문 시작 시 guest 생성
+  async function ensureGuest(): Promise<string> {
+    if (guestUid) return guestUid;
+    const data = await api('/start', { method: 'POST' });
+    setGuestUid(data.guest_uid);
+    return data.guest_uid;
+  }
+
+  async function handleSelect(value: string) {
+    const uid = await ensureGuest();
+    const q = questions[step];
+
+    // 답변 저장 API 호출 (fire-and-forget)
+    api(`/${uid}/answer`, {
+      method: 'PATCH',
+      body: JSON.stringify({ question: q.title.replace('\n', ' '), answer: value }),
+    }).catch(() => {});
+
     if (phase === 'intro') {
       setIntroAnswers((prev) => [...prev, value]);
       if (step + 1 >= INTRO_QUESTIONS.length) {
         setStep(0);
-        setPhase('email');
+        setPhase('picky');
       } else {
         setStep((s) => s + 1);
       }
@@ -185,10 +245,12 @@ export default function StartPage() {
     if (phase === 'intro' && step > 0) {
       setStep((s) => s - 1);
       setIntroAnswers((prev) => prev.slice(0, -1));
-    } else if (phase === 'email') {
+    } else if (phase === 'picky') {
       setPhase('intro');
       setStep(INTRO_QUESTIONS.length - 1);
       setIntroAnswers((prev) => prev.slice(0, -1));
+    } else if (phase === 'email') {
+      setPhase('picky');
     } else if (phase === 'detail' && step > 0) {
       setStep((s) => s - 1);
       setDetailAnswers((prev) => prev.slice(0, -1));
@@ -202,9 +264,24 @@ export default function StartPage() {
     }
   }
 
-  function handleEmailSubmit(e: React.FormEvent) {
+  async function handlePickySubmit() {
+    if (picky.trim() && guestUid) {
+      api(`/${guestUid}/answer`, {
+        method: 'PATCH',
+        body: JSON.stringify({ question: '까다로운 기준', answer: picky.trim() }),
+      }).catch(() => {});
+    }
+    setPhase('email');
+  }
+
+  async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
+    const uid = await ensureGuest();
+    api(`/${uid}/email`, {
+      method: 'PATCH',
+      body: JSON.stringify({ email: email.trim() }),
+    }).catch(() => {});
     setPhase('bridge');
   }
 
@@ -226,12 +303,22 @@ export default function StartPage() {
   }
 
   function handlePhotoSubmit() {
-    try {
-      localStorage.setItem(
-        'sto_onboarding',
-        JSON.stringify({ introAnswers, detailAnswers, email, hasPhoto: !!photo }),
-      );
-    } catch {}
+    if (photo && guestUid) {
+      api(`/${guestUid}/photo`, {
+        method: 'PATCH',
+        body: JSON.stringify({ photo_data: photo }),
+      }).catch(() => {});
+    }
+    setPhase('message');
+  }
+
+  function handleMessageSubmit() {
+    if (message.trim() && guestUid) {
+      api(`/${guestUid}/answer`, {
+        method: 'PATCH',
+        body: JSON.stringify({ question: '나한테 하고 싶은 말', answer: message.trim() }),
+      }).catch(() => {});
+    }
     setPhase('done');
   }
 
@@ -340,8 +427,8 @@ export default function StartPage() {
     );
   }
 
-  // ── Bridge screen (after email, before detail questions) ──
-  if (phase === 'bridge') {
+  // ── Message screen (free text, optional) ──
+  if (phase === 'message') {
     return (
       <main
         className="min-h-screen flex flex-col items-center justify-center px-6"
@@ -356,19 +443,140 @@ export default function StartPage() {
             letterSpacing: '-0.5px',
           }}
         >
+          마지막으로,
+        </h1>
+        <p className="text-center text-lg mb-8 opacity-70" style={{ color: C.ink }}>
+          나한테 하고 싶은 말 있어?
+        </p>
+
+        <div className="w-full max-w-md flex flex-col gap-4">
+          <div className="relative">
+            <textarea
+              value={message}
+              onChange={(e) => {
+                if (e.target.value.length <= 2000) setMessage(e.target.value);
+              }}
+              placeholder="편하게 써줘 (선택)"
+              rows={5}
+              className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg resize-none"
+              style={{
+                color: C.ink,
+                background: '#FFFFFF',
+                border: `2px solid ${C.ink}`,
+              }}
+            />
+            <span
+              className="absolute bottom-3 right-4 text-xs"
+              style={{ color: C.ink, opacity: 0.4 }}
+            >
+              {message.length} / 2,000
+            </span>
+          </div>
+          <button
+            onClick={handleMessageSubmit}
+            className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
+            style={{
+              color: C.ink,
+              background: C.gold,
+              border: `2px solid ${C.ink}`,
+              boxShadow: `4px 4px 0 ${C.ink}`,
+            }}
+          >
+            {message.trim() ? '보내기' : '괜찮아, 넘어갈게'}
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Picky screen (optional free text) ──
+  if (phase === 'picky') {
+    return (
+      <main
+        className="min-h-screen flex flex-col items-center justify-center px-6"
+        style={{ background: C.bg }}
+      >
+        <h1
+          className="font-bold text-center whitespace-pre-line mb-3"
+          style={{
+            color: C.ink,
+            fontSize: 'clamp(32px, 6vw, 48px)',
+            lineHeight: '1.25',
+            letterSpacing: '-0.5px',
+          }}
+        >
+          말하기 힘든{'\n'}
+          <span style={{ color: C.accent }}>나만의 까다로운 기준</span>이{'\n'}있다면?
+        </h1>
+        <p className="text-center text-base mb-8 opacity-70" style={{ color: C.ink }}>
+          상대방은 전혀 모를 거야. 편하게 써줘.
+        </p>
+
+        <div className="w-full max-w-md flex flex-col gap-4">
+          <textarea
+            value={picky}
+            onChange={(e) => {
+              if (e.target.value.length <= 500) setPicky(e.target.value);
+            }}
+            placeholder=""
+            rows={4}
+            className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg resize-none"
+            style={{
+              color: C.ink,
+              background: '#FFFFFF',
+              border: `2px solid ${C.ink}`,
+            }}
+          />
+          <button
+            onClick={handlePickySubmit}
+            className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
+            style={{
+              color: C.ink,
+              background: C.gold,
+              border: `2px solid ${C.ink}`,
+              boxShadow: `4px 4px 0 ${C.ink}`,
+            }}
+          >
+            {picky.trim() ? '다음' : '딱히 없어'}
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Bridge screen (after email, before detail questions) ──
+  if (phase === 'bridge') {
+    return (
+      <main
+        className="min-h-screen flex flex-col items-center justify-center px-6"
+        style={{ background: C.dark, color: C.bg }}
+      >
+        <h1
+          className="font-bold text-center mb-6"
+          style={{
+            fontSize: 'clamp(36px, 7vw, 56px)',
+            lineHeight: '1.25',
+            letterSpacing: '-0.5px',
+          }}
+        >
           고마워!
         </h1>
-        <p className="text-center text-lg mb-10 opacity-70" style={{ color: C.ink }}>
-          너에 대해서도 좀 더 자세히 물어봐도 돼?
+        <p
+          className="text-center text-lg sm:text-xl mb-12 leading-relaxed"
+          style={{ color: C.gold }}
+        >
+          너에 대해서도
+          <br />
+          좀 더 자세히 물어봐도 돼?
         </p>
         <button
           onClick={handleStartDetail}
-          className="inline-flex items-center px-8 py-3.5 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
+          className="inline-flex items-center px-10 py-4 rounded-full font-bold text-lg hover:-translate-y-0.5 transition-transform"
           style={{
             background: C.gold,
             color: C.ink,
-            border: `2px solid ${C.ink}`,
-            boxShadow: `4px 4px 0 ${C.ink}`,
+            border: `2px solid ${C.gold}`,
+            boxShadow: `5px 5px 0 ${C.ink}`,
           }}
         >
           좋아, 물어봐

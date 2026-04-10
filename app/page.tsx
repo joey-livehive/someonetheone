@@ -117,7 +117,7 @@ function PlacesScrollSection() {
           <br className="sm:hidden" />
           <span style={{ color: C.ink }}> 다 찾아줄게.</span>
         </h2>
-        <CtaButton className="mt-6 sm:mt-10">이상형 소개받으러 가기</CtaButton>
+        <CtaButton className="mt-6 sm:mt-10">이상형 알려주기</CtaButton>
       </div>
 
       {/* Cards */}
@@ -161,7 +161,7 @@ function PlacesScrollSection() {
           <br />
           <span style={{ color: C.accent }}>지구 어디든</span>
         </h2>
-        <CtaButton className="mt-6 sm:mt-10">이상형 소개받으러 가기</CtaButton>
+        <CtaButton className="mt-6 sm:mt-10">이상형 알려주기</CtaButton>
       </div>
 
       {/* Earth image */}

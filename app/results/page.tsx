@@ -289,6 +289,11 @@ export default function ResultsPage() {
 
   return (
     <main className="min-h-screen pb-32">
+      {/* Prototype notice */}
+      <div className="bg-sto-primary/10 text-center py-2 px-4">
+        <p className="text-xs text-sto-muted">이 페이지는 프로토타입이며, 모든 프로필은 가상의 데이터입니다.</p>
+      </div>
+
       {/* Header */}
       <div className="pt-12 pb-8 px-6 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sto-accent/10 text-sto-accent text-sm font-medium mb-6">

@@ -42,7 +42,7 @@ export default function ChatPhotoUpload({ onUpload, onSkip }: Props) {
     const reader = new FileReader();
     reader.onload = async () => {
       const result = reader.result as string;
-      const compressed = await compressImage(result, 800, 0.7);
+      const compressed = await compressImage(result, 400, 0.5);
       setPreview(compressed);
     };
     reader.readAsDataURL(file);

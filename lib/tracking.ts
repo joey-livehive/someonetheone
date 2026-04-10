@@ -77,7 +77,7 @@ export function trackPageView(pageName: string) {
 /** Lead — "이상형 알려주기" 버튼 클릭 */
 export function trackLead() {
   if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', 'Lead', { content_name: 'someonetheone_start' });
+    window.fbq('track', 'Lead', { content_ids: ['someonetheone'], content_type: 'product', content_name: 'start' });
   }
   sendEvent('click', 'cta_start');
   devLog('[Event] Lead / cta_start');
@@ -99,8 +99,7 @@ export function trackPicky(value: string) {
 export function trackCompleteRegistration(email: string) {
   if (typeof window !== 'undefined' && window.fbq) {
     window.fbq('track', 'CompleteRegistration', {
-      content_name: 'someonetheone_email',
-      status: true,
+      content_ids: ['someonetheone'], content_type: 'product', content_name: 'email', status: true,
     });
   }
   sendEvent('submit', 'email', { email });
@@ -123,7 +122,7 @@ export function trackMessage(hasMessage: boolean) {
 export function trackSubmitApplication() {
   if (typeof window !== 'undefined' && window.fbq) {
     window.fbq('track', 'SubmitApplication', {
-      content_name: 'someonetheone_complete',
+      content_ids: ['someonetheone'], content_type: 'product', content_name: 'complete',
     });
   }
   sendEvent('complete', 'survey_done');

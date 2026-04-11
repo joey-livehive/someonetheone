@@ -106,6 +106,17 @@ export function trackCompleteRegistration(email: string) {
   devLog('[Event] CompleteRegistration', { email });
 }
 
+/** 전화번호 제출 */
+export function trackPhone(phone: string) {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'Contact', {
+      content_ids: ['someonetheone'], content_type: 'product', content_name: 'phone',
+    });
+  }
+  sendEvent('submit', 'phone', { phone });
+  devLog('[Event] Contact / phone', { phone });
+}
+
 /** 사진 업로드 */
 export function trackPhoto() {
   sendEvent('submit', 'photo');

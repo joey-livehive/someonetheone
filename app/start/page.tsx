@@ -7,6 +7,7 @@ import {
   trackAnswer,
   trackPicky,
   trackCompleteRegistration,
+  trackPhone,
   trackPhoto,
   trackMessage,
   trackSubmitApplication,
@@ -190,8 +191,8 @@ const DETAIL_QUESTIONS: Question[] = [
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// phase: 'intro' → 'picky' → 'email' → 'bridge' → 'detail' → 'photo' → 'message' → 'done'
-type Phase = 'intro' | 'picky' | 'email' | 'bridge' | 'detail' | 'photo' | 'message' | 'done';
+// phase: 'intro' → 'picky' → 'email' → 'phone' → 'bridge' → 'detail' → 'photo' → 'message' → 'done'
+type Phase = 'intro' | 'picky' | 'email' | 'phone' | 'bridge' | 'detail' | 'photo' | 'message' | 'done';
 
 async function api(path: string, options?: RequestInit) {
   const res = await fetch(`${API_BASE}/theone/survey${path}`, {
@@ -208,6 +209,7 @@ export default function StartPage() {
   const [introAnswers, setIntroAnswers] = useState<string[]>([]);
   const [detailAnswers, setDetailAnswers] = useState<string[]>([]);
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [picky, setPicky] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -265,11 +267,13 @@ export default function StartPage() {
       setIntroAnswers((prev) => prev.slice(0, -1));
     } else if (phase === 'email') {
       setPhase('picky');
+    } else if (phase === 'phone') {
+      setPhase('email');
     } else if (phase === 'detail' && step > 0) {
       setStep((s) => s - 1);
       setDetailAnswers((prev) => prev.slice(0, -1));
     } else if (phase === 'detail' && step === 0) {
-      setPhase('email');
+      setPhase('phone');
       setStep(0);
     } else if (phase === 'photo') {
       setPhase('detail');
@@ -298,7 +302,27 @@ export default function StartPage() {
       body: JSON.stringify({ email: email.trim() }),
     }).catch(() => {});
     trackCompleteRegistration(email.trim());
+    setPhase('phone');
+  }
+
+  async function handlePhoneSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 10 || digits.length > 11) return;
+    const uid = await ensureGuest();
+    api(`/${uid}/phone`, {
+      method: 'PATCH',
+      body: JSON.stringify({ phone: digits }),
+    }).catch(() => {});
+    trackPhone(digits);
     setPhase('bridge');
+  }
+
+  function formatPhone(value: string): string {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    if (digits.length < 4) return digits;
+    if (digits.length < 8) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
   }
 
   function handleStartDetail() {
@@ -614,7 +638,7 @@ export default function StartPage() {
         className="flex items-center justify-between px-5 py-3.5"
         style={{ borderBottom: `1.5px solid ${C.ink}` }}
       >
-        {(step > 0 || phase === 'email' || phase === 'detail') ? (
+        {(step > 0 || phase === 'email' || phase === 'phone' || phase === 'detail') ? (
           <button
             onClick={handleBack}
             className="flex items-center gap-1 font-semibold text-sm"
@@ -703,6 +727,53 @@ export default function StartPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="email@example.com"
+                required
+                className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg"
+                style={{
+                  color: C.ink,
+                  background: '#FFFFFF',
+                  border: `2px solid ${C.ink}`,
+                }}
+              />
+              <button
+                type="submit"
+                className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
+                style={{
+                  color: C.ink,
+                  background: C.gold,
+                  border: `2px solid ${C.ink}`,
+                  boxShadow: `4px 4px 0 ${C.ink}`,
+                }}
+              >
+                다음
+              </button>
+            </form>
+          </div>
+        ) : phase === 'phone' ? (
+          /* ── Phone step ── */
+          <div className="w-full max-w-md">
+            <h1
+              className="font-bold mb-2"
+              style={{
+                color: C.ink,
+                fontSize: 'clamp(32px, 6vw, 48px)',
+                lineHeight: '1.25',
+                letterSpacing: '-0.5px',
+              }}
+            >
+              한 가지만 더!
+            </h1>
+            <p className="mb-10 opacity-60 text-base" style={{ color: C.ink }}>
+              전화번호도 알려줘. 더 빠르게 연락할 수 있어.
+            </p>
+
+            <form onSubmit={handlePhoneSubmit} className="flex flex-col gap-4">
+              <input
+                type="tel"
+                inputMode="numeric"
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                placeholder="010-1234-5678"
                 required
                 className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg"
                 style={{

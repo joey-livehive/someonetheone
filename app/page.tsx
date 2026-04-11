@@ -320,7 +320,7 @@ export default function LandingPage() {
             <span style={{ color: C.gold }}>찾아줬어</span>
           </h2>
           <p className="mb-10 opacity-80" style={{ fontFamily: 'var(--font-gaegu)', fontSize: '20px', lineHeight: '1.5' }}>
-            이메일만 남겨줘. 찾는 대로 알려줄게.
+            전화번호만 남겨줘. 찾는 대로 알려줄게.
           </p>
           <Link
             href="/start"

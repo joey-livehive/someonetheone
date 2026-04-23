@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { track } from '@/lib/report/tracking';
 
 function SuccessInner() {
   const params = useSearchParams();
@@ -18,7 +19,7 @@ function SuccessInner() {
       return;
     }
 
-    const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.publicvoid.im';
 
     fetch(`${API}/theone/payments/toss/confirm`, {
       method: 'POST',
@@ -34,8 +35,20 @@ function SuccessInner() {
         return res.json();
       })
       .then((data) => {
-        if (data.status === 'success') setStatus('done');
-        else setStatus('error');
+        if (data.status === 'success') {
+          setStatus('done');
+          track('purchase_complete', { orderId, amount: Number(amount) }, {
+            pixel: 'Purchase',
+            pixelData: {
+              value: Number(amount),
+              currency: 'KRW',
+              content_ids: ['someonetheone'],
+              content_name: orderId,
+            },
+          });
+        } else {
+          setStatus('error');
+        }
       })
       .catch(() => setStatus('error'));
   }, [params]);

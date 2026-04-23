@@ -74,8 +74,12 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: PurchaseBottomS
     };
   }, [open]);
 
-  const handlePay = () => {
-    // Phase 1: 테스트 결제 스텁 + 트래킹
+  const [paying, setPaying] = useState(false);
+
+  const handlePay = async () => {
+    if (paying) return;
+    setPaying(true);
+
     if (typeof window !== 'undefined') {
       const fbq = (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq;
       if (fbq) {
@@ -86,13 +90,43 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: PurchaseBottomS
           content_name: `report_${reportId}_${selected.id}`,
         });
       }
-      console.log('[purchase_click]', {
-        reportId,
-        plan: selected.id,
-        amount: selected.discountedPrice,
-      });
     }
-    alert(`[테스트] ${selected.name} 플랜 · ${selected.discountedPrice.toLocaleString()}원\n실제 결제는 PG 연동 후에 동작해.`);
+
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const guestUid = new URLSearchParams(window.location.search).get('guest') || reportId;
+
+      const orderRes = await fetch(`${API}/theone/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guest_uid: guestUid, product_id: selected.id }),
+      });
+      if (!orderRes.ok) throw new Error('주문 생성 실패');
+      const order = await orderRes.json();
+
+      const startRes = await fetch(`${API}/theone/payments/toss/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: order.order_id,
+          amount: order.amount,
+          order_name: `someonetheone ${selected.name}`,
+        }),
+      });
+      if (!startRes.ok) throw new Error('결제 시작 실패');
+      const toss = await startRes.json();
+
+      const checkoutUrl = toss.checkout?.url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+        return;
+      }
+    } catch (e) {
+      console.error('[purchase_error]', e);
+      alert('결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setPaying(false);
+    }
   };
 
   return (
@@ -212,12 +246,14 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: PurchaseBottomS
           <button
             type="button"
             onClick={handlePay}
-            className="w-full bg-brand-orange text-white border-[1.5px] border-brand-line
+            disabled={paying}
+            className={`w-full bg-brand-orange text-white border-[1.5px] border-brand-line
                        rounded-full py-4 font-display font-extrabold text-[17px]
                        tracking-[-0.02em] shadow-[3px_3px_0_var(--line)]
-                       active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--line)]"
+                       active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--line)]
+                       ${paying ? 'opacity-60 pointer-events-none' : ''}`}
           >
-            결제하고 엄선된 사람 소개 받기!
+            {paying ? '결제 준비 중...' : '결제하고 엄선된 사람 소개 받기!'}
           </button>
         </div>
       </div>

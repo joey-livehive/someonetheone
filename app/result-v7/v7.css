@@ -162,6 +162,88 @@
   color: rgba(237,228,211,0.65);
 }
 
+/* ============ APPLICATION SUMMARY (의뢰인님의 취향) ============ */
+.v7-root .application-summary {
+  margin: 0 20px 28px;
+  padding: 28px 24px 22px;
+  background: var(--v7-cream-off);
+  border: 1px solid var(--v7-line);
+  border-radius: 4px;
+  position: relative;
+}
+.v7-root .application-summary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 24px;
+  width: 40px;
+  height: 3px;
+  background: var(--v7-gold);
+}
+.v7-root .application-summary .as-kicker {
+  font-weight: 700;
+  font-size: 10px;
+  color: var(--v7-gold-deep);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.v7-root .application-summary h3 {
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1.3;
+  letter-spacing: -0.035em;
+  color: var(--v7-ink);
+  margin: 0 0 6px;
+}
+.v7-root .application-summary .as-sub {
+  font-weight: 500;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--v7-ink-mute);
+  letter-spacing: -0.01em;
+  margin: 0 0 22px;
+}
+.v7-root .application-summary .as-group + .as-group {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--v7-line);
+}
+.v7-root .application-summary .as-group-label {
+  font-weight: 700;
+  font-size: 10px;
+  color: var(--v7-gold-deep);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.v7-root .application-summary .as-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+  padding: 7px 0;
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+}
+.v7-root .application-summary .as-q {
+  color: var(--v7-ink-mute);
+  font-weight: 500;
+}
+.v7-root .application-summary .as-a {
+  color: var(--v7-ink);
+  font-weight: 700;
+}
+.v7-root .application-summary .as-free {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--v7-ink);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  padding-left: 12px;
+  border-left: 2px solid var(--v7-gold);
+  margin: 0;
+}
+
 /* ============ STATS BOX ============ */
 .v7-root .stats {
   margin: 0 20px;
@@ -277,9 +359,9 @@
 .v7-root .person-photo::after {
   content: '';
   position: absolute; inset: 0;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(10,10,10,0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgba(10,10,10,0.25) 0%, rgba(10,10,10,0.45) 100%);
   z-index: 1;
 }
 /* 실사진 위에 라벨/오버레이가 올라오도록 z-index 보강 */
@@ -290,20 +372,31 @@
   position: absolute;
   top: 20px; left: 20px;
   z-index: 3;
-  font-weight: 700;
-  font-size: 10px;
-  letter-spacing: 0.25em;
-  color: rgba(201,169,97,0.9);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--v7-gold);
+  padding: 5px 10px;
+  background: rgba(10,10,10,0.5);
+  border: 1px solid rgba(201,169,97,0.35);
+  border-radius: 2px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .v7-root .person-count {
   position: absolute;
   top: 20px; right: 20px;
   z-index: 3;
-  font-weight: 600;
-  font-size: 12px;
-  color: rgba(237,228,211,0.7);
+  font-weight: 700;
+  font-size: 13px;
+  color: #EDE4D3;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
+  padding: 5px 10px;
+  background: rgba(10,10,10,0.5);
+  border-radius: 2px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .v7-root .person-overlay {
   position: absolute;
@@ -644,20 +737,36 @@
 
 .v7-root .p-card.photo {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 2;
   background:
     radial-gradient(ellipse at 30% 30%, rgba(201,169,97,0.15) 0%, transparent 55%),
     linear-gradient(180deg, #2a2520 0%, #0a0806 100%);
 }
+/* wide 일 때는 세로 여유를 더 주기 위해 4:3 비율 */
+.v7-root .p-card.photo.wide {
+  aspect-ratio: 4 / 3;
+}
 .v7-root .p-card.photo::after {
   content: '';
   position: absolute; inset: 0;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(10,10,10,0.25);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  background: linear-gradient(180deg, rgba(10,10,10,0.15) 0%, rgba(10,10,10,0.35) 100%);
   z-index: 1;
 }
-.v7-root .p-card.photo .photo-badge { z-index: 3; }
+.v7-root .p-card.photo .photo-badge {
+  z-index: 3;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: var(--v7-gold);
+  padding: 6px 12px;
+  background: rgba(10,10,10,0.55);
+  border: 1px solid rgba(201,169,97,0.35);
+  border-radius: 2px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
 .v7-root .p-card.photo .photo-badge {
   position: absolute;
   top: 50%; left: 50%;
@@ -855,6 +964,72 @@
   color: rgba(237,228,211,0.1);
 }
 
+/* ============ REMAINING CANDIDATES (나머지 4명 프리뷰) ============ */
+.v7-root .remaining-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 20px;
+}
+.v7-root .rc-card {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--v7-line);
+  border-radius: 4px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(201,169,97,0.15) 0%, transparent 55%),
+    linear-gradient(180deg, #2a2520 0%, #0a0806 100%);
+  color: var(--v7-cream);
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: transform 0.12s;
+  user-select: none;
+}
+.v7-root .rc-card:active { transform: scale(0.97); }
+.v7-root .rc-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  background: linear-gradient(180deg, rgba(10,10,10,0.2) 0%, rgba(10,10,10,0.55) 100%);
+  z-index: 1;
+}
+.v7-root .rc-card .rc-no {
+  position: absolute;
+  top: 12px; left: 12px;
+  z-index: 3;
+  font-weight: 700;
+  font-size: 10px;
+  color: var(--v7-gold);
+  letter-spacing: 0.2em;
+  padding: 3px 7px;
+  background: rgba(10,10,10,0.55);
+  border: 1px solid rgba(201,169,97,0.3);
+  border-radius: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.v7-root .rc-card .rc-foot {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 3;
+  padding: 14px 14px 12px;
+}
+.v7-root .rc-card .rc-source {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: var(--v7-cream);
+  margin-bottom: 2px;
+}
+.v7-root .rc-card .rc-loc {
+  font-weight: 500;
+  font-size: 11px;
+  color: rgba(237,228,211,0.65);
+  letter-spacing: -0.01em;
+}
+
 /* ============ SCARCITY ============ */
 .v7-root .scarcity {
   margin: 48px 20px 0;
@@ -953,6 +1128,93 @@
 .v7-root .sc-box-body b {
   font-weight: 700;
   color: var(--v7-gold);
+}
+
+/* ============ DARK ZONE (INTERMISSION ~ VS) ============ */
+.v7-root .v7-bridge-gradient {
+  height: 70px;
+  background: linear-gradient(
+    180deg,
+    var(--v7-cream) 0%,
+    #D6C3A2 30%,
+    #5a4a38 65%,
+    #0A0A0A 100%
+  );
+  margin-top: 48px;
+  margin-bottom: -1px; /* seam 방지 */
+}
+.v7-root .v7-bridge-back {
+  height: 80px;
+  background: linear-gradient(
+    180deg,
+    #0A0A0A 0%,
+    #3a332a 35%,
+    #D6C3A2 80%,
+    var(--v7-cream) 100%
+  );
+  margin-top: -1px;
+}
+.v7-root .v7-darkzone {
+  position: relative;
+  background: #0A0A0A;
+  color: #EDE4D3;
+  padding: 4px 0 32px;
+  margin: 0;
+}
+.v7-root .v7-darkzone-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 140px;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(201,169,97,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 15%, rgba(201,169,97,0.08) 0%, transparent 55%);
+}
+
+/* ── 다크존 내부 요소 색감 보정 ── */
+.v7-root .v7-darkzone .bridge h2 {
+  color: #EDE4D3;
+}
+.v7-root .v7-darkzone .bridge-mark {
+  color: var(--v7-gold);
+}
+.v7-root .v7-darkzone .bridge-mark::before,
+.v7-root .v7-darkzone .bridge-mark::after {
+  background: var(--v7-gold);
+}
+.v7-root .v7-darkzone .sec-kicker {
+  color: var(--v7-gold);
+}
+.v7-root .v7-darkzone .sec-title {
+  color: #EDE4D3;
+}
+.v7-root .v7-darkzone .sec-sub {
+  color: rgba(237,228,211,0.65);
+}
+/* 다크존 내부 카드(casting-scene/privacy)는 크림 유지 → 대비 강조 */
+.v7-root .v7-darkzone .casting-scene {
+  border-color: rgba(201,169,97,0.15);
+}
+.v7-root .v7-darkzone .privacy {
+  border-color: rgba(201,169,97,0.15);
+}
+/* VS BAD 카드는 어두운 배경에서 너무 묻히므로 톤 조정 */
+.v7-root .v7-darkzone .vs-bad {
+  background: #2a2620;
+  opacity: 1;
+}
+.v7-root .v7-darkzone .vs-bad h4 {
+  color: rgba(237,228,211,0.5);
+}
+.v7-root .v7-darkzone .vs-bad ul li {
+  color: rgba(237,228,211,0.45);
+}
+.v7-root .v7-darkzone .vs-bad ul li::before {
+  color: rgba(237,228,211,0.35);
+}
+.v7-root .v7-darkzone .vs-bad .vs-tag {
+  background: rgba(237,228,211,0.1);
+  color: rgba(237,228,211,0.55);
 }
 
 /* ============ BRIDGE ============ */
@@ -1637,6 +1899,64 @@
   color: var(--v7-ink);
   margin: 0;
 }
+/* ===== 의뢰인님의 신청 내역 (바텀시트 상단 요약) ===== */
+.v7-sheet .submission-summary {
+  margin: 4px 20px 22px;
+  padding: 18px 18px 8px;
+  background: var(--v7-cream-off);
+  border: 1px solid var(--v7-line);
+  border-radius: 4px;
+}
+.v7-sheet .submission-summary .ss-head {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--v7-ink);
+  letter-spacing: -0.02em;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--v7-line);
+}
+.v7-sheet .submission-summary .ss-group + .ss-group {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--v7-line);
+}
+.v7-sheet .submission-summary .ss-group-label {
+  font-weight: 700;
+  font-size: 10px;
+  color: var(--v7-gold-deep);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.v7-sheet .submission-summary .ss-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.v7-sheet .submission-summary .ss-q {
+  color: var(--v7-ink-mute);
+  font-weight: 500;
+}
+.v7-sheet .submission-summary .ss-a {
+  color: var(--v7-ink);
+  font-weight: 700;
+}
+.v7-sheet .submission-summary .ss-free {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--v7-ink);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  padding-left: 10px;
+  border-left: 2px solid var(--v7-gold);
+  margin: 0;
+}
+
 .v7-sheet .sheet-plans {
   padding: 0 20px;
   display: flex;

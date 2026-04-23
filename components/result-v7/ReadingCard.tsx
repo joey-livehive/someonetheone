@@ -18,9 +18,9 @@ export function ReadingCard({ userName, personalizedOpenings }: ReadingCardProps
         <span className="letter-from">{READING_CARD_CONTENT.fromLabel}</span>
       </div>
       <h2>
-        선택지에서 읽어낸
+        의뢰인님의 취향을 고려한
         <br />
-        의뢰인님의 여섯 가지 성향.
+        엄선된 상대.
       </h2>
 
       {/* ========== 문단 1 ========== */}

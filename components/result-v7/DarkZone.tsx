@@ -1,6 +1,11 @@
 import { ReactNode } from 'react';
 
-/** v7 은 별도의 다크 영역 래퍼가 없다. 개별 블록 단위로 다크 카드를 사용. */
+/** INTERMISSION ~ VS 구간을 다크 배경으로 감싸는 래퍼. 상단에 골드 라디얼 글로우. */
 export function DarkZone({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+  return (
+    <div className="v7-darkzone">
+      <div aria-hidden className="v7-darkzone-glow" />
+      {children}
+    </div>
+  );
 }

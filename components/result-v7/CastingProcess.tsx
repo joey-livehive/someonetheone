@@ -41,11 +41,12 @@ const scenes: Scene[] = [
   {
     no: 'SCENE 03',
     channel: 'LinkedIn',
-    title: '커리어 기반으로 진지함을 필터링합니다.',
+    title: '커리어 기반으로 운명의 짝을 찾는 분만 봅니다.',
     desc: (
       <>
-        "진지한 관계"라는 목적을 먼저 명시하기 때문에 가벼운 만남을 찾는 사람은 자연스럽게
-        걸러집니다. <b>응답한 사람만</b> 후보군에 포함됩니다.
+        LinkedIn에서 커리어·가치관·관심사를 확인하고,{' '}
+        <b>진지한 관계를 원하는 분</b>에게만 접근합니다. 가벼운 만남을 찾는 분은 처음부터 후보에
+        오르지 않습니다.
       </>
     ),
     mock: <LinkedinMock />,
@@ -58,9 +59,9 @@ export function CastingProcess() {
       <Section tight>
         <SectionLabel>BEHIND THE SCENES</SectionLabel>
         <SectionTitle>
-          우리가 <HL>사람을</HL>
+          <HL>SomeOneTheOne</HL>에서
           <br />
-          찾는 방식.
+          사람을 찾는 방식.
         </SectionTitle>
         <SectionSub>
           매니저가 오프라인과 온라인 양쪽에서 직접 접근하며, 의뢰인님의 정보는 먼저 공개되지

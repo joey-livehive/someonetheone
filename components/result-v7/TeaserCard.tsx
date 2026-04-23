@@ -7,9 +7,11 @@ import { useSheet } from './sheetContext';
 
 interface TeaserCardProps {
   candidate: Candidate;
+  /** 유저 설문의 "어디쯤 살아?" 답변. 없으면 블러만 렌더. */
+  userLocation?: string;
 }
 
-export function TeaserCard({ candidate }: TeaserCardProps) {
+export function TeaserCard({ candidate, userLocation }: TeaserCardProps) {
   const { openSheet } = useSheet();
   return (
     <>
@@ -23,10 +25,7 @@ export function TeaserCard({ candidate }: TeaserCardProps) {
       </Section>
 
       <div className="person-card">
-        <div
-          className="person-photo"
-          onContextMenu={(e) => e.preventDefault()}
-        >
+        <div className="person-photo">
           {candidate.teaserPhoto && (
             <Image
               src={candidate.teaserPhoto}
@@ -35,12 +34,13 @@ export function TeaserCard({ candidate }: TeaserCardProps) {
               priority
               sizes="(max-width: 480px) 100vw, 480px"
               draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
               className="person-photo-img"
               style={
                 {
                   objectFit: 'cover',
-                  filter: 'blur(32px) saturate(1.05)',
-                  transform: 'scale(1.2)',
+                  filter: 'blur(16px) saturate(1.1) brightness(0.95)',
+                  transform: 'scale(1.12)',
                   pointerEvents: 'none',
                   WebkitUserSelect: 'none',
                   WebkitTouchCallout: 'none',
@@ -93,7 +93,8 @@ export function TeaserCard({ candidate }: TeaserCardProps) {
           <div className="meta-row">
             <span className="meta-k">Found</span>
             <span className="meta-v">
-              {candidate.location} <span className="v7-blur">◯◯◯◯</span>, 오프라인
+              {userLocation ? `${userLocation} ` : ''}
+              <span className="v7-blur">◯◯◯◯</span>, 오프라인
             </span>
           </div>
         </div>

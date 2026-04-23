@@ -27,7 +27,7 @@ export function RadarChart({ data }: { data: MatchAnalysis['radarData'] }) {
             pointRadius: 4,
           },
           {
-            label: '이 분',
+            label: '엄선된 상대',
             data: data.candidateActual,
             backgroundColor: 'rgba(201,169,97,0.25)',
             borderColor: '#C9A961',

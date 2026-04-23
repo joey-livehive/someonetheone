@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { Candidate } from '@/lib/report/types';
 import { ChapterCard } from './ChapterCard';
@@ -45,11 +47,11 @@ export function Chapter2({ candidate }: { userName: string; candidate: Candidate
   return (
     <>
       <Section>
-        <SectionLabel>02. THE PERSON</SectionLabel>
+        <SectionLabel>01. THE PERSON</SectionLabel>
         <SectionTitle>
-          이 분에 대한
+          엄선된 상대에 대한
           <br />
-          <HL>기록</HL>.
+          <HL>상세한 기록</HL>.
         </SectionTitle>
         <SectionSub>
           SNS 게시물 67건, 오프라인 관찰, 지인 추천 3건을
@@ -64,7 +66,7 @@ export function Chapter2({ candidate }: { userName: string; candidate: Candidate
         sub="의뢰인님의 기준과 교차되는 지점을 중심으로 정리했습니다."
       >
         <div className="person-grid">
-          <div className="p-card photo" onContextMenu={(e) => e.preventDefault()}>
+          <div className="p-card photo wide">
             {candidate.chapter2Photo && (
               <Image
                 src={candidate.chapter2Photo}
@@ -72,13 +74,14 @@ export function Chapter2({ candidate }: { userName: string; candidate: Candidate
                 fill
                 sizes="(max-width: 480px) 100vw, 480px"
                 draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
                 className="chapter2-photo-img"
                 style={
                   {
                     objectFit: 'cover',
                     objectPosition: '50% 25%',
-                    filter: 'blur(30px) saturate(1.05)',
-                    transform: 'scale(1.2)',
+                    filter: 'blur(9px) saturate(1.15) brightness(1)',
+                    transform: 'scale(1.08)',
                     pointerEvents: 'none',
                     WebkitUserSelect: 'none',
                     WebkitTouchCallout: 'none',

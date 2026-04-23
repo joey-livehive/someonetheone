@@ -5,19 +5,17 @@ import { PricingPlan } from '@/lib/report/types';
 
 interface Plan extends PricingPlan {
   desc: string;
-  descBold: string[];
 }
 
 const plans: Plan[] = [
   {
     id: 'starter',
     name: '스타터',
-    originalPrice: 49900,
+    originalPrice: 44900,
     discountedPrice: 39900,
-    discountPercent: 20,
+    discountPercent: 11,
     cardCount: 5,
-    desc: '엄선된 5명 프로필 전달',
-    descBold: ['5명 프로필'],
+    desc: '엄선된 5명 프로필 카드 전달',
   },
   {
     id: 'regular',
@@ -26,41 +24,22 @@ const plans: Plan[] = [
     discountedPrice: 69900,
     discountPercent: 22,
     cardCount: 10,
-    conversationGuarantee: 3,
     recommended: true,
-    desc: '10명 프로필 + 3명 대화 보장',
-    descBold: ['10명 프로필', '3명 대화 보장'],
+    desc: '엄선된 10명 프로필 카드 전달',
   },
   {
     id: 'premium',
     name: '프리미엄',
-    originalPrice: 129900,
+    originalPrice: 149900,
     discountedPrice: 99900,
-    discountPercent: 23,
+    discountPercent: 33,
     cardCount: 20,
-    conversationGuarantee: 10,
-    desc: '20명 프로필 + 10명 대화 보장',
-    descBold: ['20명 프로필', '10명 대화 보장'],
+    desc: '엄선된 20명 프로필 카드 전달',
   },
 ];
 
 function perPerson(plan: Plan) {
   return Math.round(plan.discountedPrice / plan.cardCount).toLocaleString();
-}
-
-function renderDesc(plan: Plan) {
-  // 볼드 토큰들을 문자열 사이에 삽입
-  const parts: React.ReactNode[] = [];
-  let remaining = plan.desc;
-  plan.descBold.forEach((token, i) => {
-    const idx = remaining.indexOf(token);
-    if (idx === -1) return;
-    if (idx > 0) parts.push(remaining.slice(0, idx));
-    parts.push(<b key={i}>{token}</b>);
-    remaining = remaining.slice(idx + token.length);
-  });
-  if (remaining) parts.push(remaining);
-  return <>{parts}</>;
 }
 
 interface Props {
@@ -92,16 +71,14 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: Props) {
   }, [open]);
 
   const handlePay = () => {
-    if (typeof window !== 'undefined') {
-      const fbq = (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq;
-      if (fbq) {
-        fbq('track', 'InitiateCheckout', {
-          value: selected.discountedPrice,
-          currency: 'KRW',
-          content_ids: ['someonetheone'],
-          content_name: `report_${reportId}_${selected.id}`,
-        });
-      }
+    const fbq = (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq;
+    if (fbq) {
+      fbq('track', 'InitiateCheckout', {
+        value: selected.discountedPrice,
+        currency: 'KRW',
+        content_ids: ['someonetheone'],
+        content_name: `report_${reportId}_${selected.id}`,
+      });
     }
     alert(
       `[테스트] ${selected.name} 플랜 · ${selected.discountedPrice.toLocaleString()}원\n실제 결제는 PG 연동 후에 동작합니다.`,
@@ -164,22 +141,11 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: Props) {
                     </div>
                   </div>
                 </div>
-                <p className="plan-desc">{renderDesc(p)}</p>
+                <p className="plan-desc">{p.desc}</p>
                 <p className="plan-per">1인당 약 {perPerson(p)}원</p>
               </div>
             );
           })}
-        </div>
-
-        <div className="sheet-email">
-          <label htmlFor="v7-sheet-email-input">Email</label>
-          <p className="desc">결제 완료 후 이 이메일로 프로필을 전달합니다.</p>
-          <input
-            id="v7-sheet-email-input"
-            type="email"
-            placeholder="you@example.com"
-            autoComplete="email"
-          />
         </div>
 
         <div className="sheet-terms">

@@ -9,7 +9,6 @@ export function FinalSignature() {
         <br />
         대신 씁니다.
       </div>
-      <div className="final-sig">2026 · SEOUL</div>
     </div>
   );
 }

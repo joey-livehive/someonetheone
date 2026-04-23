@@ -77,7 +77,7 @@ export const READING_CARD_CONTENT = {
     '이 분의 ◯◯◯◯한 안정감이 의뢰인님께 잘 맞는 선택으로 판단했습니다.',
 
   probabilityLabel: '예상 만족도',
-  probabilityValue: 89,
+  probabilityValue: 91,
   cases: 'BASED ON 23,481 CASES',
 } as const;
 

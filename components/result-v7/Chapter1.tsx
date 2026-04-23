@@ -19,7 +19,7 @@ export function Chapter1({ personalizedTraits }: Chapter1Props = {}) {
   return (
     <>
       <Section>
-        <SectionLabel>01. FIRST READING</SectionLabel>
+        <SectionLabel>02. FIRST READING</SectionLabel>
         <SectionTitle>
           의뢰인님의
           <br />

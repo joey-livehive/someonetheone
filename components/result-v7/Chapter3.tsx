@@ -31,9 +31,9 @@ export function Chapter3({ match }: { userName: string; match: MatchAnalysis }) 
       <Section>
         <SectionLabel>03. THE MATCH</SectionLabel>
         <SectionTitle>
-          의뢰인님의 기준 ×
+          의뢰인님의 기준에
           <br />
-          <HL>이 분의</HL> 실제.
+          <HL>부합하는</HL> 상대.
         </SectionTitle>
         <SectionSub>6개 축을 비교 분석했습니다.</SectionSub>
       </Section>
@@ -50,7 +50,7 @@ export function Chapter3({ match }: { userName: string; match: MatchAnalysis }) 
 
         <div className="radar-legend">
           <span className="you">의뢰인님의 기준</span>
-          <span className="them">이 분</span>
+          <span className="them">엄선된 상대</span>
         </div>
         <div className="radar-wrap">
           <RadarChart data={match.radarData} />

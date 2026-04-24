@@ -47,14 +47,22 @@ export function CoupleTestimonials() {
             className="shrink-0 w-[260px] snap-start bg-brand-cream border-[1.5px] border-brand-line
                        rounded-[18px] overflow-hidden shadow-[4px_5px_0_var(--line)]"
           >
-            <div className="relative aspect-[4/3] bg-brand-ink/10 overflow-hidden">
+            <div className="relative aspect-[4/3] bg-brand-ink/10 overflow-hidden" onContextMenu={(e) => e.preventDefault()}>
               <Image
                 src={c.photo}
                 alt=""
                 fill
                 sizes="260px"
-                className="object-cover"
                 draggable={false}
+                className="object-cover select-none"
+                style={{
+                  filter: 'blur(8px) saturate(1.05)',
+                  transform: 'scale(1.15)',
+                  pointerEvents: 'none',
+                  WebkitUserSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                  WebkitUserDrag: 'none',
+                } as React.CSSProperties}
               />
             </div>
             <div className="p-4 pb-[18px]">

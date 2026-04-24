@@ -195,8 +195,9 @@ export function getReport(reportId: string): ReportData | null {
   return reports[reportId] ?? null;
 }
 
-export function getDefaultReport(reportId: string): ReportData {
-  return { ...femaleReportFormal, reportId };
+export function getDefaultReport(reportId: string, gender: 'F' | 'M' = 'F'): ReportData {
+  const base = gender === 'M' ? maleReportFormal : femaleReportFormal;
+  return { ...base, reportId, tone: 'formal' };
 }
 
 export const mockReportIds = Object.keys(reports);

@@ -1637,6 +1637,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 .v7-root .cp-photo-label {
   font-weight: 600;

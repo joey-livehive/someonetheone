@@ -311,10 +311,10 @@ export default function LandingPage() {
               className={`polaroid polaroid--wide${visibleCards[4] ? ' is-visible' : ''}`}
             >
               <div className="polaroid__img">
-                <Image src="/images/earth.webp" alt="지구 어디든" fill sizes="(max-width: 480px) 90vw, 480px" />
+                <Image src="/images/earth.webp" alt="전 세계 어디든" fill sizes="(max-width: 480px) 90vw, 480px" />
               </div>
               <div className="polaroid__cap">
-                <span className="polaroid__name">지구 어디든</span>
+                <span className="polaroid__name">전 세계 어디든</span>
               </div>
             </div>
           </div>

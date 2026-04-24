@@ -10,10 +10,10 @@ interface RemainingHint {
 }
 
 const hints: RemainingHint[] = [
-  { source: 'Instagram', location: '연남동 · 28세' },
-  { source: 'LinkedIn', location: '판교 · 31세' },
-  { source: '프리미엄 헬스장', location: '강남 · 29세' },
-  { source: '와인바·북카페', location: '성수 · 27세' },
+  { source: 'Instagram', location: '28세' },
+  { source: 'LinkedIn', location: '31세' },
+  { source: '프리미엄 헬스장', location: '29세' },
+  { source: '와인바·북카페', location: '27세' },
 ];
 
 export function RemainingCandidates({ photos }: { photos?: string[] }) {

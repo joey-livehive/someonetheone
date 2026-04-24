@@ -13,10 +13,10 @@ interface RemainingHint {
 }
 
 const hints: RemainingHint[] = [
-  { source: 'Instagram', location: '연남동 · 28세', bg: 'linear-gradient(135deg, #E8D5B7 0%, #C9A574 100%)' },
-  { source: 'LinkedIn', location: '판교 · 31세', bg: 'linear-gradient(135deg, #D4B896 0%, #8A7C60 100%)' },
-  { source: '프리미엄 헬스장', location: '강남 · 29세', bg: 'linear-gradient(135deg, #EBD9B6 0%, #B59B78 100%)' },
-  { source: '와인바·북카페', location: '성수 · 27세', bg: 'linear-gradient(135deg, #D6C3A2 0%, #7A6850 100%)' },
+  { source: 'Instagram', location: '28세', bg: 'linear-gradient(135deg, #E8D5B7 0%, #C9A574 100%)' },
+  { source: 'LinkedIn', location: '31세', bg: 'linear-gradient(135deg, #D4B896 0%, #8A7C60 100%)' },
+  { source: '프리미엄 헬스장', location: '29세', bg: 'linear-gradient(135deg, #EBD9B6 0%, #B59B78 100%)' },
+  { source: '와인바·북카페', location: '27세', bg: 'linear-gradient(135deg, #D6C3A2 0%, #7A6850 100%)' },
 ];
 
 export function RemainingCandidates({ photos }: { photos?: string[] }) {

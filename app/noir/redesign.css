@@ -148,32 +148,6 @@
   color: var(--ink);
   display: inline-block;
 }
-.noir-scoped .pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px 7px 12px;
-  background: var(--ink);
-  color: var(--cream);
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-.noir-scoped .pill .dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--gold);
-}
-.noir-scoped .highlight-mark {
-  background: var(--ink);
-  color: var(--cream);
-  padding: 0 10px;
-  display: inline-block;
-  margin: 0 2px;
-}
-.noir-scoped .highlight-yellow,
 .noir-scoped .hl {
   background: var(--gold-pale);
   padding: 0 6px;
@@ -293,6 +267,18 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 16px 14px;
 }
+.noir-scoped .channels__grid .polaroid {
+  opacity: 0;
+  transform: translateY(18px) scale(0.985);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.15, 1),
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.15, 1);
+  will-change: opacity, transform;
+}
+.noir-scoped .channels__grid .polaroid.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
 .noir-scoped .polaroid {
   position: relative;
   background: var(--paper);
@@ -330,14 +316,6 @@
   align-items: baseline;
   justify-content: center;
   gap: 8px;
-}
-.noir-scoped .polaroid__num {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  color: var(--gold-deep);
-  text-transform: uppercase;
-  flex-shrink: 0;
 }
 .noir-scoped .polaroid__name {
   font-family: var(--font-mono);
@@ -426,47 +404,6 @@
   letter-spacing: 0;
   flex-shrink: 0;
 }
-.noir-scoped .niche__bubble {
-  position: absolute;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 8px 14px;
-  border-radius: 999px;
-  letter-spacing: -0.015em;
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(28, 18, 8, 0.14);
-}
-.noir-scoped .niche__bubble::before {
-  content: '◆';
-  margin-right: 6px;
-  font-size: 9px;
-}
-.noir-scoped .niche__bubble--a {
-  top: 0; left: -6px;
-  transform: rotate(-3deg);
-  background: var(--ink); color: var(--cream);
-}
-.noir-scoped .niche__bubble--a::before { color: var(--gold); }
-.noir-scoped .niche__bubble--b {
-  top: 88px; left: -2px;
-  transform: rotate(-1deg);
-  background: var(--gold); color: var(--ink);
-}
-.noir-scoped .niche__bubble--b::before { color: var(--ink); }
-.noir-scoped .niche__bubble--c {
-  top: -4px; right: -6px;
-  transform: rotate(2deg);
-  background: var(--gold); color: var(--ink);
-}
-.noir-scoped .niche__bubble--c::before { color: var(--ink); }
-.noir-scoped .niche__bubble--d {
-  top: 84px; right: -2px;
-  transform: rotate(3deg);
-  background: var(--ink); color: var(--cream);
-}
-.noir-scoped .niche__bubble--d::before { color: var(--gold); }
-
 /* ─── Promises (Dark Section) ───────────────────────────────── */
 .noir-scoped .promises {
   margin: 80px -24px 0;
@@ -774,42 +711,7 @@
 }
 .noir-scoped .countup-ones__stack.is-rolled { transform: translateY(-1em); }
 .noir-scoped .countup-ones__digit { height: 1em; line-height: 1; }
-.noir-scoped .final-hero__label {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  color: var(--ink);
-  line-height: 1.35;
-  margin-bottom: 40px;
-}
-.noir-scoped .final-hero__quote-mark {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 48px;
-  line-height: 0.4;
-  color: var(--gold);
-  display: block;
-  margin-bottom: 16px;
-}
-.noir-scoped .final-hero__quote {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 1.6;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  padding: 0 8px;
-  margin-bottom: 14px;
-}
-.noir-scoped .final-hero__quote-meta {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--ink-mute);
-  text-transform: uppercase;
-  margin-bottom: 44px;
-}
+
 /* ─── Case Records (리포트 v7 CoupleTestimonials 디자인 이식) ─── */
 .noir-scoped .cases-section {
   margin: 88px -24px 48px;
@@ -817,16 +719,6 @@
 }
 .noir-scoped .cases-section--bare { margin-top: 40px; }
 .noir-scoped .cases-section .channels__head { margin: 0 24px 20px; }
-.noir-scoped .cases-section__head { padding: 0 24px 20px; text-align: left; }
-.noir-scoped .cases-section__title {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.4;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-}
 
 .noir-scoped .couples-scroll {
   display: flex;
@@ -936,18 +828,6 @@
 /* ============================================================
    START FLOW
    ============================================================ */
-.noir-scoped .progress-bar {
-  height: 2px;
-  background: var(--line-soft);
-  position: relative;
-}
-.noir-scoped .progress-bar__fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--ink);
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .noir-scoped .phase {
   padding: 32px 24px 120px;
   min-height: calc(100vh - 80px);
@@ -1303,16 +1183,6 @@
   font-family: var(--font-mono);
   font-weight: 400;
   letter-spacing: 0.05em;
-}
-
-/* Utility */
-.noir-scoped .subtle {
-  font-size: 12px;
-  color: var(--ink-mute);
-  text-align: center;
-  margin-top: 14px;
-  font-family: var(--font-mono);
-  letter-spacing: 0.08em;
 }
 
 /* Narrow screen */

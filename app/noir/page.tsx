@@ -12,9 +12,11 @@ function OnesRoller({ value }: { value: number }) {
   const ROLL_MS = 700;
 
   useEffect(() => {
-    if (value !== displayed && pending === null) {
-      setPending(value);
-    }
+    if (value === displayed || pending !== null) return;
+    // 십의 자리까지 함께 바뀌면 롤이 깨지므로 즉시 반영
+    const sameTens = Math.floor(value / 10) === Math.floor(displayed / 10);
+    if (sameTens) setPending(value);
+    else setDisplayed(value);
   }, [value, displayed, pending]);
 
   useEffect(() => {
@@ -85,7 +87,7 @@ function CountUp({ target = 3285, interval = 8000 }: { target?: number; interval
 const TICKER_ITEMS = [
   'SOMEONETHEONE',
   'PRIVATE CASTING AGENCY',
-  'EST. 2025 · SEOUL',
+  'EST. 2025',
   'MATCH NO. 04293',
   '3,283 CASTINGS COMPLETED',
 ];
@@ -113,7 +115,6 @@ function TopNav() {
       <span className="topnav__logo">
         someonetheone<span className="dot">.</span>
       </span>
-      <span className="topnav__meta">2026 · EST.</span>
     </nav>
   );
 }
@@ -139,6 +140,8 @@ const CHANNELS: Array<{ num: string; name: string; src: string; icon?: React.Rea
 
 export default function LandingPage() {
   const [ctaVisible, setCtaVisible] = useState(false);
+  const polaroidRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [visibleCards, setVisibleCards] = useState<boolean[]>([false, false, false, false, false]);
 
   useEffect(() => {
     trackPageView('landing');
@@ -150,6 +153,30 @@ export default function LandingPage() {
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    polaroidRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setVisibleCards((prev) => {
+              if (prev[i]) return prev;
+              const next = [...prev];
+              next[i] = true;
+              return next;
+            });
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.25 },
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach((o) => o.disconnect());
   }, []);
 
   return (
@@ -201,7 +228,6 @@ export default function LandingPage() {
         <div className="channels">
           <div className="channels__head">
             <span className="channels__label">◆ Why We Cast</span>
-            <span className="channels__count">Preface</span>
           </div>
 
           <div className="problem problem--inchannels">
@@ -246,7 +272,6 @@ export default function LandingPage() {
 
           <div className="channels__head channels__head--deep">
             <span className="channels__label">◆ Where We Cast</span>
-            <span className="channels__count">05 Channels</span>
           </div>
 
           {/* Niche heading — below Where We Cast horizontal line */}
@@ -259,8 +284,14 @@ export default function LandingPage() {
           </div>
 
           <div className="channels__grid">
-            {CHANNELS.map((c) => (
-              <div className="polaroid" key={c.num}>
+            {CHANNELS.map((c, i) => (
+              <div
+                ref={(el) => {
+                  polaroidRefs.current[i] = el;
+                }}
+                className={`polaroid${visibleCards[i] ? ' is-visible' : ''}`}
+                key={c.num}
+              >
                 <div className="polaroid__img">
                   <Image src={c.src} alt={c.name} fill sizes="(max-width: 480px) 45vw, 220px" />
                 </div>
@@ -273,7 +304,12 @@ export default function LandingPage() {
               </div>
             ))}
             {/* wide earth */}
-            <div className="polaroid polaroid--wide">
+            <div
+              ref={(el) => {
+                polaroidRefs.current[4] = el;
+              }}
+              className={`polaroid polaroid--wide${visibleCards[4] ? ' is-visible' : ''}`}
+            >
               <div className="polaroid__img">
                 <Image src="/images/earth.webp" alt="지구 어디든" fill sizes="(max-width: 480px) 90vw, 480px" />
               </div>
@@ -289,7 +325,6 @@ export default function LandingPage() {
         <div className="promises">
           <div className="channels__head channels__head--dark">
             <span className="channels__label">◆ Four Commitments</span>
-            <span className="channels__count">04 Vows</span>
           </div>
           <h2 className="promises__title">
             <span className="hl">엄선된 상대</span>를
@@ -306,7 +341,9 @@ export default function LandingPage() {
                 저희의 기준입니다
               </h3>
               <p className="promise__body">
-                성격이든 외모든, 의뢰인께 중요한 것은 저희에게도 중요합니다.
+                성격이든 외모든,
+                <br />
+                의뢰인께 중요한 것은 저희에게도 중요합니다.
               </p>
             </div>
           </div>
@@ -319,7 +356,9 @@ export default function LandingPage() {
                 어디에도 공개하지 않습니다
               </h3>
               <p className="promise__body">
-                꼭 필요한 경우에도, 반드시 의뢰인 허락을 먼저 구합니다.
+                꼭 필요한 경우에도,
+                <br />
+                반드시 의뢰인 허락을 먼저 구합니다.
               </p>
             </div>
           </div>
@@ -332,7 +371,9 @@ export default function LandingPage() {
                 저희가 건네드립니다
               </h3>
               <p className="promise__body">
-                조심스럽게, 그러나 확실하게. 의뢰인 정보는 절대 말하지 않습니다.
+                조심스럽게, 그러나 확실하게.
+                <br />
+                의뢰인 정보는 절대 말하지 않습니다.
               </p>
             </div>
           </div>
@@ -345,7 +386,9 @@ export default function LandingPage() {
                 먼저 살펴드립니다
               </h3>
               <p className="promise__body">
-                좋은 점, 특별한 점, 조심할 점까지. 리포트로 정리해 보내드립니다.
+                좋은 점, 특별한 점, 조심할 점까지.
+                <br />
+                리포트로 정리해 보내드립니다.
               </p>
             </div>
           </div>
@@ -355,7 +398,6 @@ export default function LandingPage() {
         <div className="final-hero">
           <div className="channels__head">
             <span className="channels__label">◆ Since 2025</span>
-            <span className="channels__count">Archive</span>
           </div>
           <div className="final-hero__caption">현재까지 성사된 만남 건수</div>
           <div className="final-hero__num">
@@ -429,7 +471,6 @@ export default function LandingPage() {
           <div className="behind__head-wrap">
             <div className="channels__head channels__head--dark">
               <span className="channels__label">◆ Behind The Scenes</span>
-              <span className="channels__count">03 Scenes</span>
             </div>
             <div className="behind__head">
               <h2 className="sec-title">
@@ -438,7 +479,9 @@ export default function LandingPage() {
                 사람을 찾는 방식.
               </h2>
               <p className="sec-sub">
-                매니저가 오프라인과 온라인 양쪽에서 직접 접근하며, 의뢰인님의 정보는 먼저 공개되지 않습니다.
+                오프라인과 온라인 양쪽에서 직접 캐스팅해오며,
+                <br />
+                의뢰인님의 정보는 먼저 공개되지 않습니다.
               </p>
             </div>
           </div>
@@ -530,7 +573,7 @@ export default function LandingPage() {
           <div className="footer__logo">
             someonetheone<span style={{ color: 'var(--gold-deep)' }}>.</span>
           </div>
-          <div className="footer__meta">Private Casting Agency · Seoul · Est. 2025</div>
+          <div className="footer__meta">Private Casting Agency · Est. 2025</div>
         </div>
       </div>
     </main>

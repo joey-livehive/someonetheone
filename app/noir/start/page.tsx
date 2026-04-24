@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   trackPageView,
@@ -58,29 +58,6 @@ async function api(path: string, options?: RequestInit) {
   return res.json();
 }
 
-const TICKER_ITEMS = [
-  'SOMEONETHEONE',
-  'PRIVATE CASTING AGENCY',
-  'EST. 2025 · SEOUL',
-  'BRIEF IN PROGRESS',
-];
-
-function AgencyBar() {
-  const repeated = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
-  return (
-    <div className="agency-bar">
-      <div className="agency-bar__track">
-        {repeated.map((t, i) => (
-          <span key={i}>
-            {t}
-            <span className="dot" style={{ marginLeft: '0.8em' }}>◆</span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function formatPhone(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 11);
   if (digits.length < 4) return digits;
@@ -119,7 +96,6 @@ export default function NoirStartPage() {
   const [photo, setPhoto] = useState<string | null>(null);
   const [guestUid, setGuestUid] = useState<string | null>(null);
   const matchNo = useMemo(() => '04' + String(Math.floor(Math.random() * 900) + 100), []);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     trackPageView('start');
@@ -135,21 +111,6 @@ export default function NoirStartPage() {
     setGuestUid(data.guest_uid);
     setTrackingGuestUid(data.guest_uid);
     return data.guest_uid;
-  }
-
-  // ─── Progress (0-100) ───
-  function progressPct() {
-    const map: Record<Phase, number> = {
-      intro: 5 + introStep,
-      picky: 14,
-      phone: 15,
-      bridge: 16,
-      detail: 16 + detailStep,
-      photo: 24,
-      message: 25,
-      done: 26,
-    };
-    return Math.max(6, Math.round((map[phase] / 26) * 100));
   }
 
   // ─── Meta label ───
@@ -190,16 +151,20 @@ export default function NoirStartPage() {
   }
 
   // ─── Pick an option (intro/detail) ───
-  async function handleSelect(q: Question, value: string) {
+  function handleSelect(q: Question, value: string) {
     setAnswers((prev) => ({ ...prev, [q.key]: value }));
-    const uid = await ensureGuest().catch(() => null);
-    if (uid) {
-      api(`/${uid}/answer`, {
-        method: 'PATCH',
-        body: JSON.stringify({ question: q.title.replace('\n', ' '), answer: value }),
-      }).catch(() => {});
-    }
-    trackAnswer(q.title.replace('\n', ' '), value, phase);
+    const question = q.title.replace(/\n/g, ' ');
+    trackAnswer(question, value, phase);
+
+    // API는 백그라운드 — 다음 질문 전환을 막지 않도록
+    ensureGuest()
+      .then((uid) =>
+        api(`/${uid}/answer`, {
+          method: 'PATCH',
+          body: JSON.stringify({ question, answer: value }),
+        }),
+      )
+      .catch(() => {});
 
     setTimeout(() => {
       if (phase === 'intro') {
@@ -223,20 +188,20 @@ export default function NoirStartPage() {
     setPhase('phone');
   }
 
-  async function handlePhoneNext() {
+  function handlePhoneNext() {
     const digits = phone.replace(/\D/g, '');
     if (digits.length < 10 || digits.length > 11) return;
-    try {
-      const uid = await ensureGuest();
-      api(`/${uid}/phone`, {
-        method: 'PATCH',
-        body: JSON.stringify({ phone: digits }),
-      }).catch(() => {});
-    } catch {
-      // API 실패해도 플로우는 막지 않음
-    }
-    trackPhone(digits);
+    // UI는 즉시 진행, API는 백그라운드 (에러/지연이 UX 막지 않도록)
     setPhase('bridge');
+    trackPhone(digits);
+    ensureGuest()
+      .then((uid) =>
+        api(`/${uid}/phone`, {
+          method: 'PATCH',
+          body: JSON.stringify({ phone: digits }),
+        }),
+      )
+      .catch(() => {});
   }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -341,7 +306,6 @@ export default function NoirStartPage() {
             </p>
           </div>
           <div className="field">
-            <span className="field__label">◆ 의뢰서 · 비공개 메모</span>
             <textarea
               className="textarea"
               maxLength={500}
@@ -405,14 +369,6 @@ export default function NoirStartPage() {
       {/* ─── BRIDGE ─── */}
       {phase === 'bridge' && (
         <div className="bridge screen-fade">
-          <div className="bridge__seal">
-            <span>
-              SECTION
-              <br />
-              II OF II
-            </span>
-          </div>
-          <span className="bridge__eyebrow">◆ 의뢰서 1부 접수 완료</span>
           <h2 className="bridge__title">
             이제, <em>의뢰인에 대해</em>
             <br />
@@ -425,7 +381,7 @@ export default function NoirStartPage() {
             <br />
             의뢰인이 어떤 분이신지 먼저 알아야 합니다.
             <br />
-            2분이면 충분합니다.
+            1분이면 충분합니다.
           </p>
           <div className="bridge__footer">
             <button
@@ -474,7 +430,6 @@ export default function NoirStartPage() {
               </>
             )}
             <input
-              ref={fileInputRef}
               id="noir-photo-input"
               type="file"
               accept="image/*"

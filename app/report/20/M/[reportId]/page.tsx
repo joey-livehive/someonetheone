@@ -58,7 +58,8 @@ export default async function ReportPage({
   const { reportId } = await params;
   const { mock } = await searchParams;
 
-  const data = getReport(reportId) || getDefaultReport(reportId);
+  const data = getReport(reportId) || getDefaultReport(reportId, 'M');
+  data.tone = 'formal';
 
   let userAnswers: UserAnswers;
   let personalized: PersonalizedContent;

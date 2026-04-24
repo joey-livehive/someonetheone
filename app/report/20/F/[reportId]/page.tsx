@@ -1,28 +1,28 @@
-import '../../v7.css';
-import { getReport, getDefaultReport } from '@/lib/report/mockData';
+import { notFound } from 'next/navigation';
+import { getReport, mockReportIds, getDefaultReport } from '@/lib/report/mockData';
 import { getMockPersonalized } from '@/lib/personalization/mock-personalized';
-import { isMockUserKey, getMockUser } from '@/lib/personalization/mock-users';
+import { getMockUser, isMockUserKey } from '@/lib/personalization/mock-users';
 import type { UserAnswers, PersonalizedContent } from '@/lib/personalization/types';
-import { TopNav } from '@/components/result-v7/TopNav';
-import { Hero } from '@/components/result-v7/Hero';
-import { HuntBox } from '@/components/result-v7/HuntBox';
-import { ApplicationSummary } from '@/components/result-v7/ApplicationSummary';
-import { TeaserCard } from '@/components/result-v7/TeaserCard';
-import { ReadingCard } from '@/components/result-v7/ReadingCard';
-import { Chapter1 } from '@/components/result-v7/Chapter1';
-import { Chapter2 } from '@/components/result-v7/Chapter2';
-import { Chapter3 } from '@/components/result-v7/Chapter3';
-import { ScarcityBlock } from '@/components/result-v7/ScarcityBlock';
-import { RemainingCandidates } from '@/components/result-v7/RemainingCandidates';
-import { BridgeGradient, BridgeIntro, BridgeBack } from '@/components/result-v7/Bridge';
-import { DarkZone } from '@/components/result-v7/DarkZone';
-import { CastingProcess } from '@/components/result-v7/CastingProcess';
-import { PrivacyBox } from '@/components/result-v7/PrivacyBox';
-import { VsSection } from '@/components/result-v7/VsSection';
-import { PriceCompare } from '@/components/result-v7/PriceCompare';
-import { CoupleTestimonials } from '@/components/result-v7/CoupleTestimonials';
-import { FinalSignature } from '@/components/result-v7/FinalSignature';
-import { ReportShell } from '@/components/result-v7/ReportShell';
+import { TopNav } from '@/components/report/TopNav';
+import { Hero } from '@/components/report/Hero';
+import { ApplicationSummary } from '@/components/report/ApplicationSummary';
+import { HuntBox } from '@/components/report/HuntBox';
+import { TeaserCard } from '@/components/report/TeaserCard';
+import { ReadingCard } from '@/components/report/ReadingCard';
+import { Chapter1 } from '@/components/report/Chapter1';
+import { Chapter2 } from '@/components/report/Chapter2';
+import { Chapter3 } from '@/components/report/Chapter3';
+import { ScarcityBlock } from '@/components/report/ScarcityBlock';
+import { RemainingCandidates } from '@/components/report/RemainingCandidates';
+import { BridgeGradient, BridgeIntro, BridgeBack } from '@/components/report/Bridge';
+import { DarkZone } from '@/components/report/DarkZone';
+import { CastingProcess } from '@/components/report/CastingProcess';
+import { PrivacyBox } from '@/components/report/PrivacyBox';
+import { VsSection } from '@/components/report/VsSection';
+import { PriceCompare } from '@/components/report/PriceCompare';
+import { CoupleTestimonials } from '@/components/report/CoupleTestimonials';
+import { FinalSignature } from '@/components/report/FinalSignature';
+import { ReportShell } from '@/components/report/ReportShell';
 import { TrackSection } from '@/components/report/TrackSection';
 
 export const dynamic = 'force-dynamic';
@@ -58,7 +58,7 @@ export default async function ReportPage({
   const { reportId } = await params;
   const { mock } = await searchParams;
 
-  const data = getReport(reportId) || getDefaultReport(reportId, 'M');
+  const data = getReport(reportId) || getDefaultReport(reportId, 'F');
   data.tone = 'formal';
 
   let userAnswers: UserAnswers;
@@ -80,7 +80,7 @@ export default async function ReportPage({
   }
 
   return (
-    <main className="v7-root">
+    <main className="max-w-[480px] mx-auto pb-[130px] relative bg-brand-bg min-h-screen font-body text-brand-ink">
       <ReportShell reportId={reportId} tone={data.tone}>
         <TopNav publishedAt={data.publishedAt} />
         <Hero userName={data.userName} />
@@ -93,20 +93,14 @@ export default async function ReportPage({
         />
 
         <TrackSection section="teaser_card" reportId={reportId}>
-          <TeaserCard
-            candidate={data.teaserCandidate}
-            userLocation={userAnswers.selfInfo?.location}
-          />
+          <TeaserCard candidate={data.teaserCandidate} />
         </TrackSection>
-        <ReadingCard
-          userName={data.userName}
-          personalizedOpenings={personalized.readingCard}
-        />
+        <ReadingCard userName={data.userName} personalized={personalized.readingCard} />
         <TrackSection section="chapter1" reportId={reportId}>
           <Chapter2 userName={data.userName} candidate={data.teaserCandidate} />
         </TrackSection>
         <TrackSection section="chapter2" reportId={reportId}>
-          <Chapter1 personalizedTraits={personalized.chapter1Traits} />
+          <Chapter1 userName={data.userName} personalized={personalized.chapter1Traits} />
         </TrackSection>
         <TrackSection section="chapter3" reportId={reportId}>
           <Chapter3 userName={data.userName} match={data.match} />
@@ -114,7 +108,7 @@ export default async function ReportPage({
         <TrackSection section="remaining" reportId={reportId}>
           <RemainingCandidates photos={data.remainingPhotos} />
         </TrackSection>
-        <ScarcityBlock total={data.totalCandidates} />
+        <ScarcityBlock userName={data.userName} total={data.totalCandidates} />
 
         <BridgeGradient />
 
@@ -122,7 +116,7 @@ export default async function ReportPage({
           <DarkZone>
             <BridgeIntro />
             <CastingProcess />
-            <PrivacyBox />
+            <PrivacyBox userName={data.userName} />
             <VsSection />
           </DarkZone>
         </TrackSection>

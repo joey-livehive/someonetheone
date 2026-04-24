@@ -23,6 +23,7 @@ import { PriceCompare } from '@/components/result-v7/PriceCompare';
 import { CoupleTestimonials } from '@/components/result-v7/CoupleTestimonials';
 import { FinalSignature } from '@/components/result-v7/FinalSignature';
 import { ReportShell } from '@/components/result-v7/ReportShell';
+import { TrackSection } from '@/components/report/TrackSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,32 +92,46 @@ export default async function ReportPage({
           total={data.totalCandidates}
         />
 
-        <TeaserCard
-          candidate={data.teaserCandidate}
-          userLocation={userAnswers.selfInfo?.location}
-        />
+        <TrackSection section="teaser_card" reportId={reportId}>
+          <TeaserCard
+            candidate={data.teaserCandidate}
+            userLocation={userAnswers.selfInfo?.location}
+          />
+        </TrackSection>
         <ReadingCard
           userName={data.userName}
           personalizedOpenings={personalized.readingCard}
         />
-        <Chapter2 userName={data.userName} candidate={data.teaserCandidate} />
-        <Chapter1 personalizedTraits={personalized.chapter1Traits} />
-        <Chapter3 userName={data.userName} match={data.match} />
-        <RemainingCandidates photos={data.remainingPhotos} />
+        <TrackSection section="chapter1" reportId={reportId}>
+          <Chapter2 userName={data.userName} candidate={data.teaserCandidate} />
+        </TrackSection>
+        <TrackSection section="chapter2" reportId={reportId}>
+          <Chapter1 personalizedTraits={personalized.chapter1Traits} />
+        </TrackSection>
+        <TrackSection section="chapter3" reportId={reportId}>
+          <Chapter3 userName={data.userName} match={data.match} />
+        </TrackSection>
+        <TrackSection section="remaining" reportId={reportId}>
+          <RemainingCandidates photos={data.remainingPhotos} />
+        </TrackSection>
         <ScarcityBlock total={data.totalCandidates} />
 
         <BridgeGradient />
 
-        <DarkZone>
-          <BridgeIntro />
-          <CastingProcess />
-          <PrivacyBox />
-          <VsSection />
-        </DarkZone>
+        <TrackSection section="dark_zone" reportId={reportId}>
+          <DarkZone>
+            <BridgeIntro />
+            <CastingProcess />
+            <PrivacyBox />
+            <VsSection />
+          </DarkZone>
+        </TrackSection>
 
         <BridgeBack />
 
-        <PriceCompare />
+        <TrackSection section="price_compare" reportId={reportId}>
+          <PriceCompare />
+        </TrackSection>
         <CoupleTestimonials />
         <FinalSignature />
       </ReportShell>

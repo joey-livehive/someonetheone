@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
-import { getReport, mockReportIds } from '@/lib/report/mockData';
+import { getReport, mockReportIds, getDefaultReport } from '@/lib/report/mockData';
 import { getMockPersonalized } from '@/lib/personalization/mock-personalized';
 import { getMockUser, isMockUserKey } from '@/lib/personalization/mock-users';
+import type { UserAnswers, PersonalizedContent } from '@/lib/personalization/types';
 import { TopNav } from '@/components/report/TopNav';
 import { Hero } from '@/components/report/Hero';
 import { ApplicationSummary } from '@/components/report/ApplicationSummary';
@@ -24,8 +25,27 @@ import { FinalSignature } from '@/components/report/FinalSignature';
 import { ReportShell } from '@/components/report/ReportShell';
 import { TrackSection } from '@/components/report/TrackSection';
 
-export function generateStaticParams() {
-  return mockReportIds.map((reportId) => ({ reportId }));
+export const dynamic = 'force-dynamic';
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.publicvoid.im';
+
+const EMPTY_PERSONALIZED: PersonalizedContent = {
+  chapter1Traits: { trait01Intro: '', trait02Intro: '', trait03Intro: '', trait04Intro: '' },
+  readingCard: { paragraph1Opening: '', paragraph2Opening: '' },
+};
+
+async function fetchReport(reportId: string): Promise<{ userAnswers: UserAnswers; personalized: PersonalizedContent } | null> {
+  try {
+    const res = await fetch(`${API}/theone/reports/${reportId}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return {
+      userAnswers: json.user_answers || { idealType: {} },
+      personalized: json.personalized || EMPTY_PERSONALIZED,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export default async function ReportPage({
@@ -36,17 +56,31 @@ export default async function ReportPage({
   searchParams: Promise<{ mock?: string }>;
 }) {
   const { reportId } = await params;
-  const data = getReport(reportId);
-  if (!data) notFound();
-
   const { mock } = await searchParams;
-  const mockKey = isMockUserKey(mock) ? mock : 'A';
-  const personalized = getMockPersonalized(mockKey);
-  const userAnswers = getMockUser(mockKey);
+
+  const data = getReport(reportId) || getDefaultReport(reportId);
+
+  let userAnswers: UserAnswers;
+  let personalized: PersonalizedContent;
+
+  if (getReport(reportId) && mock) {
+    const mockKey = isMockUserKey(mock) ? mock : 'A';
+    userAnswers = getMockUser(mockKey);
+    personalized = getMockPersonalized(mockKey);
+  } else {
+    const apiData = await fetchReport(reportId);
+    if (apiData) {
+      userAnswers = apiData.userAnswers;
+      personalized = apiData.personalized;
+    } else {
+      userAnswers = getMockUser('A');
+      personalized = EMPTY_PERSONALIZED;
+    }
+  }
 
   return (
     <main className="max-w-[480px] mx-auto pb-[130px] relative bg-brand-bg min-h-screen font-body text-brand-ink">
-      <ReportShell reportId={data.reportId} tone={data.tone}>
+      <ReportShell reportId={reportId} tone={data.tone}>
         <TopNav publishedAt={data.publishedAt} />
         <Hero userName={data.userName} />
         <ApplicationSummary userAnswers={userAnswers} />

@@ -4,7 +4,6 @@ import { getMockPersonalized } from '@/lib/personalization/mock-personalized';
 import { getMockUser, isMockUserKey } from '@/lib/personalization/mock-users';
 import { TopNav } from '@/components/report/TopNav';
 import { Hero } from '@/components/report/Hero';
-import { CredibilityStrip } from '@/components/report/CredibilityStrip';
 import { ApplicationSummary } from '@/components/report/ApplicationSummary';
 import { HuntBox } from '@/components/report/HuntBox';
 import { TeaserCard } from '@/components/report/TeaserCard';
@@ -50,7 +49,6 @@ export default async function ReportPage({
     <main className="max-w-[480px] mx-auto pb-[130px] relative bg-brand-bg min-h-screen font-body text-brand-ink">
       <ReportShell reportId={data.reportId} tone={data.tone}>
         <TopNav publishedAt={data.publishedAt} />
-        <CredibilityStrip />
         <Hero userName={data.userName} />
         <ApplicationSummary userAnswers={userAnswers} />
         <HuntBox

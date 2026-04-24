@@ -168,7 +168,7 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: PurchaseBottomS
                                font-hand text-[13px] px-3.5 py-[3px] rounded-[14px]
                                border-[1.5px] border-brand-line whitespace-nowrap"
                   >
-                    ✨ 제일 많이 골라
+                    ✨ 제일 많이 골라요
                   </div>
                 )}
                 <div className="flex justify-between items-start gap-2 mb-2">

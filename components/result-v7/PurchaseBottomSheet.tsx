@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { PricingPlan } from '@/lib/report/types';
+import { track } from '@/lib/report/tracking';
 
 interface Plan extends PricingPlan {
   desc: string;
@@ -51,6 +52,12 @@ interface Props {
 export function PurchaseBottomSheet({ open, onClose, reportId }: Props) {
   const [selectedId, setSelectedId] = useState<Plan['id']>('regular');
   const selected = plans.find((p) => p.id === selectedId)!;
+  const [paying, setPaying] = useState(false);
+
+  const selectPlan = (id: Plan['id']) => {
+    setSelectedId(id);
+    track('plan_select', { reportId, plan: id, amount: plans.find((p) => p.id === id)?.discountedPrice, version: 'v7' });
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -70,19 +77,55 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: Props) {
     };
   }, [open]);
 
-  const handlePay = () => {
-    const fbq = (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq;
-    if (fbq) {
-      fbq('track', 'InitiateCheckout', {
+  const handlePay = async () => {
+    if (paying) return;
+    setPaying(true);
+
+    track('purchase_click', { reportId, plan: selected.id, amount: selected.discountedPrice, version: 'v7' }, {
+      pixel: 'InitiateCheckout',
+      pixelData: {
         value: selected.discountedPrice,
         currency: 'KRW',
         content_ids: ['someonetheone'],
         content_name: `report_${reportId}_${selected.id}`,
+      },
+    });
+
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.publicvoid.im';
+      const guestUid = new URLSearchParams(window.location.search).get('guest') || undefined;
+
+      const orderRes = await fetch(`${API}/theone/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guest_uid: guestUid, product_id: selected.id, report_id: reportId }),
       });
+      if (!orderRes.ok) throw new Error('주문 생성 실패');
+      const order = await orderRes.json();
+
+      const startRes = await fetch(`${API}/theone/payments/toss/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: order.order_id,
+          amount: order.amount,
+          order_name: `someonetheone ${selected.name}`,
+        }),
+      });
+      if (!startRes.ok) throw new Error('결제 시작 실패');
+      const toss = await startRes.json();
+
+      const checkoutUrl = toss.checkout?.url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+        return;
+      }
+    } catch (e) {
+      console.error('[purchase_error]', e);
+      alert('결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setPaying(false);
     }
-    alert(
-      `[테스트] ${selected.name} 플랜 · ${selected.discountedPrice.toLocaleString()}원\n실제 결제는 PG 연동 후에 동작합니다.`,
-    );
   };
 
   return (
@@ -117,7 +160,7 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: Props) {
               <div
                 key={p.id}
                 className={cls.join(' ')}
-                onClick={() => setSelectedId(p.id)}
+                onClick={() => selectPlan(p.id)}
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
@@ -161,8 +204,8 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: Props) {
         </div>
 
         <div className="sheet-pay">
-          <button type="button" onClick={handlePay}>
-            <span>결제 진행</span>
+          <button type="button" onClick={handlePay} disabled={paying} style={paying ? { opacity: 0.6 } : undefined}>
+            <span>{paying ? '결제 준비 중...' : '결제 진행'}</span>
             <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path
                 d="M1 7H13M13 7L8 2M13 7L8 12"

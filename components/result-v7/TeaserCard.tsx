@@ -54,7 +54,7 @@ export function TeaserCard({ candidate, userLocation }: TeaserCardProps) {
           <div className="person-count">01 / 05</div>
           <div className="person-overlay">
             <p className="person-overlay-text">프로필 사진은 소개 신청 후 공개됩니다.</p>
-            <button type="button" className="cta-primary" onClick={openSheet}>
+            <button type="button" className="cta-primary" onClick={() => openSheet('teaser_card')}>
               <span>소개 받기</span>
               <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <path

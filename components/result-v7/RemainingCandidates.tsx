@@ -39,7 +39,7 @@ export function RemainingCandidates({ photos }: { photos?: string[] }) {
             <button
               key={h.source}
               type="button"
-              onClick={openSheet}
+              onClick={() => openSheet('remaining_candidates')}
               aria-label={`${h.source}에서 찾은 후보 · 소개 신청 후 공개`}
               className="rc-card"
             >

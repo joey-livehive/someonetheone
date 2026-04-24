@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   trackPageView,
@@ -12,6 +12,7 @@ import {
   trackSubmitApplication,
   setGuestUid as setTrackingGuestUid,
 } from '@/lib/tracking';
+import { API_BASE } from '../api';
 
 type Phase = 'intro' | 'picky' | 'phone' | 'bridge' | 'detail' | 'photo' | 'message' | 'done';
 
@@ -47,7 +48,8 @@ const DETAIL_Q: Question[] = [
   { key: 'ready', section: '의뢰인 · READINESS', num: '07 / 07', title: '지금 연애 준비도는\n어느 정도인가요?', highlight: '연애 준비도', sub: null, opts: ['당장이라도 만나고 싶음', '좋은 분이면 천천히', '아직은 탐색 단계', '마음만 열어둔 상태'] },
 ];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+const ADVANCE_DELAY_MS = 180;
 
 async function api(path: string, options?: RequestInit) {
   const res = await fetch(`${API_BASE}/theone/survey${path}`, {
@@ -95,6 +97,8 @@ export default function NoirStartPage() {
   const [message, setMessage] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
   const [guestUid, setGuestUid] = useState<string | null>(null);
+  const guestPromiseRef = useRef<Promise<string> | null>(null);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const matchNo = useMemo(() => '04' + String(Math.floor(Math.random() * 900) + 100), []);
 
   useEffect(() => {
@@ -105,13 +109,41 @@ export default function NoirStartPage() {
     window.scrollTo(0, 0);
   }, [phase, introStep, detailStep]);
 
-  async function ensureGuest(): Promise<string> {
-    if (guestUid) return guestUid;
-    const data = await api('/start', { method: 'POST' });
-    setGuestUid(data.guest_uid);
-    setTrackingGuestUid(data.guest_uid);
-    return data.guest_uid;
+  useEffect(() => () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+  }, []);
+
+  // 동시에 여러 번 호출돼도 /start 는 1회만 — promise 를 ref 에 캐싱
+  function ensureGuest(): Promise<string> {
+    if (guestUid) return Promise.resolve(guestUid);
+    if (guestPromiseRef.current) return guestPromiseRef.current;
+    guestPromiseRef.current = api('/start', { method: 'POST' })
+      .then((data: { guest_uid: string }) => {
+        setGuestUid(data.guest_uid);
+        setTrackingGuestUid(data.guest_uid);
+        return data.guest_uid;
+      })
+      .catch((err) => {
+        guestPromiseRef.current = null;
+        throw err;
+      });
+    return guestPromiseRef.current;
   }
+
+  // guest 보장 후 PATCH — UX 는 막지 않고, 실패는 조용히 무시
+  function patchGuest(path: string, body: object) {
+    ensureGuest()
+      .then((uid) =>
+        api(`/${uid}${path}`, {
+          method: 'PATCH',
+          body: JSON.stringify(body),
+        }),
+      )
+      .catch(() => {});
+  }
+
+  const patchAnswer = (question: string, answer: string) =>
+    patchGuest('/answer', { question, answer });
 
   // ─── Meta label ───
   function metaLabel() {
@@ -151,22 +183,16 @@ export default function NoirStartPage() {
   }
 
   // ─── Pick an option (intro/detail) ───
+  // 180ms 연출 사이에 재클릭되면 타이머를 리셋해 step 이 두 번 advance 되지 않도록
   function handleSelect(q: Question, value: string) {
     setAnswers((prev) => ({ ...prev, [q.key]: value }));
     const question = q.title.replace(/\n/g, ' ');
     trackAnswer(question, value, phase);
+    patchAnswer(question, value);
 
-    // API는 백그라운드 — 다음 질문 전환을 막지 않도록
-    ensureGuest()
-      .then((uid) =>
-        api(`/${uid}/answer`, {
-          method: 'PATCH',
-          body: JSON.stringify({ question, answer: value }),
-        }),
-      )
-      .catch(() => {});
-
-    setTimeout(() => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    advanceTimerRef.current = setTimeout(() => {
+      advanceTimerRef.current = null;
       if (phase === 'intro') {
         if (introStep < INTRO_Q.length - 1) setIntroStep((s) => s + 1);
         else setPhase('picky');
@@ -174,65 +200,54 @@ export default function NoirStartPage() {
         if (detailStep < DETAIL_Q.length - 1) setDetailStep((s) => s + 1);
         else setPhase('photo');
       }
-    }, 180);
+    }, ADVANCE_DELAY_MS);
   }
 
-  async function handlePickyNext() {
-    if (picky.trim() && guestUid) {
-      api(`/${guestUid}/answer`, {
-        method: 'PATCH',
-        body: JSON.stringify({ question: '까다로운 기준', answer: picky.trim() }),
-      }).catch(() => {});
-    }
-    trackPicky(picky.trim());
+  function handlePickyNext() {
+    const value = picky.trim();
+    trackPicky(value);
     setPhase('phone');
+    if (value) patchAnswer('까다로운 기준', value);
   }
 
   function handlePhoneNext() {
     const digits = phone.replace(/\D/g, '');
     if (digits.length < 10 || digits.length > 11) return;
-    // UI는 즉시 진행, API는 백그라운드 (에러/지연이 UX 막지 않도록)
-    setPhase('bridge');
     trackPhone(digits);
-    ensureGuest()
-      .then((uid) =>
-        api(`/${uid}/phone`, {
-          method: 'PATCH',
-          body: JSON.stringify({ phone: digits }),
-        }),
-      )
-      .catch(() => {});
+    setPhase('bridge');
+    patchGuest('/phone', { phone: digits });
   }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드 가능합니다.');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > PHOTO_MAX_BYTES) {
+      alert('5MB 이하 이미지만 업로드 가능합니다.');
+      e.target.value = '';
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => setPhoto(reader.result as string);
     reader.readAsDataURL(file);
   }
 
   function handlePhotoNext() {
-    if (photo && guestUid) {
-      api(`/${guestUid}/photo`, {
-        method: 'PATCH',
-        body: JSON.stringify({ photo_data: photo }),
-      }).catch(() => {});
-    }
     trackPhoto();
     setPhase('message');
+    if (photo) patchGuest('/photo', { photo_data: photo });
   }
 
   function handleMessageSubmit() {
-    if (message.trim() && guestUid) {
-      api(`/${guestUid}/answer`, {
-        method: 'PATCH',
-        body: JSON.stringify({ question: '디렉터에게 전언', answer: message.trim() }),
-      }).catch(() => {});
-    }
-    trackMessage(!!message.trim());
+    const value = message.trim();
+    trackMessage(!!value);
     trackSubmitApplication();
     setPhase('done');
+    if (value) patchAnswer('디렉터에게 전언', value);
   }
 
   const phoneDigits = phone.replace(/\D/g, '');
@@ -421,7 +436,7 @@ export default function NoirStartPage() {
           <label className="photo-box" htmlFor="noir-photo-input">
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img className="photo-preview" src={photo} alt="preview" />
+              <img className="photo-preview" src={photo} alt="업로드한 참고 사진" />
             ) : (
               <>
                 <div className="photo-box__icon">+</div>

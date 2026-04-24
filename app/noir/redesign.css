@@ -287,9 +287,6 @@
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 0 var(--line-soft);
 }
-.noir-scoped .polaroid:nth-child(5) {
-  grid-column: span 2;
-}
 .noir-scoped .polaroid:hover { transform: translateY(-2px); z-index: 2; }
 .noir-scoped .polaroid__img {
   width: 100%;
@@ -308,6 +305,7 @@
   object-fit: cover;
   filter: sepia(0.12) contrast(0.95);
 }
+.noir-scoped .polaroid--wide { grid-column: span 2; }
 .noir-scoped .polaroid--wide .polaroid__img { aspect-ratio: 16 / 7; }
 .noir-scoped .polaroid--wide .polaroid__img img { object-fit: contain; padding: 8px; }
 .noir-scoped .polaroid__cap {

@@ -1,28 +1,33 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { track } from '@/lib/report/tracking';
+import { API_BASE } from '../../api';
 
 type Status = 'confirming' | 'done' | 'error';
 
 function SuccessInner() {
   const params = useSearchParams();
   const [status, setStatus] = useState<Status>('confirming');
+  const confirmedRef = useRef(false);
 
   useEffect(() => {
+    // StrictMode / params 재귀 대비: confirm 은 1회만
+    if (confirmedRef.current) return;
+
     const orderId = params.get('orderId');
     const paymentKey = params.get('paymentKey');
     const amount = params.get('amount');
 
-    if (!orderId || !amount) {
+    if (!orderId || !paymentKey || !amount) {
       setStatus('error');
       return;
     }
 
-    const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.publicvoid.im';
+    confirmedRef.current = true;
 
-    fetch(`${API}/theone/payments/toss/confirm`, {
+    fetch(`${API_BASE}/theone/payments/toss/confirm`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

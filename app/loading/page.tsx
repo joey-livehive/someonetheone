@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   trackPageView,
@@ -49,14 +49,23 @@ const FEMALE_CARDS: CardData[] = [
   { tag: 'ESTP · 서울 · 25', match: 86, desc: '활발하고 즉흥적인', photo: '/loading-cards/f5.webp' },
 ];
 
-type Stage = 'analyzing' | 'phone';
+type ReportState =
+  | { status: 'idle' }
+  | { status: 'generating'; reportId: string }
+  | { status: 'ready'; reportId: string; gender: string }
+  | { status: 'failed'; reportId: string };
+
+type Stage = 'analyzing' | 'phone' | 'waiting' | 'failed';
 
 export default function LoadingPage() {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>('analyzing');
-  const [t, setT] = useState(0); // seconds since mount
+  const [t, setT] = useState(0);
   const [phone, setPhone] = useState('');
   const submittedRef = useRef(false);
+  const reportRef = useRef<ReportState>({ status: 'idle' });
+  const [reportState, setReportState] = useState<ReportState>({ status: 'idle' });
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const cards = useMemo(() => {
     if (typeof window === 'undefined') return MALE_CARDS;
@@ -64,10 +73,96 @@ export default function LoadingPage() {
     return userGender === 'male' ? FEMALE_CARDS : MALE_CARDS;
   }, []);
 
-  // 매 프레임 시간 갱신 (sin 진동 기반)
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  const pollReport = useCallback((reportId: string) => {
+    stopPolling();
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/theone/reports/${reportId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.status === 'ready') {
+          stopPolling();
+          const g = data.user_answers?.selfInfo?.gender === '여자' ? 'F' : 'M';
+          const state: ReportState = { status: 'ready', reportId, gender: g };
+          reportRef.current = state;
+          setReportState(state);
+        } else if (data.status === 'failed') {
+          stopPolling();
+          const state: ReportState = { status: 'failed', reportId };
+          reportRef.current = state;
+          setReportState(state);
+        }
+      } catch {}
+    }, 2000);
+  }, [stopPolling]);
+
+  const createReport = useCallback(async () => {
+    const guestUid = typeof window !== 'undefined'
+      ? sessionStorage.getItem('sto_guest_uid')
+      : null;
+    if (!guestUid) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/theone/reports`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guest_uid: guestUid, version: '20' }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const state: ReportState = { status: 'generating', reportId: data.report_id };
+      reportRef.current = state;
+      setReportState(state);
+      pollReport(data.report_id);
+    } catch {
+      const failed: ReportState = { status: 'failed', reportId: '' };
+      reportRef.current = failed;
+      setReportState(failed);
+    }
+  }, [pollReport]);
+
+  const retryReport = useCallback(async () => {
+    const current = reportRef.current;
+    if (current.status !== 'failed') return;
+
+    // report 생성 자체가 실패한 경우 (reportId 없음) → 새로 생성
+    if (!current.reportId) {
+      setStage('waiting');
+      await createReport();
+      return;
+    }
+
+    const state: ReportState = { status: 'generating', reportId: current.reportId };
+    reportRef.current = state;
+    setReportState(state);
+    setStage('waiting');
+
+    try {
+      const res = await fetch(`${API_BASE}/theone/reports/${current.reportId}/retry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      pollReport(current.reportId);
+    } catch {
+      const failed: ReportState = { status: 'failed', reportId: current.reportId };
+      reportRef.current = failed;
+      setReportState(failed);
+      setStage('failed');
+    }
+  }, [pollReport, createReport]);
+
   useEffect(() => {
     trackPageView('loading');
     trackSubmitApplication();
+    createReport();
 
     const start = performance.now();
     let raf = 0;
@@ -81,8 +176,11 @@ export default function LoadingPage() {
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+    return () => {
+      cancelAnimationFrame(raf);
+      stopPolling();
+    };
+  }, [createReport, stopPolling]);
 
   const ms = t * 1000;
   const percent = Math.min(100, Math.floor((ms / TOTAL_MS) * 100));
@@ -99,16 +197,23 @@ export default function LoadingPage() {
     return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
   }
 
-  function handlePhoneSubmit(e: React.FormEvent) {
+  function navigateToReport() {
+    const current = reportRef.current;
+    if (current.status === 'ready') {
+      router.push(`/report/20/${current.gender}/${current.reportId}`);
+    }
+  }
+
+  async function handlePhoneSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submittedRef.current) return;
     const digits = phone.replace(/\D/g, '');
     if (digits.length < 10 || digits.length > 11) return;
     submittedRef.current = true;
-    const guestUid =
-      typeof window !== 'undefined'
-        ? sessionStorage.getItem('sto_guest_uid')
-        : null;
+
+    const guestUid = typeof window !== 'undefined'
+      ? sessionStorage.getItem('sto_guest_uid')
+      : null;
     if (guestUid) {
       fetch(`${API_BASE}/theone/survey/${guestUid}/phone`, {
         method: 'PATCH',
@@ -117,7 +222,116 @@ export default function LoadingPage() {
       }).catch(() => {});
     }
     trackPhone(digits);
-    router.push('/results');
+
+    const current = reportRef.current;
+    if (current.status === 'ready') {
+      navigateToReport();
+    } else if (current.status === 'failed') {
+      setStage('failed');
+    } else {
+      setStage('waiting');
+    }
+  }
+
+  // report ready 감지 — waiting 상태에서 ready 되면 바로 이동
+  useEffect(() => {
+    if (stage === 'waiting' && reportState.status === 'ready') {
+      navigateToReport();
+    } else if (stage === 'waiting' && reportState.status === 'failed') {
+      setStage('failed');
+    }
+  }, [stage, reportState]);
+
+  // ── Failed ──
+  if (stage === 'failed') {
+    return (
+      <main
+        className="min-h-screen flex flex-col"
+        style={{ background: C.bg }}
+      >
+        <nav
+          className="flex items-center justify-between px-5 py-3.5"
+          style={{ borderBottom: `1.5px solid ${C.ink}` }}
+        >
+          <div className="w-12" />
+          <span
+            className="text-xl font-bold tracking-tight"
+            style={{ color: C.ink, fontFamily: "'PP Editorial Old', serif" }}
+          >
+            casting
+          </span>
+          <div className="w-12" />
+        </nav>
+
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+          <div className="w-full max-w-md text-center">
+            <div
+              className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+              style={{ background: `${C.accent}20`, border: `2px solid ${C.accent}` }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+              </svg>
+            </div>
+            <h1
+              className="font-bold mb-3"
+              style={{
+                color: C.ink,
+                fontSize: 'clamp(24px, 5vw, 36px)',
+                lineHeight: '1.3',
+              }}
+            >
+              리포트 생성에 실패했어
+            </h1>
+            <p className="mb-8 opacity-60 text-sm" style={{ color: C.ink }}>
+              일시적인 문제야. 다시 시도해줘!
+            </p>
+            <button
+              onClick={retryReport}
+              className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
+              style={{
+                color: C.ink,
+                background: C.gold,
+                border: `2px solid ${C.ink}`,
+                boxShadow: `4px 4px 0 ${C.ink}`,
+              }}
+            >
+              다시 시도
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Waiting (phone 제출 후 report 아직 generating) ──
+  if (stage === 'waiting') {
+    return (
+      <main
+        className="min-h-screen flex flex-col items-center justify-center"
+        style={{ background: C.dark, color: C.bg }}
+      >
+        <div className="text-center px-6">
+          <div
+            className="w-12 h-12 mx-auto mb-6 rounded-full border-4 border-t-transparent animate-spin"
+            style={{ borderColor: `${C.gold} transparent ${C.gold} ${C.gold}` }}
+          />
+          <h1
+            className="font-bold mb-3"
+            style={{
+              fontSize: 'clamp(24px, 5vw, 36px)',
+              lineHeight: '1.3',
+              color: C.gold,
+            }}
+          >
+            리포트 마무리 중...
+          </h1>
+          <p className="opacity-60 text-sm">
+            거의 다 됐어! 잠깐만 기다려줘.
+          </p>
+        </div>
+      </main>
+    );
   }
 
   // ── Phone ──

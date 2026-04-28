@@ -70,6 +70,11 @@ function devLog(label: string, params?: Record<string, unknown>) {
 
 /** 페이지 뷰 */
 export function trackPageView(pageName: string) {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'ViewContent', {
+      content_ids: ['someonetheone'], content_type: 'product', content_name: pageName,
+    });
+  }
   sendEvent('page_view', pageName);
   devLog('[Event] page_view', { pageName });
 }

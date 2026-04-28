@@ -89,7 +89,8 @@ export default function LoadingPage() {
         const data = await res.json();
         if (data.status === 'ready') {
           stopPolling();
-          const g = data.user_answers?.selfInfo?.gender === '여자' ? 'F' : 'M';
+          const rawGender = data.user_answers?.selfInfo?.gender || '';
+          const g = (rawGender === '여자' || rawGender === '여성' || rawGender === 'female') ? 'F' : 'M';
           const state: ReportState = { status: 'ready', reportId, gender: g };
           reportRef.current = state;
           setReportState(state);

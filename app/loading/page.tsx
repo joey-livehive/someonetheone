@@ -32,21 +32,21 @@ const BAR_LABELS = ['외모', '성격', '능력', '분위기'];
 
 type CardData = { tag: string; match: number; desc: string; photo?: string };
 
-// 사진은 /public/loading-cards/m1.jpg ~ m5.jpg, f1.jpg ~ f5.jpg에 두면 자동 로드
+// 사진은 /public/loading-cards/m1.webp ~ m5.webp, f1.webp ~ f5.webp
 const MALE_CARDS: CardData[] = [
-  { tag: 'INFJ · 서울 · 28', match: 94, desc: '조용한데 다정한 사람', photo: '/loading-cards/m1.jpg' },
-  { tag: 'ENFP · 경기 · 27', match: 91, desc: '에너지 넘치는 분위기', photo: '/loading-cards/m2.jpg' },
-  { tag: 'INTP · 서울 · 30', match: 89, desc: '깊이 있는 대화 가능', photo: '/loading-cards/m3.jpg' },
-  { tag: 'ESFJ · 인천 · 26', match: 87, desc: '챙겨주는 게 자연스러운', photo: '/loading-cards/m4.jpg' },
-  { tag: 'ISTJ · 서울 · 29', match: 85, desc: '안정감 있는 타입', photo: '/loading-cards/m5.jpg' },
+  { tag: 'INFJ · 서울 · 28', match: 94, desc: '조용한데 다정한 사람', photo: '/loading-cards/m1.webp' },
+  { tag: 'ENFP · 경기 · 27', match: 91, desc: '에너지 넘치는 분위기', photo: '/loading-cards/m2.webp' },
+  { tag: 'INTP · 서울 · 30', match: 89, desc: '깊이 있는 대화 가능', photo: '/loading-cards/m3.webp' },
+  { tag: 'ESFJ · 인천 · 26', match: 87, desc: '챙겨주는 게 자연스러운', photo: '/loading-cards/m4.webp' },
+  { tag: 'ISTJ · 서울 · 29', match: 85, desc: '안정감 있는 타입', photo: '/loading-cards/m5.webp' },
 ];
 
 const FEMALE_CARDS: CardData[] = [
-  { tag: 'ENFJ · 서울 · 27', match: 95, desc: '다정하고 세심한 분위기', photo: '/loading-cards/f1.jpg' },
-  { tag: 'INFP · 경기 · 26', match: 92, desc: '감성적이고 따뜻한 사람', photo: '/loading-cards/f2.jpg' },
-  { tag: 'ISFJ · 서울 · 28', match: 90, desc: '조용한데 깊이 있어', photo: '/loading-cards/f3.jpg' },
-  { tag: 'ENTP · 인천 · 29', match: 88, desc: '재치 있는 대화 가능', photo: '/loading-cards/f4.jpg' },
-  { tag: 'ESTP · 서울 · 25', match: 86, desc: '활발하고 즉흥적인', photo: '/loading-cards/f5.jpg' },
+  { tag: 'ENFJ · 서울 · 27', match: 95, desc: '다정하고 세심한 분위기', photo: '/loading-cards/f1.webp' },
+  { tag: 'INFP · 경기 · 26', match: 92, desc: '감성적이고 따뜻한 사람', photo: '/loading-cards/f2.webp' },
+  { tag: 'ISFJ · 서울 · 28', match: 90, desc: '조용한데 깊이 있어', photo: '/loading-cards/f3.webp' },
+  { tag: 'ENTP · 인천 · 29', match: 88, desc: '재치 있는 대화 가능', photo: '/loading-cards/f4.webp' },
+  { tag: 'ESTP · 서울 · 25', match: 86, desc: '활발하고 즉흥적인', photo: '/loading-cards/f5.webp' },
 ];
 
 type Stage = 'analyzing' | 'phone';

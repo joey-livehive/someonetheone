@@ -38,7 +38,7 @@ export function PriceCompare() {
           ))}
         </div>
         <div className="pc-col us" style={{ transform: 'scale(1.04)', zIndex: 1 }}>
-          <div className="pc-brand">someonetheone</div>
+          <div className="pc-brand">casting</div>
           {rows.map((r) => (
             <div key={r.k} className="pc-row">
               <div className="pc-k">{r.k}</div>

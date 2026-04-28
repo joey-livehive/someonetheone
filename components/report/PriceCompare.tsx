@@ -37,7 +37,7 @@ const sides: Brand[] = [
 ];
 
 const center: Brand = {
-  brand: 'someonetheone',
+  brand: 'casting',
   us: true,
   rows: [
     { k: '가격', v: '3~10만원대' },

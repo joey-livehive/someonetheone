@@ -306,7 +306,7 @@ function BackNav({ onBack, dark = false }: { onBack: () => void; dark?: boolean 
         className="text-xl font-bold tracking-tight"
         style={{ color: fg, fontFamily: "'PP Editorial Old', serif" }}
       >
-        someonetheone
+        casting
       </span>
       <div className="w-12" />
     </nav>
@@ -973,7 +973,7 @@ export default function StartPage() {
             className="text-xl font-bold tracking-tight"
             style={{ color: C.ink, fontFamily: "'PP Editorial Old', serif" }}
           >
-            someonetheone
+            casting
           </span>
           <div className="w-12" />
         </nav>
@@ -1090,7 +1090,7 @@ export default function StartPage() {
           className="text-xl font-bold tracking-tight"
           style={{ color: C.ink, fontFamily: "'PP Editorial Old', serif" }}
         >
-          someonetheone
+          casting
         </span>
         <div className="w-12" />
       </nav>

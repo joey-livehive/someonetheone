@@ -294,7 +294,7 @@ export default function NoirStartPage() {
           ←
         </button>
         <span className="topnav__logo">
-          someonetheone<span className="dot">.</span>
+          casting<span className="dot">.</span>
         </span>
         <span className="topnav__meta">{metaLabel()}</span>
       </nav>
@@ -521,7 +521,7 @@ export default function NoirStartPage() {
           )}
           <div className="receipt__head">
             <div className="receipt__brand">
-              someonetheone<span className="dot">.</span>
+              casting<span className="dot">.</span>
             </div>
             <div className="receipt__kind">◆ CASTING BRIEF · RECEIPT</div>
             <div className="receipt__seal">

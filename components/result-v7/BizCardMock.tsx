@@ -4,7 +4,7 @@ export function BizCardMock() {
       <div className="mock-label">CASTING MANAGER CARD</div>
       <div className="biz-card">
         <div className="biz-logo">
-          someonetheone<span className="dot">.</span>
+          casting<span className="dot">.</span>
         </div>
         <div className="biz-tag">Casting Manager</div>
         <div className="biz-deco" />

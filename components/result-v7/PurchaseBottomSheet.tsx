@@ -113,7 +113,7 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: Props) {
         body: JSON.stringify({
           order_id: order.order_id,
           amount: order.amount,
-          order_name: `someonetheone ${selected.name}`,
+          order_name: `casting ${selected.name}`,
         }),
       });
       if (!startRes.ok) throw new Error('결제 시작 실패');

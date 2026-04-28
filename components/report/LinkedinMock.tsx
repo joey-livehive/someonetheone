@@ -6,7 +6,7 @@ export function LinkedinMock() {
           in
         </div>
         <div className="font-display font-bold text-[13px] text-brand-ink">
-          1:1 메시지 · someonetheone
+          1:1 메시지 · casting
         </div>
       </div>
       <div className="bg-brand-bg-deep rounded-[10px] px-3 py-[11px] text-[13px] leading-[1.6] text-brand-ink-soft [&_b]:font-display [&_b]:font-bold [&_b]:text-brand-ink">

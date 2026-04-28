@@ -79,7 +79,7 @@ export function VsSection() {
                      rounded-[18px] p-[22px] shadow-[0_12px_28px_rgba(0,0,0,0.3)]"
         >
           <span className="inline-block font-hand text-[13px] bg-brand-orange text-white px-3 py-0.5 rounded-xl mb-2.5">
-            someonetheone
+            casting
           </span>
           <h4 className="font-display font-extrabold text-[17px] tracking-[-0.02em] leading-[1.4] text-brand-ink mb-2.5">
             앱이 아니라{' '}

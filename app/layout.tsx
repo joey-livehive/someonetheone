@@ -27,18 +27,18 @@ const gowunDodum = Gowun_Dodum({
 });
 
 export const metadata: Metadata = {
-  title: 'someonetheone — 네 사람, 내가 찾아줄게',
+  title: 'casting — 네 사람, 내가 찾아줄게',
   description: '원하는 사람이 어디있든 다 찾아주는 AI',
   openGraph: {
-    title: 'someonetheone — 네 사람, 내가 찾아줄게',
+    title: 'casting — 네 사람, 내가 찾아줄게',
     description: '원하는 사람이 어디있든 다 찾아주는 AI',
-    siteName: 'someonetheone',
-    url: 'https://someonetheone.publicvoid.im',
+    siteName: 'casting',
+    url: 'https://casting.publicvoid.im',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'someonetheone — 네 사람, 내가 찾아줄게',
+    title: 'casting — 네 사람, 내가 찾아줄게',
     description: '원하는 사람이 어디있든 다 찾아주는 AI',
     images: ['/og-image.png'],
   },

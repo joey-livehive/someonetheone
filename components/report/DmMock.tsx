@@ -12,12 +12,12 @@ export function DmMock() {
           S
         </div>
         <div>
-          <div className="font-display font-bold text-[13px] text-brand-ink">someonetheone</div>
-          <div className="text-[11px] text-brand-ink-mute">@someonetheone_official</div>
+          <div className="font-display font-bold text-[13px] text-brand-ink">casting</div>
+          <div className="text-[11px] text-brand-ink-mute">@casting_official</div>
         </div>
       </div>
       <div className="bg-brand-bg-deep rounded-[14px] rounded-tl-[4px] px-3.5 py-2.5 text-[13px] leading-[1.55] text-brand-ink max-w-[92%]">
-        안녕하세요 :) someonetheone에서 활동하는 캐스팅 매니저예요.
+        안녕하세요 :) casting에서 활동하는 캐스팅 매니저예요.
       </div>
       <div className="mt-1.5 bg-brand-bg-deep rounded-[14px] rounded-tl-[4px] px-3.5 py-2.5 text-[13px] leading-[1.55] text-brand-ink max-w-[92%] [&_b]:font-display [&_b]:font-bold">
         피드 분위기 보고 연락드려요. 저희가 찾던 분위기랑 딱 맞으셔서요.{' '}

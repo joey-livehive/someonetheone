@@ -9,7 +9,7 @@ export function FinalSignature() {
       <div className="font-hand text-[18px] leading-[1.75] text-brand-ink">
         {tone === 'formal' ? '의뢰인님의 시간은 소중하니까요.' : '네 시간은 소중하니까.'}
         <br />
-        <span className="text-brand-orange font-bold">someonetheone</span>이
+        <span className="text-brand-orange font-bold">casting</span>이
         <br />
         {tone === 'formal' ? '대신 발품 팔아올게요. 💌' : '대신 발품 팔아올게. 💌'}
       </div>

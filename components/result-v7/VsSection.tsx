@@ -18,7 +18,7 @@ export function VsSection() {
   return (
     <>
       <Section>
-        <SectionLabel>WHY SOMEONETHEONE</SectionLabel>
+        <SectionLabel>WHY CASTING</SectionLabel>
         <SectionTitle>
           소개팅 앱이 아닌,
           <br />
@@ -42,7 +42,7 @@ export function VsSection() {
         </div>
 
         <div className="vs-item vs-good">
-          <span className="vs-tag">someonetheone</span>
+          <span className="vs-tag">casting</span>
           <h4>
             앱이 아닌 <b>캐스팅 에이전시</b>.
             <br />

@@ -85,7 +85,7 @@ function CountUp({ target = 3285, interval = 8000 }: { target?: number; interval
 }
 
 const TICKER_ITEMS = [
-  'SOMEONETHEONE',
+  'CASTING',
   'PRIVATE CASTING AGENCY',
   'EST. 2025',
   'MATCH NO. 04293',
@@ -113,7 +113,7 @@ function TopNav() {
     <nav className="topnav">
       <span className="topnav__back is-hidden" />
       <span className="topnav__logo">
-        someonetheone<span className="dot">.</span>
+        casting<span className="dot">.</span>
       </span>
     </nav>
   );
@@ -499,7 +499,7 @@ export default function LandingPage() {
               </p>
               <div className="mock">
                 <div className="mock-label">SAMPLE MESSAGE</div>
-                <div className="dm-bubble">안녕하세요. someonetheone 캐스팅 매니저입니다.</div>
+                <div className="dm-bubble">안녕하세요. casting 캐스팅 매니저입니다.</div>
                 <div className="dm-bubble">
                   피드에서 느껴지는 분위기가 저희 기준에 부합해 연락드립니다.{' '}
                   <b>진지한 관계를 찾는 분과의 소개</b>에 관심 있으신지 확인 드립니다.
@@ -525,7 +525,7 @@ export default function LandingPage() {
                 <div className="mock-label">CASTING MANAGER CARD</div>
                 <div className="biz-card">
                   <div className="biz-logo">
-                    someonetheone<span className="dot">.</span>
+                    casting<span className="dot">.</span>
                   </div>
                   <div className="biz-tag">Casting Manager</div>
                   <div className="biz-deco" />
@@ -571,7 +571,7 @@ export default function LandingPage() {
         {/* ─── FOOTER ─── */}
         <div className="footer">
           <div className="footer__logo">
-            someonetheone<span style={{ color: 'var(--gold-deep)' }}>.</span>
+            casting<span style={{ color: 'var(--gold-deep)' }}>.</span>
           </div>
           <div className="footer__meta">Private Casting Agency · Est. 2025</div>
         </div>

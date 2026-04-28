@@ -223,7 +223,7 @@ export default function LandingPage() {
       <div className="fixed bottom-0 left-0 right-0 z-50 px-5 pb-6 pt-6" style={{ background: `linear-gradient(transparent, ${C.bg} 25%)` }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <span className="text-xl font-bold tracking-tight" style={{ color: C.ink, fontFamily: "'PP Editorial Old', serif" }}>
-            someonetheone
+            casting
           </span>
           <Link
             href="/start"
@@ -337,10 +337,10 @@ export default function LandingPage() {
       <footer className="py-10 pb-24 px-6" style={{ background: C.dark, borderTop: `1px solid rgba(254,249,236,0.1)` }}>
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-semibold" style={{ color: C.bg, fontFamily: "'PP Editorial Old', serif" }}>
-            someonetheone
+            casting
           </span>
           <span className="text-sm opacity-60" style={{ color: C.bg }}>
-            &copy; 2026 someonetheone. All rights reserved.
+            &copy; 2026 casting. All rights reserved.
           </span>
         </div>
       </footer>

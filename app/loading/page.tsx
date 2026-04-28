@@ -136,7 +136,7 @@ export default function LoadingPage() {
             className="text-xl font-bold tracking-tight"
             style={{ color: C.ink, fontFamily: "'PP Editorial Old', serif" }}
           >
-            someonetheone
+            casting
           </span>
           <div className="w-12" />
         </nav>
@@ -227,7 +227,7 @@ export default function LoadingPage() {
             opacity: 0.85,
           }}
         >
-          someonetheone
+          casting
         </h1>
 
         {/* phase별 메인 비주얼 — 위에 중앙정렬 phase 텍스트 */}

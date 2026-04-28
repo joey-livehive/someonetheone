@@ -5,7 +5,7 @@ export const CHAT_STEPS: ChatStep[] = [
   {
     id: 'intro',
     messages: [
-      '안녕 👋 나는 someonetheone이야.',
+      '안녕 👋 나는 캐스팅이야.',
       '네 이상형을 말해주면 AI가 인스타, 오프라인, 커뮤니티 어디든 뒤져서 딱 맞는 사람을 찾아줄게.',
       '간단한 질문 몇 개만 할게. 시작해볼까?',
     ],

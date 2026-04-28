@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -333,6 +333,7 @@ export default function StartPage() {
   const [photo, setPhoto] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [guestUid, setGuestUid] = useState<string | null>(null);
+  const guestPromiseRef = useRef<Promise<string> | null>(null);
   const [path, setPath] = useState<Path>(null);
   const [mbti, setMbti] = useState<string[]>(['', '', '', '']);
   const [otherRegionInput, setOtherRegionInput] = useState(false);
@@ -352,16 +353,20 @@ export default function StartPage() {
 
   useEffect(() => { trackPageView('start'); }, []);
 
-  async function ensureGuest(): Promise<string> {
-    if (guestUid) return guestUid;
-    const data = await api('/start', { method: 'POST' });
-    setGuestUid(data.guest_uid);
-    setTrackingGuestUid(data.guest_uid);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('sto_guest_uid', data.guest_uid);
+  const ensureGuest = useCallback((): Promise<string> => {
+    if (guestUid) return Promise.resolve(guestUid);
+    if (!guestPromiseRef.current) {
+      guestPromiseRef.current = api('/start', { method: 'POST' }).then((data) => {
+        setGuestUid(data.guest_uid);
+        setTrackingGuestUid(data.guest_uid);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('sto_guest_uid', data.guest_uid);
+        }
+        return data.guest_uid as string;
+      });
     }
-    return data.guest_uid;
-  }
+    return guestPromiseRef.current;
+  }, [guestUid]);
 
   function persistAnswer(question: string, answer: string) {
     ensureGuest()
@@ -557,6 +562,10 @@ export default function StartPage() {
     } else if (phase === 'chapter2' && step === 0) {
       setPhase('bridge');
     } else if (phase === 'intermission') {
+      const lastQ = CHAPTER2_QUESTIONS[CHAPTER2_QUESTIONS.length - 1];
+      if (lastQ?.type === 'mbti') setMbti(['', '', '', '']);
+      else if (lastQ?.type === 'age') setAge('');
+      else if (lastQ?.type === 'height') setHeight('');
       setPhase('chapter2');
       setStep(CHAPTER2_QUESTIONS.length - 1);
       setCh2Answers((p) => p.slice(0, -1));

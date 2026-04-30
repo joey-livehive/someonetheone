@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 /**
- * mockData의 제한된 마크업만 렌더링 — `<b>강조</b>` 와 `<blur>가림</blur>` 두 종 허용.
+ * mockData의 제한된 마크업만 렌더링 — `<b>강조</b>`, `<blur>가림</blur>`, `<red>내용없음</red>` 허용.
  * 중첩 지원 (예: `<b>조용한 <blur>◯◯◯</blur></b>`).
  * 짝이 안 맞거나 다른 태그는 리터럴로 출력. `dangerouslySetInnerHTML` 전면 제거 목적.
  */
@@ -9,7 +9,8 @@ export function SafeText({ children }: { children: string }) {
   return <>{tokenize(children)}</>;
 }
 
-const OPEN_RE = /<(b|blur)>/;
+type Tag = 'b' | 'blur' | 'red';
+const OPEN_RE = /<(b|blur|red)>/;
 
 function tokenize(text: string): ReactNode[] {
   const out: ReactNode[] = [];
@@ -23,7 +24,7 @@ function tokenize(text: string): ReactNode[] {
       break;
     }
     const openIdx = cursor + (open.index ?? 0);
-    const tag = open[1] as 'b' | 'blur';
+    const tag = open[1] as Tag;
 
     if (openIdx > cursor) out.push(text.slice(cursor, openIdx));
 
@@ -39,9 +40,15 @@ function tokenize(text: string): ReactNode[] {
     const innerNodes = tokenize(inner);
     if (tag === 'b') {
       out.push(<b key={key++}>{innerNodes}</b>);
-    } else {
+    } else if (tag === 'blur') {
       out.push(
         <span key={key++} className="blur-text">
+          {innerNodes}
+        </span>,
+      );
+    } else {
+      out.push(
+        <span key={key++} className="text-red-500 font-semibold">
           {innerNodes}
         </span>,
       );
@@ -53,7 +60,7 @@ function tokenize(text: string): ReactNode[] {
 }
 
 /** 중첩 깊이를 카운트해서 매칭되는 닫힘 태그 위치 반환. 없으면 -1. */
-function findMatchingClose(text: string, tag: 'b' | 'blur', from: number): number {
+function findMatchingClose(text: string, tag: Tag, from: number): number {
   const open = `<${tag}>`;
   const close = `</${tag}>`;
   let depth = 1;

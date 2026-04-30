@@ -3,20 +3,19 @@
 import Image from 'next/image';
 import { Candidate } from '@/lib/report/types';
 import { Section, SectionLabel, SectionTitle, HL } from './SectionFrame';
-import { useSheet } from './sheetContext';
 import { useTone } from './toneContext';
 import { SafeText } from './SafeText';
+import { FaceBlurOverlay } from './FaceBlurOverlay';
 
 interface TeaserCardProps {
   candidate: Candidate;
 }
 
 export function TeaserCard({ candidate }: TeaserCardProps) {
-  const { openSheet } = useSheet();
   const tone = useTone();
   return (
     <Section>
-      <SectionLabel>맛보기 · 1 of 5</SectionLabel>
+      <SectionLabel>캐스팅 된 사람!</SectionLabel>
       <SectionTitle>
         이 사람, <HL>{tone === 'formal' ? '어떠세요?' : '어때?'}</HL>
       </SectionTitle>
@@ -38,8 +37,6 @@ export function TeaserCard({ candidate }: TeaserCardProps) {
                 draggable={false}
                 className="object-cover select-none"
                 style={{
-                  filter: 'blur(12px) saturate(1.05)',
-                  transform: 'scale(1.15)',
                   pointerEvents: 'none',
                   WebkitUserSelect: 'none',
                   WebkitTouchCallout: 'none',
@@ -59,23 +56,8 @@ export function TeaserCard({ candidate }: TeaserCardProps) {
                 placeholder]
               </div>
             )}
-            <div className="absolute inset-0 bg-brand-bg/15 pointer-events-none" />
 
-            {/* 중앙 CTA */}
-            <div
-              className="absolute left-1/2 top-[48%] -translate-x-1/2 -translate-y-1/2 z-[4]
-                         flex flex-col items-center pointer-events-none w-[88%]"
-            >
-              <button
-                type="button"
-                onClick={() => openSheet('teaser_card')}
-                className="pointer-events-auto bg-brand-orange text-white rounded-full
-                           px-7 py-4 font-display font-bold text-[16px] tracking-[-0.02em]
-                           animate-cta-pulse active:scale-[0.97] transition-transform"
-              >
-                얼굴 확인하기
-              </button>
-            </div>
+            {candidate.teaserFace && <FaceBlurOverlay position={candidate.teaserFace} blur={30} />}
 
             {/* 하단 그라디언트 */}
             <div className="absolute left-0 right-0 bottom-0 z-[2] pt-10 px-[18px] pb-[18px] text-white bg-[linear-gradient(180deg,transparent_0%,rgba(28,26,23,0.88)_100%)]">
@@ -86,20 +68,18 @@ export function TeaserCard({ candidate }: TeaserCardProps) {
                 </span>
                 &rdquo; 님
               </div>
-              <div className="text-[13px] opacity-85 mt-[5px]">
-                📍 {candidate.location} · {candidate.foundAt.includes('헬스장') ? '오프라인 헬스장' : '오프라인 요가'}에서 찾음
-              </div>
             </div>
           </div>
 
           {/* 메타 */}
           <div className="grid grid-cols-2 gap-4 px-[22px] pt-[22px] pb-6">
-            <MetaItem label="얼굴상" value={candidate.faceType} />
-            <MetaItem label="나이" value={`${candidate.ageRange} <blur>${candidate.ageDetail}</blur>`} />
-            <MetaItem label="직업" value={`${candidate.occupation} <blur>${candidate.occupationDetail}</blur>`} />
-            <MetaItem label="성격" value={candidate.personality} />
-            <MetaItem label="찾은 곳" value={`${candidate.foundAt} (오프라인)`} full />
-            <MetaItem label="🔒 비밀 매력 포인트" value={candidate.secretAppeal} full />
+            <MetaItem label="외모상" value={candidate.faceType} full />
+            <MetaItem label="나이" value={candidate.ageRange} />
+            <MetaItem label="거주지역" value={candidate.location} />
+            {candidate.mbti && <MetaItem label="MBTI" value={candidate.mbti} />}
+            {candidate.recommendation && (
+              <MetaItem label="캐스터의 추천사" value={candidate.recommendation} full />
+            )}
           </div>
         </div>
       </div>

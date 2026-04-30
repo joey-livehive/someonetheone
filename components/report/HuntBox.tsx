@@ -1,7 +1,6 @@
 'use client';
 
 import { ReportData } from '@/lib/report/types';
-import { useTone } from './toneContext';
 
 interface HuntBoxProps {
   userName: string;
@@ -10,8 +9,7 @@ interface HuntBoxProps {
   total: number;
 }
 
-export function HuntBox({ userName, stats, effort, total }: HuntBoxProps) {
-  const tone = useTone();
+export function HuntBox({ stats }: HuntBoxProps) {
   const items: { n: number; unit: string; label: string }[] = [
     { n: stats.offlineGyms, unit: '곳', label: '오프라인 헬스장' },
     { n: stats.instagramProfiles, unit: '명', label: 'Instagram 프로필' },
@@ -34,52 +32,32 @@ export function HuntBox({ userName, stats, effort, total }: HuntBoxProps) {
           📍 찾아온 경로
         </div>
 
-        <div className="grid grid-cols-2 gap-x-3 gap-y-4 mt-2">
-          {items.map((it) => (
-            <div key={it.label} className="flex items-baseline gap-2">
-              <div className="font-display font-extrabold text-[26px] text-brand-orange-deep tracking-[-0.04em]">
-                {it.n}
-                <span className="text-[15px] text-brand-ink-soft">{it.unit}</span>
+        <div className="mt-2 mb-3">
+          <div className="font-hand text-[14px] text-brand-orange-deep tracking-[0.18em] uppercase mb-2">
+            찾은 장소
+          </div>
+          <div className="font-display font-extrabold text-[18px] text-brand-ink tracking-[-0.02em]">
+            캐스팅 내부 POOL
+          </div>
+        </div>
+
+        <div className="pt-3 border-t border-dashed border-brand-ink/20">
+          <div className="font-hand text-[14px] text-brand-orange-deep tracking-[0.18em] uppercase mb-3">
+            그 외 찾아본 경로
+          </div>
+          <div className="grid grid-cols-1 gap-y-2.5 min-[400px]:grid-cols-2 min-[400px]:gap-x-3 min-[400px]:gap-y-4">
+            {items.map((it) => (
+              <div key={it.label} className="flex items-baseline gap-2">
+                <div className="font-display font-extrabold text-[26px] text-brand-orange-deep tracking-[-0.04em]">
+                  {it.n}
+                  <span className="text-[15px] text-brand-ink-soft">{it.unit}</span>
+                </div>
+                <div className="text-[13px] text-brand-ink-soft">{it.label}</div>
               </div>
-              <div className="text-[13px] text-brand-ink-soft">{it.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 flex gap-2">
-          <div
-            className="flex-1 bg-brand-mustard/20 border border-brand-mustard-deep
-                       rounded-xl px-3 py-[13px] text-[13px] text-brand-ink
-                       leading-[1.45] text-center"
-          >
-            <b className="block font-display font-extrabold text-brand-orange-deep text-[15px] mb-[3px]">
-              {effort.castingHours}시간
-            </b>
-            캐스팅 매니저 발품
-          </div>
-          <div
-            className="flex-1 bg-brand-mustard/20 border border-brand-mustard-deep
-                       rounded-xl px-3 py-[13px] text-[13px] text-brand-ink
-                       leading-[1.45] text-center"
-          >
-            <b className="block font-display font-extrabold text-brand-orange-deep text-[15px] mb-[3px]">
-              {effort.verificationMeetings}건
-            </b>
-            오프라인 검증 미팅
+            ))}
           </div>
         </div>
 
-        <div
-          className="mt-[18px] pt-4 border-t border-dashed border-brand-ink-mute
-                     font-hand text-[17px] text-brand-ink leading-[1.55]"
-        >
-          → 그 중에서 {userName}님과 가장 잘 맞을{' '}
-          <b className="text-brand-orange-deep">{total}명</b>을{' '}
-          {tone === 'formal' ? '골라왔어요.' : '골라왔어.'}
-          <br />
-          맛보기로 딱 <b className="text-brand-orange-deep">1명</b>만 먼저{' '}
-          {tone === 'formal' ? '보여드릴게요.' : '보여줄게.'}
-        </div>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ export function Chapter3({ userName, match }: { userName: string; match: MatchAn
   const title =
     tone === 'formal' ? '왜 잘 맞는지 알려드릴게요' : '너랑 왜 잘 맞냐면';
   return (
-    <ChapterCard number="CHAPTER 3" title={title} lead={lead}>
+    <ChapterCard number="CHAPTER 2" title={title} lead={lead}>
       <div className="flex justify-center gap-5 mb-1.5 text-[13px]">
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-3 h-3 rounded-[3px] bg-brand-orange" />
@@ -38,15 +38,6 @@ export function Chapter3({ userName, match }: { userName: string; match: MatchAn
             <SafeText>{note}</SafeText>
           </div>
         ))}
-      </div>
-
-      <div className="mt-5 bg-[linear-gradient(135deg,#FFF3DC_0%,var(--cream)_100%)] border-[1.5px] border-brand-line rounded-[14px] p-5">
-        <div className="font-hand text-[16px] text-brand-orange-deep mb-3">
-          🎬 만약 두 사람이 만난다면
-        </div>
-        <div className="text-[14px] text-brand-ink leading-[1.7] [&_b]:font-display [&_b]:font-bold">
-          <SafeText>{match.simulation}</SafeText>
-        </div>
       </div>
     </ChapterCard>
   );

@@ -93,7 +93,7 @@ export function MeetOrPassCta({ initialCta }: Props) {
 
         <div className="bg-brand-cream/5 rounded-[14px] p-4 border border-brand-cream/15">
           <div className="font-display font-bold text-[15px] text-brand-cream mb-2">
-            이유를 알려줄래요?
+            {isMeet ? '좋았던 이유를 알려줄래요?' : '이유를 알려줄래요?'}
           </div>
           <div className="text-[12.5px] text-brand-mustard/90 leading-[1.55] mb-3">
             피드백을 주시면, 다음 카드가 더 좋아질 확률이 81% 증가해요.

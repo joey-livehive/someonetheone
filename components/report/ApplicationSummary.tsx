@@ -10,7 +10,11 @@ import type { UserAnswers } from '@/lib/personalization/types';
  * 섹션 헤더/서브는 우리 서비스 톤(요체).
  */
 
-const IDEAL_TYPE_QUESTIONS: { q: string; k: keyof UserAnswers['idealType'] }[] = [
+type IdealKey = keyof UserAnswers['idealType'];
+type SelfKey = keyof NonNullable<UserAnswers['selfInfo']>;
+type PersonalityKey = keyof NonNullable<UserAnswers['personality']>;
+
+const IDEAL_TYPE_QUESTIONS: { q: string; k: IdealKey }[] = [
   { q: '어떤 사람이 끌려?', k: 'attractionFactor' },
   { q: '나이는 어느 정도?', k: 'agePreference' },
   { q: '키는 어느 정도?', k: 'heightPreference' },
@@ -22,21 +26,114 @@ const IDEAL_TYPE_QUESTIONS: { q: string; k: keyof UserAnswers['idealType'] }[] =
   { q: '첫 만남은 어떤 게 좋아?', k: 'firstMeeting' },
 ];
 
-const SELF_INFO_QUESTIONS: { q: string; k: keyof NonNullable<UserAnswers['selfInfo']> }[] = [
-  { q: '나이대가 어떻게 돼?', k: 'ageRange' },
-  { q: '성별이 어떻게 돼?', k: 'gender' },
-  { q: '어디쯤 살아?', k: 'location' },
-  { q: '주말에 보통 뭐 해?', k: 'weekend' },
-  { q: '술은 어때?', k: 'drinking' },
-  { q: '연애 스타일은?', k: 'relationshipStyle' },
-  { q: '지금 연애 준비됐어?', k: 'readiness' },
+// ks: 첫 번째로 채워진 키의 값을 사용 (prod 키 우선, legacy 키 fallback)
+const SELF_INFO_QUESTIONS: { q: string; ks: SelfKey[] }[] = [
+  { q: '나이가 어떻게 돼?', ks: ['age', 'ageRange'] },
+  { q: '성별이 어떻게 돼?', ks: ['gender'] },
+  { q: '어디쯤 살아?', ks: ['location'] },
+  { q: '키가 어떻게 돼?', ks: ['height'] },
+  { q: 'MBTI가 뭐야?', ks: ['mbti'] },
+  { q: '무슨 일 해?', ks: ['occupation'] },
+  { q: '구체적으로 어떤 일?', ks: ['jobDetail'] },
+  { q: '연소득은 얼마야?', ks: ['income'] },
+  { q: '주말에 보통 뭐 해?', ks: ['weekend'] },
+  { q: '술은 어때?', ks: ['drinking'] },
+  { q: '연애 스타일은?', ks: ['datingFrequency', 'relationshipStyle'] },
+  { q: '데이트는 어떤 스타일이 좋아?', ks: ['dateStyle'] },
+  { q: '스킨십은 어느 정도가 편해?', ks: ['skinship'] },
+  { q: '결혼 생각은 있어?', ks: ['marriageIntent'] },
+  { q: '지금 연애 준비됐어?', ks: ['readiness'] },
 ];
 
+const PERSONALITY_QUESTIONS: { q: string; k: PersonalityKey }[] = [
+  { q: '질투 많이 하는 편이야?', k: 'jealousy' },
+  { q: '싸웠을 땐 어떤 편이야?', k: 'conflictStyle' },
+  { q: '사람들이 널 뭐라고 평가해?', k: 'selfDescription' },
+];
+
+// form `사람들이 널 뭐라고 평가해?` 옵션 token → 표시 라벨
+const SELF_DESCRIPTION_LABELS: Record<string, string> = {
+  lively: '활발해',
+  warm: '다정해',
+  calm: '차분해',
+  serious: '진중해',
+  fun: '재밌어',
+  comfortable: '편안해',
+  honest: '솔직해',
+  smart: '똑똑해',
+};
+
+function formatPersonalityAnswer(key: PersonalityKey, raw: string): string {
+  if (key === 'selfDescription') {
+    return raw
+      .split(',')
+      .map((tok) => SELF_DESCRIPTION_LABELS[tok.trim()] ?? tok.trim())
+      .filter(Boolean)
+      .join(', ');
+  }
+  return raw;
+}
+
 export function ApplicationSummary({ userAnswers }: { userAnswers: UserAnswers }) {
-  const selfRows = SELF_INFO_QUESTIONS.flatMap(({ q, k }) => {
-    const a = userAnswers.selfInfo?.[k];
-    return a ? [{ q, a }] : [];
+  const idealRows = IDEAL_TYPE_QUESTIONS.flatMap(({ q, k }) => {
+    const a = userAnswers.idealType[k];
+    return a ? [{ q, a, key: k as string }] : [];
   });
+
+  const selfRows = SELF_INFO_QUESTIONS.flatMap(({ q, ks }) => {
+    for (const k of ks) {
+      const a = userAnswers.selfInfo?.[k];
+      if (a) return [{ q, a, key: ks[0] as string }];
+    }
+    return [];
+  });
+
+  const personalityRows = PERSONALITY_QUESTIONS.flatMap(({ q, k }) => {
+    const a = userAnswers.personality?.[k];
+    return a ? [{ q, a: formatPersonalityAnswer(k, a), key: k as string }] : [];
+  });
+
+  // 비어있는 그룹은 끼워 넣지 않고, 첫 그룹은 divider 없이 렌더한다.
+  const groups: { label: string; node: React.ReactNode }[] = [];
+
+  if (idealRows.length > 0) {
+    groups.push({
+      label: '이상형',
+      node: idealRows.map(({ q, a, key }) => <Row key={key} q={q} a={a} />),
+    });
+  }
+  if (selfRows.length > 0) {
+    groups.push({
+      label: '본인 정보',
+      node: selfRows.map(({ q, a, key }) => <Row key={key} q={q} a={a} />),
+    });
+  }
+  if (personalityRows.length > 0) {
+    groups.push({
+      label: '성격',
+      node: personalityRows.map(({ q, a, key }) => <Row key={key} q={q} a={a} />),
+    });
+  }
+  if (userAnswers.freeResponse?.strictCriteria) {
+    groups.push({
+      label: '까다로운 기준',
+      node: (
+        <p className="text-[13.5px] text-brand-ink leading-[1.7] pl-3 border-l-2 border-brand-mustard-deep">
+          {userAnswers.freeResponse.strictCriteria}
+        </p>
+      ),
+    });
+  }
+  if (userAnswers.freeResponse?.messageToUs) {
+    groups.push({
+      label: '나한테 하고 싶은 말',
+      node: (
+        <p className="text-[14px] text-brand-ink leading-[1.65] pl-3 border-l-2 border-brand-mustard-deep font-hand">
+          &ldquo;{userAnswers.freeResponse.messageToUs}&rdquo;
+        </p>
+      ),
+    });
+  }
 
   return (
     <div className="px-7 mt-7">
@@ -59,35 +156,11 @@ export function ApplicationSummary({ userAnswers }: { userAnswers: UserAnswers }
           의뢰인님이 남겨 주신 그대로 담아왔어요.
         </p>
 
-        <Group label="이상형">
-          {IDEAL_TYPE_QUESTIONS.map((row) => (
-            <Row key={row.k} q={row.q} a={userAnswers.idealType[row.k]} />
-          ))}
-        </Group>
-
-        {selfRows.length > 0 && (
-          <Group label="본인 정보" divider>
-            {selfRows.map(({ q, a }) => (
-              <Row key={q} q={q} a={a} />
-            ))}
+        {groups.map(({ label, node }, i) => (
+          <Group key={label} label={label} divider={i > 0}>
+            {node}
           </Group>
-        )}
-
-        {userAnswers.freeResponse?.strictCriteria && (
-          <Group label="까다로운 기준" divider>
-            <p className="text-[13.5px] text-brand-ink leading-[1.7] pl-3 border-l-2 border-brand-mustard-deep">
-              {userAnswers.freeResponse.strictCriteria}
-            </p>
-          </Group>
-        )}
-
-        {userAnswers.freeResponse?.messageToUs && (
-          <Group label="나한테 하고 싶은 말" divider>
-            <p className="text-[14px] text-brand-ink leading-[1.65] pl-3 border-l-2 border-brand-mustard-deep font-hand">
-              &ldquo;{userAnswers.freeResponse.messageToUs}&rdquo;
-            </p>
-          </Group>
-        )}
+        ))}
       </div>
     </div>
   );

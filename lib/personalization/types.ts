@@ -5,28 +5,48 @@
  */
 
 export interface UserAnswers {
-  // ── 이상형 (필수) ──
+  // ── 이상형 ──
+  // prod 응답에 일부 키만 들어오는 경우가 있어 모두 옵셔널.
   idealType: {
-    attractionFactor: string;
-    agePreference: string;
-    heightPreference: string;
-    bodyType: string;
-    relationshipPriority: string;
-    contactStyle: string;
-    religionImportance: string;
-    dealBreaker: string;
-    firstMeeting: string;
+    attractionFactor?: string;
+    agePreference?: string;
+    heightPreference?: string;
+    bodyType?: string;
+    relationshipPriority?: string;
+    contactStyle?: string;
+    religionImportance?: string;
+    dealBreaker?: string;
+    firstMeeting?: string;
   };
 
   // ── 본인 정보 (옵셔널) ──
   selfInfo?: {
-    ageRange?: string;
+    // prod backend 키
+    age?: string;
     gender?: string;
     location?: string;
+    occupation?: string;
+    jobDetail?: string;
+    height?: string;
     weekend?: string;
     drinking?: string;
+    datingFrequency?: string;
+    mbti?: string;
+    dateStyle?: string;
+    skinship?: string;
+    marriageIntent?: string;
+    income?: string;
+    // legacy / mock 키 (mock-users.ts, result-v7 호환용)
+    ageRange?: string;
     relationshipStyle?: string;
     readiness?: string;
+  };
+
+  // ── 성격 (옵셔널) ──
+  personality?: {
+    jealousy?: string;
+    conflictStyle?: string;
+    selfDescription?: string;
   };
 
   // ── 자유 응답 (옵셔널) ──
@@ -52,5 +72,7 @@ export interface PersonalizedContent {
     paragraph1Opening: string;
     /** [LLM_GENERATED] 문단 2 도입 — 자유응답 or 본인정보 or 폴백 */
     paragraph2Opening: string;
+    /** 후보별 매칭 한 줄 — ReadingCard 마지막 문단 자리. 없으면 컴포넌트 기본 카피로 폴백. */
+    candidateMatch?: string;
   };
 }

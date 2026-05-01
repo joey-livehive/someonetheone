@@ -12,10 +12,13 @@ export function ReportShell({
   reportId,
   tone,
   children,
+  variant = 'teaser',
 }: {
   reportId: string;
   tone: Tone;
   children: ReactNode;
+  /** 'teaser' = 결제 전(카운트다운+결제 sheet), 'paid' = 결제 후(결제 UI 제거) */
+  variant?: 'teaser' | 'paid';
 }) {
   const [open, setOpen] = useState(false);
 
@@ -24,6 +27,7 @@ export function ReportShell({
   }, [reportId, tone]);
 
   const openSheet = (source?: string) => {
+    if (variant === 'paid') return;
     track('sheet_open', { reportId, source }, {
       pixel: 'AddToCart',
       pixelData: { content_name: `sheet_${source}`, content_ids: [reportId] },
@@ -36,9 +40,13 @@ export function ReportShell({
     <ToneProvider value={tone}>
       <SheetProvider value={{ openSheet }}>
         {children}
-        <PurchaseToast />
-        <FixedBottomCta />
-        <PurchaseBottomSheet open={open} onClose={closeSheet} reportId={reportId} />
+        {variant === 'teaser' && (
+          <>
+            <PurchaseToast />
+            <FixedBottomCta />
+            <PurchaseBottomSheet open={open} onClose={closeSheet} reportId={reportId} />
+          </>
+        )}
       </SheetProvider>
     </ToneProvider>
   );

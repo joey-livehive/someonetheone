@@ -42,10 +42,14 @@ export interface Candidate {
   background: string;
   /** 결제 후 공개되는 호기심 훅 한 줄. <blur>...</blur> 마크업 사용. */
   secretAppeal: string;
-  /** 맛보기 카드용 인물 사진 (4:5). 없으면 그라디언트 placeholder. 블러 처리는 컴포넌트가 적용. */
+  /** 맛보기 카드용 인물 사진 (4:5). 없으면 그라디언트 placeholder. 블러는 파일 자체에 pre-blur 적용. */
   teaserPhoto?: string;
   /** Chapter 2용 분위기 사진 (16:9). 없으면 그라디언트 placeholder. */
   chapter2Photo?: string;
+  /** MBTI 16 유형 (예: 'ENFP'). 폼에 없으면 undefined → 칸 자체 안 그림. */
+  mbti?: string;
+  /** 디렉터 추천사 한 줄. 폼에 없으면 undefined → 칸 자체 안 그림. */
+  recommendation?: string;
 }
 
 export interface DayScheduleItem {

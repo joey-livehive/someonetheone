@@ -67,8 +67,6 @@ export function Chapter1({ userName, personalized }: Chapter1Props) {
   const tone = useTone();
   const traits = tone === 'formal' ? traitsFormal : traitsCasual;
 
-  const title =
-    tone === 'formal' ? `${userName}님은 이런 분이세요` : `${userName}님은 이런 사람이야`;
   const lead =
     tone === 'formal'
       ? `${userName}님이 고르신 <b>선택지 하나하나</b>, 그리고 그 밑에 숨어있는 <b>진짜 연애 성향</b>까지 뜯어봤어요. 관계 심리학 프레임으로 정리해드릴게요.`
@@ -83,9 +81,10 @@ export function Chapter1({ userName, personalized }: Chapter1Props) {
 
   return (
     <ChapterCard
-      number="CHAPTER 2"
+      number="📋 의뢰서 복기"
+      numberVariant="mustard"
       psyBadge="애착 이론 · 관계 심리학 기반 분석"
-      title={title}
+      title="의뢰인 분석"
       lead={lead}
     >
       <div>

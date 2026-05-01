@@ -6,34 +6,35 @@ import { useTone } from './toneContext';
 import { SafeText } from './SafeText';
 import { track } from '@/lib/report/tracking';
 
+// 정가는 1명당 1만원 기준. 할인율은 정가 대비 할인가로 자동 산출(정수 절사).
+const PRICE_PER_PERSON = 10_000;
+
+function makePlan(p: Omit<PricingPlan, 'originalPrice' | 'discountPercent'>): PricingPlan {
+  const originalPrice = p.cardCount * PRICE_PER_PERSON;
+  return {
+    ...p,
+    originalPrice,
+    discountPercent: Math.floor(((originalPrice - p.discountedPrice) / originalPrice) * 100),
+  };
+}
+
 const plans: PricingPlan[] = [
-  {
-    id: 'starter',
-    name: '스타터',
-    originalPrice: 24900,
-    discountedPrice: 19900,
-    discountPercent: 20,
-    cardCount: 5,
-  },
-  {
+  makePlan({ id: 'starter', name: '스타터', cardCount: 5, discountedPrice: 39900 }),
+  makePlan({
     id: 'regular',
     name: '레귤러',
-    originalPrice: 44900,
-    discountedPrice: 34900,
-    discountPercent: 22,
     cardCount: 10,
+    discountedPrice: 69900,
     conversationGuarantee: 3,
     recommended: true,
-  },
-  {
+  }),
+  makePlan({
     id: 'premium',
     name: '프리미엄',
-    originalPrice: 64900,
-    discountedPrice: 49900,
-    discountPercent: 23,
     cardCount: 20,
+    discountedPrice: 99900,
     conversationGuarantee: 10,
-  },
+  }),
 ];
 
 function perPerson(plan: PricingPlan) {
@@ -181,8 +182,8 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: PurchaseBottomS
         </div>
         <div className="px-6 pb-3 text-[13px] text-brand-ink-soft leading-[1.55]">
           {tone === 'formal'
-            ? '결제 후 바로 블러가 풀리고, 나머지 카드도 7일 안에 전달돼요.'
-            : '결제 후 바로 블러가 풀리고, 나머지 카드도 7일 안에 전달돼.'}
+            ? '결제 후 카드가 순차적으로 전달돼요!'
+            : '결제 후 카드가 순차적으로 전달돼!'}
         </div>
 
         {/* Plans */}
@@ -261,7 +262,7 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: PurchaseBottomS
                        active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--line)]
                        ${paying ? 'opacity-60 pointer-events-none' : ''}`}
           >
-            {paying ? '결제 준비 중...' : '결제하고 사진 보기'}
+            {paying ? '결제 준비 중...' : '결제하고 소개 받기'}
           </button>
         </div>
       </div>

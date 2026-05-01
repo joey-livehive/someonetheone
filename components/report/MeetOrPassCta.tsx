@@ -139,59 +139,83 @@ export function MeetOrPassCta({ reportId, initialCta }: Props) {
         <div className="font-display font-bold text-[22px] mb-2 leading-[1.3]">{heading}</div>
         <div className="text-[13.5px] text-brand-cream/75 leading-[1.6] mb-5">{subheading}</div>
 
-        <div className="bg-brand-cream/5 rounded-[14px] p-4 border border-brand-cream/15">
-          <div className="font-display font-bold text-[15px] text-brand-cream mb-2">
-            {isMeet ? '좋았던 이유를 알려줄래요?' : '이유를 알려줄래요?'}
-          </div>
-          <div className="text-[12.5px] text-brand-mustard/90 leading-[1.55] mb-3">
-            피드백을 주시면, 다음 카드가 더 좋아질 확률이 81% 증가해요.
-          </div>
-          <textarea
-            value={feedback}
-            onChange={(e) => {
-              setFeedback(e.target.value);
-              if (error) setError(null);
-            }}
-            disabled={submitted}
-            placeholder={placeholder}
-            rows={4}
-            aria-invalid={error ? true : undefined}
-            className="w-full rounded-xl bg-brand-cream/10 border border-brand-cream/20 p-3 text-[13.5px] text-brand-cream placeholder:text-brand-cream/35 focus:outline-none focus:border-brand-mustard resize-none disabled:opacity-60"
-          />
-          {error && (
-            <div className="mt-2 text-[12px] text-red-300" role="alert">
-              {error}
+        {submitted ? (
+          /* 제출 후: 큼직한 success 카드로 화면 자체를 교체. 의뢰인 의견 그대로 echo. */
+          <div className="bg-brand-mustard/15 rounded-[14px] p-5 border-[1.5px] border-brand-mustard">
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-mustard text-brand-ink text-[18px] font-bold">
+                ✓
+              </span>
+              <div className="font-display font-bold text-[18px] text-brand-cream leading-tight">
+                의견 잘 받았어요!
+              </div>
             </div>
-          )}
-          <button
-            type="button"
-            onClick={async () => {
-              if (!feedback.trim()) {
-                setError('한 줄만 남겨주세요!');
-                return;
-              }
-              if (pending) return;
-              setPending(true);
-              setError(null);
-              try {
-                await postCta(
-                  reportId,
-                  isMeet ? 'contact_request' : 'pass',
-                  feedback.trim(),
-                );
-                setSubmitted(true);
-              } catch {
-                setError('전송에 실패했어요. 잠시 뒤 다시 시도해주세요.');
-              } finally {
-                setPending(false);
-              }
-            }}
-            disabled={!canSubmit || pending}
-            className="mt-3 w-full h-12 rounded-2xl bg-brand-mustard font-display font-bold text-brand-ink text-[15px] active:scale-[0.97] transition-transform disabled:opacity-50 disabled:active:scale-100"
-          >
-            {submitted ? '의견 잘 받았어요 🙌' : pending ? '전송 중…' : '의견 남기기'}
-          </button>
-        </div>
+            <div className="text-[12.5px] text-brand-cream/65 leading-[1.6] mb-3">
+              남겨주신 의견 그대로 다음 카드 큐레이션에 반영할게요.
+            </div>
+            <div className="bg-brand-ink/40 rounded-xl border border-brand-mustard/40 px-4 py-3">
+              <div className="font-hand text-[11px] text-brand-mustard/80 tracking-[0.18em] uppercase mb-1.5">
+                의뢰인님의 의견
+              </div>
+              <div className="text-[14px] text-brand-cream leading-[1.65] whitespace-pre-wrap break-words">
+                &ldquo;{feedback.trim()}&rdquo;
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-brand-cream/5 rounded-[14px] p-4 border border-brand-cream/15">
+            <div className="font-display font-bold text-[15px] text-brand-cream mb-2">
+              {isMeet ? '좋았던 이유를 알려줄래요?' : '이유를 알려줄래요?'}
+            </div>
+            <div className="text-[12.5px] text-brand-mustard/90 leading-[1.55] mb-3">
+              피드백을 주시면, 다음 카드가 더 좋아질 확률이 81% 증가해요.
+            </div>
+            <textarea
+              value={feedback}
+              onChange={(e) => {
+                setFeedback(e.target.value);
+                if (error) setError(null);
+              }}
+              placeholder={placeholder}
+              rows={4}
+              aria-invalid={error ? true : undefined}
+              className="w-full rounded-xl bg-brand-cream/10 border border-brand-cream/20 p-3 text-[13.5px] text-brand-cream placeholder:text-brand-cream/35 focus:outline-none focus:border-brand-mustard resize-none disabled:opacity-60"
+            />
+            {error && (
+              <div className="mt-2 text-[12px] text-red-300" role="alert">
+                {error}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={async () => {
+                if (!feedback.trim()) {
+                  setError('한 줄만 남겨주세요!');
+                  return;
+                }
+                if (pending) return;
+                setPending(true);
+                setError(null);
+                try {
+                  await postCta(
+                    reportId,
+                    isMeet ? 'contact_request' : 'pass',
+                    feedback.trim(),
+                  );
+                  setSubmitted(true);
+                } catch {
+                  setError('전송에 실패했어요. 잠시 뒤 다시 시도해주세요.');
+                } finally {
+                  setPending(false);
+                }
+              }}
+              disabled={!canSubmit || pending}
+              className="mt-3 w-full h-12 rounded-2xl bg-brand-mustard font-display font-bold text-brand-ink text-[15px] active:scale-[0.97] transition-transform disabled:opacity-50 disabled:active:scale-100"
+            >
+              {pending ? '전송 중…' : '의견 남기기'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

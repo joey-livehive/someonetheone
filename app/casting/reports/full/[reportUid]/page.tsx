@@ -23,12 +23,12 @@ const EMPTY_PERSONALIZED: PersonalizedContent = {
   readingCard: { paragraph1Opening: '', paragraph2Opening: '' },
 };
 
-async function fetchCastingReport(reportUid: string, token: string) {
+async function fetchCastingReport(reportUid: string, token?: string) {
   try {
-    const res = await fetch(
-      `${CASTING_API_BASE}/casting/reports/${reportUid}/public?token=${encodeURIComponent(token)}`,
-      { cache: 'no-store' },
-    );
+    const url = token
+      ? `${CASTING_API_BASE}/casting/reports/${reportUid}/public?token=${encodeURIComponent(token)}`
+      : `${CASTING_API_BASE}/casting/reports/${reportUid}/public`;
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -47,8 +47,8 @@ export default async function CastingMatchReportPage({
   const { mock, cta, t, token: tokenParam } = await searchParams;
   const token = t || tokenParam;
 
-  // 1순위: token 이 있으면 casting backend 에서 실제 리포트를 가져온다.
-  const dbReport = token ? await fetchCastingReport(reportUid, token) : null;
+  // 1순위: casting backend 에서 실제 리포트를 가져온다 (token 옵셔널).
+  const dbReport = await fetchCastingReport(reportUid, token);
 
   const fixture = getFixture(reportUid);
   const mockReport = getReport(reportUid);

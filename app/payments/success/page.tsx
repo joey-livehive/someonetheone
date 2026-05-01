@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { track } from '@/lib/report/tracking';
+import { castingFetch } from '@/lib/casting/api';
 
 function SuccessInner() {
   const params = useSearchParams();
@@ -19,22 +20,15 @@ function SuccessInner() {
       return;
     }
 
-    const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.publicvoid.im';
-
-    fetch(`${API}/theone/payments/toss/confirm`, {
+    castingFetch('/casting/payments/toss/confirm', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         payment_key: paymentKey,
         order_id: orderId,
         amount: Number(amount),
       }),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error('confirm failed');
-        return res.json();
-      })
-      .then((data) => {
+      .then((data: any) => {
         if (data.status === 'success') {
           setStatus('done');
           track('purchase_complete', { orderId, amount: Number(amount) }, {

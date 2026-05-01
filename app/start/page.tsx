@@ -11,6 +11,7 @@ import {
   trackMessage,
   setGuestUid as setTrackingGuestUid,
 } from '../../lib/tracking';
+import { castingFetch, setCastingSession } from '@/lib/casting/api';
 
 const C = {
   bg: '#FEFBF4',
@@ -270,7 +271,7 @@ const MBTI_PAIRS: [string, string][] = [
   ['J', 'P'],
 ];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// API 호출은 lib/casting/api.ts 의 castingFetch 사용 (token 헤더 자동 주입).
 
 type Phase =
   | 'chapter1'
@@ -313,13 +314,50 @@ function BackNav({ onBack, dark = false }: { onBack: () => void; dark?: boolean 
   );
 }
 
+// 호환 wrapper — 기존 호출부 (path: string) 시그니처 유지하면서 casting endpoint 로 라우팅.
+// /start → POST /casting/guests/start
+// /{uid}/answer (PATCH) → PATCH /casting/guests/{uid}/answer (body: question/answer → key/value)
+// /{uid}/path (PATCH) → PATCH /casting/guests/{uid}/answer (key='path', value=...)
+// /{uid}/photo (PATCH) → PATCH /casting/guests/{uid}/photo (body: photo_data → value)
 async function api(path: string, options?: RequestInit) {
-  const res = await fetch(`${API_BASE}/theone/survey${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  if (!res.ok) throw new Error(`API ${res.status}`);
-  return res.json();
+  const method = (options?.method || 'GET').toUpperCase();
+  const body = options?.body ? JSON.parse(options.body as string) : undefined;
+
+  if (path === '/start') {
+    return castingFetch('/casting/guests/start', {
+      method: 'POST',
+      auth: false,
+      body: JSON.stringify({}),
+    });
+  }
+  // PATCH /{uid}/answer
+  let m = path.match(/^\/([^/]+)\/answer$/);
+  if (m && method === 'PATCH') {
+    const uid = m[1];
+    return castingFetch(`/casting/guests/${uid}/answer`, {
+      method: 'PATCH',
+      body: JSON.stringify({ key: body?.question, value: body?.answer }),
+    });
+  }
+  // PATCH /{uid}/path
+  m = path.match(/^\/([^/]+)\/path$/);
+  if (m && method === 'PATCH') {
+    const uid = m[1];
+    return castingFetch(`/casting/guests/${uid}/answer`, {
+      method: 'PATCH',
+      body: JSON.stringify({ key: 'path', value: body?.path }),
+    });
+  }
+  // PATCH /{uid}/photo
+  m = path.match(/^\/([^/]+)\/photo$/);
+  if (m && method === 'PATCH') {
+    const uid = m[1];
+    return castingFetch(`/casting/guests/${uid}/photo`, {
+      method: 'PATCH',
+      body: JSON.stringify({ value: body?.photo_data }),
+    });
+  }
+  throw new Error(`Unsupported casting api path: ${path} (${method})`);
 }
 
 export default function StartPage() {
@@ -356,11 +394,15 @@ export default function StartPage() {
   const ensureGuest = useCallback((): Promise<string> => {
     if (guestUid) return Promise.resolve(guestUid);
     if (!guestPromiseRef.current) {
-      guestPromiseRef.current = api('/start', { method: 'POST' }).then((data) => {
+      guestPromiseRef.current = api('/start', { method: 'POST' }).then((data: any) => {
+        // casting endpoint 응답: { guest_uid, access_token, ... }
         setGuestUid(data.guest_uid);
         setTrackingGuestUid(data.guest_uid);
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('sto_guest_uid', data.guest_uid);
+        }
+        if (data.access_token) {
+          setCastingSession(data.guest_uid, data.access_token);
         }
         return data.guest_uid as string;
       });

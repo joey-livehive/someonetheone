@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { PricingPlan } from '@/lib/report/types';
 import { track } from '@/lib/report/tracking';
+import { castingFetch } from '@/lib/casting/api';
 
 interface Plan extends PricingPlan {
   desc: string;
@@ -96,28 +97,25 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: Props) {
     });
 
     try {
-      const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.publicvoid.im';
-      const guestUid = new URLSearchParams(window.location.search).get('guest') || undefined;
+      const guestUid =
+        new URLSearchParams(window.location.search).get('guest') ||
+        (typeof window !== 'undefined' ? sessionStorage.getItem('casting_guest_uid') : null) ||
+        undefined;
+      if (!guestUid) throw new Error('guest_uid 없음 — 설문 후에 진입해주세요.');
 
-      const orderRes = await fetch(`${API}/theone/orders`, {
+      const order = (await castingFetch('/casting/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guest_uid: guestUid, product_id: selected.id, report_id: reportId }),
-      });
-      if (!orderRes.ok) throw new Error('주문 생성 실패');
-      const order = await orderRes.json();
+        body: JSON.stringify({ guest_uid: guestUid, product_id: selected.id }),
+      })) as { order_id: string; amount: number };
 
-      const startRes = await fetch(`${API}/theone/payments/toss/start`, {
+      const toss = (await castingFetch('/casting/payments/toss/start', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           order_id: order.order_id,
           amount: order.amount,
           order_name: `casting ${selected.name}`,
         }),
-      });
-      if (!startRes.ok) throw new Error('결제 시작 실패');
-      const toss = await startRes.json();
+      })) as { checkout?: { url: string } };
 
       const checkoutUrl = toss.checkout?.url;
       if (checkoutUrl) {

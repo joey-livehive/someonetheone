@@ -3,6 +3,7 @@ import { getReport, getDefaultReport } from '@/lib/report/mockData';
 import { getMockPersonalized } from '@/lib/personalization/mock-personalized';
 import { getMockUser, isMockUserKey } from '@/lib/personalization/mock-users';
 import type { UserAnswers, PersonalizedContent } from '@/lib/personalization/types';
+import { CASTING_API_BASE } from '@/lib/casting/api';
 import { TopNav } from '@/components/report/TopNav';
 import { Hero } from '@/components/report/Hero';
 import { ApplicationSummary } from '@/components/report/ApplicationSummary';
@@ -22,21 +23,38 @@ const EMPTY_PERSONALIZED: PersonalizedContent = {
   readingCard: { paragraph1Opening: '', paragraph2Opening: '' },
 };
 
+async function fetchCastingReport(reportUid: string, token: string) {
+  try {
+    const res = await fetch(
+      `${CASTING_API_BASE}/casting/reports/${reportUid}/public?token=${encodeURIComponent(token)}`,
+      { cache: 'no-store' },
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 export default async function CastingMatchReportPage({
   params,
   searchParams,
 }: {
   params: Promise<{ reportUid: string }>;
-  searchParams: Promise<{ mock?: string; cta?: string }>;
+  searchParams: Promise<{ mock?: string; cta?: string; t?: string; token?: string }>;
 }) {
   const { reportUid } = await params;
-  const { mock, cta } = await searchParams;
+  const { mock, cta, t, token: tokenParam } = await searchParams;
+  const token = t || tokenParam;
+
+  // 1순위: token 이 있으면 casting backend 에서 실제 리포트를 가져온다.
+  const dbReport = token ? await fetchCastingReport(reportUid, token) : null;
 
   const fixture = getFixture(reportUid);
   const mockReport = getReport(reportUid);
 
-  // fixture 도 mock 리포트도 없으면 404. 디자인 검수용 mock 진입은 ?mock=A 쿼리가 있을 때만 허용.
-  if (!fixture && !(mockReport && mock)) {
+  // fixture 도, DB 도, mock 도 없으면 404. 디자인 검수용 mock 진입은 ?mock=A 쿼리가 있을 때만 허용.
+  if (!dbReport && !fixture && !(mockReport && mock)) {
     notFound();
   }
 
@@ -46,7 +64,18 @@ export default async function CastingMatchReportPage({
   let personalized: PersonalizedContent;
   let sceneImage: string | undefined;
 
-  if (fixture) {
+  if (dbReport && dbReport.report_json) {
+    // 실제 DB 리포트 — report_json 안에 fixture 와 동일 shape 의 콘텐츠가 들어있어야 함.
+    const rj = dbReport.report_json;
+    userAnswers = rj.user_answers ?? ({ idealType: {} } as UserAnswers);
+    personalized = rj.personalized ?? EMPTY_PERSONALIZED;
+    sceneImage = rj.scene_image;
+    if (rj.candidate) data.teaserCandidate = rj.candidate;
+    if (rj.match) data.match = rj.match;
+    if (rj.published_at) data.publishedAt = rj.published_at;
+    if (rj.user_name) data.userName = rj.user_name;
+    if (rj.hunt_stats) data.huntStats = rj.hunt_stats;
+  } else if (fixture) {
     userAnswers = fixture.user_answers ?? ({ idealType: {} } as UserAnswers);
     personalized = fixture.personalized ?? EMPTY_PERSONALIZED;
     sceneImage = fixture.scene_image;
@@ -80,7 +109,11 @@ export default async function CastingMatchReportPage({
         </TrackSection>
         <Chapter4Simulation match={data.match} number="CHAPTER 3" sceneImage={sceneImage} />
 
-        <MeetOrPassCta initialCta={cta} />
+        <MeetOrPassCta reportId={reportUid} initialCta={cta} />
+
+        <div className="px-7 mt-10 mb-2 text-center text-[12px] text-brand-ink-mute">
+          문의: <a href="mailto:hello@livehivecorp.com" className="underline">hello@livehivecorp.com</a>
+        </div>
       </ReportShell>
     </main>
   );

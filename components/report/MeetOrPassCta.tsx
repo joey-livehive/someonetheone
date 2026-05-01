@@ -9,6 +9,9 @@ const NEXT_STEPS = [
 ];
 
 type Stage = 'idle' | 'meet_done' | 'pass_done';
+type ApiActionType = 'contact_request' | 'pass';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.publicvoid.im';
 
 function stageFromCta(value: string | undefined): Stage {
   if (value === 'meet') return 'meet_done';
@@ -16,16 +19,54 @@ function stageFromCta(value: string | undefined): Stage {
   return 'idle';
 }
 
+function tokenFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  const sp = new URLSearchParams(window.location.search);
+  return sp.get('t') || sp.get('token');
+}
+
+async function postCta(reportId: string, action: ApiActionType, feedback?: string): Promise<void> {
+  const token = tokenFromUrl();
+  const url = new URL(`${API_BASE}/casting/reports/${reportId}/public-cta`);
+  if (token) url.searchParams.set('token', token);
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action_type: action, feedback }),
+    keepalive: true,
+  });
+  if (!res.ok) {
+    throw new Error(`cta_failed: ${res.status}`);
+  }
+}
+
 interface Props {
+  /** 결제 후 페이지의 reportUid (예: STO-C324BE08). 백엔드 API 호출 시 path 로 사용. */
+  reportId: string;
   /** 디자인 검수용 진입(`?cta=meet|pass`). 서버에서 props 로 주입. */
   initialCta?: string;
 }
 
-export function MeetOrPassCta({ initialCta }: Props) {
+export function MeetOrPassCta({ reportId, initialCta }: Props) {
   const [stage, setStage] = useState<Stage>(() => stageFromCta(initialCta));
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  const decide = async (next: 'meet_done' | 'pass_done') => {
+    if (pending) return;
+    setPending(true);
+    setError(null);
+    try {
+      await postCta(reportId, next === 'meet_done' ? 'contact_request' : 'pass');
+      setStage(next);
+    } catch {
+      setError('네트워크 오류가 났어요. 잠시 뒤 다시 시도해주세요.');
+    } finally {
+      setPending(false);
+    }
+  };
 
   if (stage === 'idle') {
     return (
@@ -53,15 +94,17 @@ export function MeetOrPassCta({ initialCta }: Props) {
           <div className="mt-5 flex flex-col gap-3">
             <button
               type="button"
-              onClick={() => setStage('meet_done')}
-              className="h-[60px] rounded-2xl bg-brand-mustard font-display font-bold text-brand-ink active:scale-[0.97] transition-transform text-[16px] flex items-center justify-center"
+              onClick={() => decide('meet_done')}
+              disabled={pending}
+              className="h-[60px] rounded-2xl bg-brand-mustard font-display font-bold text-brand-ink active:scale-[0.97] transition-transform text-[16px] flex items-center justify-center disabled:opacity-60 disabled:active:scale-100"
             >
-              연결해줘!
+              {pending ? '전송 중…' : '연결해줘!'}
             </button>
             <button
               type="button"
-              onClick={() => setStage('pass_done')}
-              className="h-[60px] rounded-2xl border border-brand-cream/35 font-display font-bold text-brand-cream active:scale-[0.97] transition-transform px-3 flex flex-col items-center justify-center leading-tight"
+              onClick={() => decide('pass_done')}
+              disabled={pending}
+              className="h-[60px] rounded-2xl border border-brand-cream/35 font-display font-bold text-brand-cream active:scale-[0.97] transition-transform px-3 flex flex-col items-center justify-center leading-tight disabled:opacity-60 disabled:active:scale-100"
             >
               <span>다른 카드 받을래</span>
               <span className="text-[11px] font-normal text-brand-cream/60 mt-0.5">
@@ -69,6 +112,11 @@ export function MeetOrPassCta({ initialCta }: Props) {
               </span>
             </button>
           </div>
+          {error && (
+            <div className="mt-3 text-[12px] text-red-300" role="alert">
+              {error}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -117,17 +165,31 @@ export function MeetOrPassCta({ initialCta }: Props) {
           )}
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               if (!feedback.trim()) {
                 setError('한 줄만 남겨주세요!');
                 return;
               }
-              setSubmitted(true);
+              if (pending) return;
+              setPending(true);
+              setError(null);
+              try {
+                await postCta(
+                  reportId,
+                  isMeet ? 'contact_request' : 'pass',
+                  feedback.trim(),
+                );
+                setSubmitted(true);
+              } catch {
+                setError('전송에 실패했어요. 잠시 뒤 다시 시도해주세요.');
+              } finally {
+                setPending(false);
+              }
             }}
-            disabled={!canSubmit}
+            disabled={!canSubmit || pending}
             className="mt-3 w-full h-12 rounded-2xl bg-brand-mustard font-display font-bold text-brand-ink text-[15px] active:scale-[0.97] transition-transform disabled:opacity-50 disabled:active:scale-100"
           >
-            {submitted ? '의견 잘 받았어요 🙌' : '의견 남기기'}
+            {submitted ? '의견 잘 받았어요 🙌' : pending ? '전송 중…' : '의견 남기기'}
           </button>
         </div>
       </div>

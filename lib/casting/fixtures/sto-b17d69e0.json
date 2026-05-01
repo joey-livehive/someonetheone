@@ -1,8 +1,10 @@
 {
   "report_id": "STO-B17D69E0",
+  "local_alias": "CASTING-LOCAL-009",
   "guest_uid": "f8c21163-79aa-440b-8d36-9a3f30d443c2",
   "status": "ready",
   "published_at": "2026.05.01",
+  "scene_image": "/images/simulation/c324be08-meeting.jpg",
   "user_answers": {
     "idealType": {
       "attractionFactor": "'외모'가 수려한 사람",

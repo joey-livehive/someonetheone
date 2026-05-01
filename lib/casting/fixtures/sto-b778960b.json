@@ -1,8 +1,10 @@
 {
   "report_id": "STO-B778960B",
+  "local_alias": "CASTING-LOCAL-004",
   "guest_uid": "841cd73a-30b7-43e4-aafd-9746f08f34aa",
   "status": "ready",
   "published_at": "2026.04.30",
+  "scene_image": "/images/simulation/c324be08-meeting.jpg",
   "user_answers": {
     "idealType": {
       "attractionFactor": "'성격'이 좋은 사람",

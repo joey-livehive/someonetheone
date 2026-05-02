@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import {
   trackPageView,
   trackAnswer,
-  trackPicky,
   trackPhoto,
   trackMessage,
   setGuestUid as setTrackingGuestUid,
@@ -24,78 +23,27 @@ const C = {
 interface Question {
   title: string;
   subtitle: string;
-  type?: 'choice' | 'mbti' | 'age' | 'height' | 'multi' | 'job';
+  type?: 'choice' | 'mbti' | 'age' | 'height' | 'job';
   options?: { label: string; value: string }[];
+  // 성별에 따라 옵션이 달라지는 경우 (이상형 키·체형, 본인 체형 등)
+  optionsByGender?: {
+    male: { label: string; value: string }[];
+    female: { label: string; value: string }[];
+  };
 }
 
-// ── Chapter 1 — 상대에 대한 객관식 (7문항) ──
-const CHAPTER1_QUESTIONS: Question[] = [
-  {
-    title: '어떤 사람이\n끌려?',
-    subtitle: '생각하지 말고, 바로 골라봐',
-    options: [
-      { label: "'외모'가 수려한 사람", value: 'appearance' },
-      { label: "'성격'이 좋은 사람", value: 'personality' },
-      { label: "유능한 '능력'을 가진 사람", value: 'competence' },
-      { label: "'분위기' 좋은 사람", value: 'vibe' },
-    ],
-  },
-  {
-    title: '상대 나이는\n어느 정도?',
-    subtitle: '상대방 선호 나이대',
-    options: [
-      { label: '나보다 어린 사람', value: 'younger' },
-      { label: '동갑이 좋아', value: 'same_age' },
-      { label: '나보다 많은 사람', value: 'older' },
-      { label: '상관없어', value: 'any_age' },
-    ],
-  },
-  {
-    title: '키는\n어느 정도?',
-    subtitle: '선호하는 상대의 키',
-    options: [
-      { label: '큰 편이 좋아', value: 'tall' },
-      { label: '비슷하면 좋겠어', value: 'similar' },
-      { label: '작은 편이 좋아', value: 'short' },
-      { label: '상관없어', value: 'any_height' },
-    ],
-  },
-  {
-    title: '체형은\n어땠음 해?',
-    subtitle: '선호하는 상대의 체형',
-    options: [
-      { label: '마른 편', value: 'slim' },
-      { label: '보통', value: 'average' },
-      { label: '근육질', value: 'muscular' },
-      { label: '상관없어', value: 'any_body' },
-    ],
-  },
-  {
-    title: '연락\n스타일은?',
-    subtitle: '상대방한테 바라는 거',
-    options: [
-      { label: '수시로 연락했으면', value: 'frequent' },
-      { label: '2~3시간에 한 번씩', value: 'twice_daily' },
-      { label: '하루에 한 번이면 충분해', value: 'once_daily' },
-      { label: '연락 빈도는 상관없어', value: 'any_frequency' },
-    ],
-  },
-  {
-    title: '이건 좀\n아닌 것 같아',
-    subtitle: '절대 안 되는 거 하나',
-    options: [
-      { label: '많이 바쁜 사람', value: 'too_busy' },
-      { label: '취미 없는 사람', value: 'no_hobby' },
-      { label: '친구 자주 만나는 사람', value: 'too_social' },
-      { label: '흡연하는 사람', value: 'smoker' },
-    ],
-  },
+const RELIGION_SELF_OPTIONS = [
+  { label: '없어', value: 'none' },
+  { label: '기독교', value: 'christian' },
+  { label: '천주교', value: 'catholic' },
+  { label: '불교', value: 'buddhist' },
+  { label: '기타', value: 'other_religion' },
 ];
 
-// ── Chapter 2 — 나에 대한 기본 정보 (6문항) ──
-const CHAPTER2_QUESTIONS: Question[] = [
+// ── Chapter 1 — 기본 + 이상형 외형 (5문항) ──
+const CHAPTER1_QUESTIONS: Question[] = [
   {
-    title: '성별이\n어떻게 돼?',
+    title: '반가워!\n성별이 어떻게 돼?',
     subtitle: '',
     options: [
       { label: '남자', value: 'male' },
@@ -103,28 +51,160 @@ const CHAPTER2_QUESTIONS: Question[] = [
     ],
   },
   {
-    title: '어디쯤\n살아?',
-    subtitle: '대략적인 지역',
+    title: '어떤 사람이\n끌려?',
+    subtitle: '생각하지 말고, 바로 골라봐',
+    options: [
+      { label: "'외모'가 수려한 사람", value: 'appearance' },
+      { label: "'성격'이 좋은 사람", value: 'personality' },
+      { label: "'능력'을 가진 사람", value: 'competence' },
+      { label: "'분위기' 좋은 사람", value: 'vibe' },
+    ],
+  },
+  {
+    title: '상대 나이는\n어느 정도?',
+    subtitle: '상대방 선호 나이대',
+    optionsByGender: {
+      // 남자 → 연하 우선
+      male: [
+        { label: '연하가 좋아', value: 'younger' },
+        { label: '연상이 좋아', value: 'older' },
+        { label: '동갑이나 또래가 좋아', value: 'same_age' },
+        { label: '상관 없어', value: 'any_age' },
+      ],
+      // 여자 → 연상 우선
+      female: [
+        { label: '연상이 좋아', value: 'older' },
+        { label: '연하가 좋아', value: 'younger' },
+        { label: '동갑이나 또래가 좋아', value: 'same_age' },
+        { label: '상관 없어', value: 'any_age' },
+      ],
+    },
+  },
+  {
+    title: '키는\n어느 정도?',
+    subtitle: '선호하는 상대의 키',
+    optionsByGender: {
+      // 남자 → 여자 키
+      male: [
+        { label: '보통이 좋아 (156~165cm)', value: 'pref_female_height_156_165' },
+        { label: '아담해야 돼 (155cm 이하)', value: 'pref_female_height_155_or_less' },
+        { label: '큰 게 좋아 (167cm~)', value: 'pref_female_height_167_plus' },
+        { label: '상관없어', value: 'any_height' },
+      ],
+      // 여자 → 남자 키
+      female: [
+        { label: '키 커야 돼 (180cm~)', value: 'pref_male_height_180_plus' },
+        { label: '보통 이상이면 돼 (172cm~)', value: 'pref_male_height_172_plus' },
+        { label: '상관없어', value: 'any_height' },
+      ],
+    },
+  },
+  {
+    title: '체형은\n어땠음 해?',
+    subtitle: '선호하는 상대의 체형',
+    optionsByGender: {
+      // 남자 → 여자 체형
+      male: [
+        { label: '글래머러스가 좋아', value: 'pref_female_glamorous' },
+        { label: '마른 게 좋아', value: 'pref_female_slim' },
+        { label: '보통이면 돼', value: 'pref_female_average' },
+        { label: '상관 없어', value: 'any_body' },
+      ],
+      // 여자 → 남자 체형
+      female: [
+        { label: '근육 탄탄해야 돼', value: 'pref_male_muscular' },
+        { label: '보통이면 돼', value: 'pref_male_average' },
+        { label: '스키니한 게 좋아', value: 'pref_male_slim' },
+        { label: '상관 없어', value: 'any_body' },
+      ],
+    },
+  },
+];
+
+// ── Chapter 2 — 관계·라이프 선호 + 거주지 (8문항, 종교 분기 +1 / 시·도 자유입력) ──
+const CHAPTER2_QUESTIONS: Question[] = [
+  {
+    title: '얼마나 자주\n만나고 싶어?',
+    subtitle: '연애할 때 기준',
+    options: [
+      { label: '주 1~2번', value: 'weekly_1_2' },
+      { label: '주 3~4번', value: 'weekly_3_4' },
+      { label: '거의 매일', value: 'daily_meet' },
+      { label: '상황 따라 유연하게', value: 'flexible_meet' },
+    ],
+  },
+  {
+    title: '연락은\n얼마나 자주가 좋아?',
+    subtitle: '',
+    options: [
+      { label: '2~3시간 간격', value: 'contact_2_3h' },
+      { label: '수시로 했으면', value: 'contact_anytime' },
+      { label: '하루에 통화 1~2번', value: 'contact_1_2_day' },
+      { label: '연락 잘 안 해도 편한 사이가 좋아', value: 'contact_relaxed' },
+    ],
+  },
+  {
+    title: '넌 지금\n얼마나 진지해?',
+    subtitle: '어떤 만남을 원하는지',
+    options: [
+      { label: '진지한 연애 원해', value: 'serious_dating' },
+      { label: '일단 대화부터 할래', value: 'casual_chat' },
+      { label: '부담없이 가볍게 만나고 싶어', value: 'casual_meet' },
+    ],
+  },
+  {
+    title: '연인이\n술 마시는 건 어때?',
+    subtitle: '',
+    options: [
+      { label: '상관없어', value: 'pref_drink_any' },
+      { label: '가끔이면 괜찮아', value: 'pref_drink_sometimes' },
+      { label: '안 마셨음 해', value: 'pref_drink_no' },
+    ],
+  },
+  {
+    title: '연인이\n담배 피운다면?',
+    subtitle: '',
+    options: [
+      { label: '괜찮아', value: 'pref_smoke_ok' },
+      { label: '가능하지만 선호하진 않아', value: 'pref_smoke_meh' },
+      { label: '흡연자는 안돼', value: 'pref_smoke_no' },
+    ],
+  },
+  {
+    title: '상대 종교는\n중요해?',
+    subtitle: '',
+    options: [
+      { label: '상관 없어', value: 'pref_any_religion' },
+      { label: '무교였으면 해', value: 'pref_no_religion' },
+      { label: '같은 종교이길 바라', value: 'pref_same_religion' },
+    ],
+  },
+  {
+    title: '상대와 거리는\n어디까지?',
+    subtitle: '',
+    options: [
+      { label: '완전 가까웠으면 해', value: 'very_near' },
+      { label: '같은 도시면 괜찮아', value: 'same_city' },
+      { label: '장거리도 좋아', value: 'long_distance' },
+    ],
+  },
+  {
+    title: '넌 어디쯤\n사는데?',
+    subtitle: '',
     options: [
       { label: '서울', value: 'seoul' },
       { label: '경기', value: 'gyeonggi' },
       { label: '인천', value: 'incheon' },
+      { label: '부산', value: 'busan' },
       { label: '그 외 지역', value: 'other_region' },
     ],
   },
+];
+
+// ── Chapter 3 — 본인 스펙 (9문항, 학생이면 직업 디테일 SKIP) ──
+const CHAPTER3_QUESTIONS: Question[] = [
   {
-    title: '무슨 일 해?',
-    subtitle: '대략적으로',
-    options: [
-      { label: '회사원', value: 'office' },
-      { label: '전문직', value: 'professional' },
-      { label: '학생', value: 'student' },
-      { label: '사업/프리랜서', value: 'freelance' },
-      { label: '기타', value: 'other' },
-    ],
-  },
-  {
-    title: '나이가\n어떻게 돼?',
+    title: '넌 나이가\n어떻게 돼?',
     subtitle: '숫자로 입력해줘',
     type: 'age',
   },
@@ -134,125 +214,66 @@ const CHAPTER2_QUESTIONS: Question[] = [
     type: 'height',
   },
   {
-    title: '연애\n스타일은?',
-    subtitle: '나한테 가까운 거',
+    title: '네 체형을\n알려줘',
+    subtitle: '',
+    optionsByGender: {
+      male: [
+        { label: '마른 편', value: 'self_slim' },
+        { label: '보통', value: 'self_average' },
+        { label: '근육 탄탄', value: 'self_muscular' },
+        { label: '통통한 편', value: 'self_chubby' },
+      ],
+      female: [
+        { label: '슬림한 편', value: 'self_slim' },
+        { label: '보통', value: 'self_average' },
+        { label: '글래머', value: 'self_glamorous' },
+        { label: '통통한 편', value: 'self_chubby' },
+      ],
+    },
+  },
+  {
+    title: '넌\n담배 피워?',
+    subtitle: '',
     options: [
-      { label: '거의 매일 보고 싶어', value: 'daily_meet' },
-      { label: '주 2~3번 정도', value: '2_3_week' },
-      { label: '주 1번이면 충분해', value: 'weekly' },
-      { label: '상황 따라 유연하게', value: 'flexible' },
+      { label: '안 피워', value: 'no_smoke' },
+      { label: '가끔 피워', value: 'sometimes_smoke' },
+      { label: '많이 피워', value: 'heavy_smoke' },
     ],
   },
   {
-    title: 'MBTI가\n뭐야?',
+    title: '술은\n자주 마셔?',
+    subtitle: '',
+    options: [
+      { label: '자주 마셔', value: 'often_drink' },
+      { label: '가끔 마셔', value: 'sometimes_drink' },
+      { label: '거의 안 마셔', value: 'rarely_drink' },
+    ],
+  },
+  {
+    title: 'MBTI\n뭐야?',
     subtitle: '모르면 건너뛰어도 돼',
     type: 'mbti',
   },
-];
-
-// ── Chapter 3 — 디테일 (11문항) ──
-const CHAPTER3_QUESTIONS: Question[] = [
   {
-    title: '질투 많이\n하는 편이야?',
-    subtitle: '상대가 이성 친구 만났을 때',
+    title: '넌\n어떤 일 해?',
+    subtitle: '대략적으로',
     options: [
-      { label: '솔직히 신경 쓰여', value: 'jealous' },
-      { label: '미리 말해주면 괜찮아', value: 'okay_if_told' },
-      { label: '별로 신경 안 써', value: 'chill' },
-      { label: '상황 따라 달라', value: 'depends_jealousy' },
+      { label: '학생', value: 'student' },
+      { label: '회사원', value: 'office' },
+      { label: '전문직', value: 'professional' },
+      { label: '공직', value: 'public' },
+      { label: '사업/프리랜서', value: 'freelance' },
+      { label: '기타', value: 'other_job' },
     ],
   },
-  {
-    title: '종교는\n중요해?',
-    subtitle: '',
-    options: [
-      { label: '상관없어', value: 'any_religion' },
-      { label: '같은 종교였으면', value: 'same_religion' },
-      { label: '종교 없는 사람이 좋아', value: 'no_religion' },
-    ],
-  },
-  {
-    title: '주말에 보통\n뭐 해?',
-    subtitle: '제일 자주 하는 거',
-    options: [
-      { label: '집에서 쉬어', value: 'rest_home' },
-      { label: '사람 만나', value: 'meet_people' },
-      { label: '나만의 취미 활동해', value: 'go_out' },
-      { label: '운동해', value: 'exercise' },
-    ],
-  },
-  {
-    title: '술은\n어때?',
-    subtitle: '',
-    options: [
-      { label: '자주 마셔', value: 'often' },
-      { label: '가끔 마셔', value: 'sometimes' },
-      { label: '거의 안 마셔', value: 'rarely' },
-      { label: '아예 못 마셔', value: 'never' },
-    ],
-  },
-  {
-    title: '데이트는\n어떤 스타일이 좋아?',
-    subtitle: '평소 가고 싶은 데',
-    options: [
-      { label: '집에서 같이 시간', value: 'home' },
-      { label: '카페·전시·문화', value: 'culture' },
-      { label: '맛집 탐방', value: 'food' },
-      { label: '액티비티·여행', value: 'active' },
-    ],
-  },
-  {
-    title: '스킨십은\n어느 정도가 편해?',
-    subtitle: '사귀는 사이 기준으로',
-    options: [
-      { label: '자주 했으면', value: 'frequent_touch' },
-      { label: '분위기 따라 적당히', value: 'moderate_touch' },
-      { label: '천천히 친해지는 편', value: 'slow_touch' },
-      { label: '상대에 맞춰도 돼', value: 'match_partner' },
-    ],
-  },
-  {
-    title: '싸웠을 땐\n어떤 편이야?',
-    subtitle: '솔직하게',
-    options: [
-      { label: '바로 풀어야 돼', value: 'resolve_now' },
-      { label: '시간 갖고 정리해', value: 'take_time' },
-      { label: '먼저 사과하는 편', value: 'apologize_first' },
-      { label: '그때그때 달라', value: 'depends' },
-    ],
-  },
-  {
-    title: '사람들이 널\n뭐라고 평가해?',
-    subtitle: '3개만 골라줘',
-    type: 'multi',
-    options: [
-      { label: '활발해', value: 'lively' },
-      { label: '다정해', value: 'warm' },
-      { label: '차분해', value: 'calm' },
-      { label: '진중해', value: 'serious' },
-      { label: '재밌어', value: 'fun' },
-      { label: '편안해', value: 'comfortable' },
-      { label: '솔직해', value: 'honest' },
-      { label: '똑똑해', value: 'smart' },
-    ],
-  },
-  {
-    title: '결혼 생각은\n있어?',
-    subtitle: '지금 시점에서',
-    options: [
-      { label: '결혼 상대 찾는 중', value: 'seeking' },
-      { label: '좋은 사람 있다면', value: 'if_right' },
-      { label: '아직은 천천히 생각 중', value: 'not_sure' },
-      { label: '안 할 수도 있어', value: 'maybe_not' },
-    ],
-  },
+  // 학생이면 SKIP
   {
     title: '직업이 정확히\n뭐야?',
     subtitle: '예: 마케팅 PM, 디자이너...',
     type: 'job',
   },
   {
-    title: '너의 연소득은\n얼마야?',
+    title: '연소득은\n얼마야?',
     subtitle: '매칭에만 쓸 거야, 걱정 마',
     options: [
       { label: '3천만원 미만', value: 'under_30' },
@@ -271,19 +292,25 @@ const MBTI_PAIRS: [string, string][] = [
   ['J', 'P'],
 ];
 
-// API 호출은 lib/casting/api.ts 의 castingFetch 사용 (token 헤더 자동 주입).
+// ── 정적 step 인덱스 (분기 로직에서 step 매칭 용) ──
+const RELIGION_STEP_IDX = CHAPTER2_QUESTIONS.findIndex(
+  (q) => q.options?.some((o) => o.value === 'pref_any_religion'),
+);
+const SIDO_STEP_IDX = CHAPTER2_QUESTIONS.findIndex(
+  (q) => q.options?.some((o) => o.value === 'seoul'),
+);
+const OCCUPATION_STEP_IDX = CHAPTER3_QUESTIONS.findIndex(
+  (q) => q.options?.some((o) => o.value === 'student'),
+);
 
 type Phase =
   | 'chapter1'
-  | 'picky'
-  | 'bridge'
+  | 'intermission1'
   | 'chapter2'
-  | 'intermission'
+  | 'intermission2'
   | 'chapter3'
   | 'photo'
   | 'message';
-
-type Path = 'quick' | 'detailed' | null;
 
 function BackNav({ onBack, dark = false }: { onBack: () => void; dark?: boolean }) {
   const fg = dark ? '#FEFBF4' : '#2C1D07';
@@ -314,11 +341,6 @@ function BackNav({ onBack, dark = false }: { onBack: () => void; dark?: boolean 
   );
 }
 
-// 호환 wrapper — 기존 호출부 (path: string) 시그니처 유지하면서 casting endpoint 로 라우팅.
-// /start → POST /casting/guests/start
-// /{uid}/answer (PATCH) → PATCH /casting/guests/{uid}/answer (body: question/answer → key/value)
-// /{uid}/path (PATCH) → PATCH /casting/guests/{uid}/answer (key='path', value=...)
-// /{uid}/photo (PATCH) → PATCH /casting/guests/{uid}/photo (body: photo_data → value)
 async function api(path: string, options?: RequestInit) {
   const method = (options?.method || 'GET').toUpperCase();
   const body = options?.body ? JSON.parse(options.body as string) : undefined;
@@ -330,7 +352,6 @@ async function api(path: string, options?: RequestInit) {
       body: JSON.stringify({}),
     });
   }
-  // PATCH /{uid}/answer
   let m = path.match(/^\/([^/]+)\/answer$/);
   if (m && method === 'PATCH') {
     const uid = m[1];
@@ -339,16 +360,6 @@ async function api(path: string, options?: RequestInit) {
       body: JSON.stringify({ key: body?.question, value: body?.answer }),
     });
   }
-  // PATCH /{uid}/path
-  m = path.match(/^\/([^/]+)\/path$/);
-  if (m && method === 'PATCH') {
-    const uid = m[1];
-    return castingFetch(`/casting/guests/${uid}/answer`, {
-      method: 'PATCH',
-      body: JSON.stringify({ key: 'path', value: body?.path }),
-    });
-  }
-  // PATCH /{uid}/photo
   m = path.match(/^\/([^/]+)\/photo$/);
   if (m && method === 'PATCH') {
     const uid = m[1];
@@ -367,21 +378,22 @@ export default function StartPage() {
   const [ch1Answers, setCh1Answers] = useState<string[]>([]);
   const [ch2Answers, setCh2Answers] = useState<string[]>([]);
   const [ch3Answers, setCh3Answers] = useState<string[]>([]);
-  const [picky, setPicky] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [guestUid, setGuestUid] = useState<string | null>(null);
   const guestPromiseRef = useRef<Promise<string> | null>(null);
-  const [path, setPath] = useState<Path>(null);
   const [mbti, setMbti] = useState<string[]>(['', '', '', '']);
-  const [otherRegionInput, setOtherRegionInput] = useState(false);
-  const [otherRegion, setOtherRegion] = useState('');
   const [age, setAge] = useState('');
   const [height, setHeight] = useState('');
   const [jobDetail, setJobDetail] = useState('');
-  const [religionInput, setReligionInput] = useState(false);
-  const [religion, setReligion] = useState('');
-  const [selfDescriptions, setSelfDescriptions] = useState<string[]>([]);
+  // 시·도 "그 외 지역" 선택 시 자유 입력 모드
+  const [otherRegionInput, setOtherRegionInput] = useState(false);
+  const [otherRegion, setOtherRegion] = useState('');
+  // 종교 분기 sub-step: 'pref' = 이상형 종교 선호, 'self' = 본인 종교 5지선다, 'other' = 본인 종교 자유 입력
+  const [religionSubStep, setReligionSubStep] = useState<'pref' | 'self' | 'other'>('pref');
+  const [religionOther, setReligionOther] = useState('');
+  // 본인 종교 답변 (ch2Answers와 별도로 보관 — 같은 step에 pref/self 둘 다 필요)
+  const [religionSelfAnswer, setReligionSelfAnswer] = useState<string | null>(null);
 
   const questions =
     phase === 'chapter1' ? CHAPTER1_QUESTIONS
@@ -395,7 +407,6 @@ export default function StartPage() {
     if (guestUid) return Promise.resolve(guestUid);
     if (!guestPromiseRef.current) {
       guestPromiseRef.current = api('/start', { method: 'POST' }).then((data: any) => {
-        // casting endpoint 응답: { guest_uid, access_token, ... }
         setGuestUid(data.guest_uid);
         setTrackingGuestUid(data.guest_uid);
         if (typeof window !== 'undefined') {
@@ -422,102 +433,36 @@ export default function StartPage() {
     trackAnswer(question, answer, phase);
   }
 
-  function advanceChapter2() {
-    if (step + 1 >= CHAPTER2_QUESTIONS.length) {
-      setPhase('intermission');
-    } else {
-      setStep((s) => s + 1);
-    }
+  // 답변을 step 인덱스에 저장 (이미 있으면 덮어쓰기). 뒤로 가도 답변 유지됨
+  function setAnswerAt(ch: 1 | 2 | 3, idx: number, value: string) {
+    const setter = ch === 1 ? setCh1Answers : ch === 2 ? setCh2Answers : setCh3Answers;
+    setter((p) => {
+      const next = [...p];
+      next[idx] = value;
+      return next;
+    });
   }
 
-  function handleSelect(value: string) {
-    const q = questions[step];
-
-    // 지역에서 "그 외 지역" 선택 시 입력 form으로 전환
-    if (phase === 'chapter2' && q?.title.startsWith('어디쯤') && value === 'other_region') {
-      setOtherRegionInput(true);
-      return;
-    }
-
-    // 종교(이제 step 1)에서 "같은 종교였으면" 선택 시 입력 form으로 전환
-    if (phase === 'chapter3' && step === 1 && value === 'same_religion') {
-      setReligionInput(true);
-      return;
-    }
-
-    persistAnswer(q.title.replace('\n', ' '), value);
-
-    if (phase === 'chapter1') {
-      setCh1Answers((p) => [...p, value]);
-      if (step + 1 >= CHAPTER1_QUESTIONS.length) {
-        setStep(0);
-        setPhase('picky');
-      } else {
-        setStep((s) => s + 1);
-      }
-    } else if (phase === 'chapter2') {
-      setCh2Answers((p) => [...p, value]);
-      // 성별은 /loading 카드 분기에 사용 — sessionStorage에 저장
-      if (step === 0 && (value === 'male' || value === 'female') && typeof window !== 'undefined') {
-        sessionStorage.setItem('sto_user_gender', value);
-      }
-      advanceChapter2();
-    } else if (phase === 'chapter3') {
-      setCh3Answers((p) => [...p, value]);
-      advanceChapter3FromStep(step);
-    }
-  }
-
-  function handleMbtiPick(idx: number, letter: string) {
-    const next = [...mbti];
-    next[idx] = letter;
-    setMbti(next);
-    if (next.every((l) => l)) {
-      const combined = next.join('');
-      persistAnswer('MBTI가 뭐야?', combined);
-      setCh2Answers((p) => [...p, combined]);
-      advanceChapter2();
-    }
-  }
-
-  function handleMbtiUnknown() {
-    persistAnswer('MBTI가 뭐야?', 'unknown');
-    setCh2Answers((p) => [...p, 'unknown']);
-    advanceChapter2();
-  }
-
-  function handleAgeSubmit() {
-    const n = parseInt(age, 10);
-    if (!n || n < 14 || n > 99) return;
-    persistAnswer('나이가 어떻게 돼?', String(n));
-    setCh2Answers((p) => [...p, String(n)]);
-    advanceChapter2();
-  }
-
-  function handleHeightSubmit() {
-    const n = parseInt(height, 10);
-    if (!n || n < 130 || n > 220) return;
-    persistAnswer('키가 어떻게 돼?', String(n));
-    setCh2Answers((p) => [...p, String(n)]);
-    advanceChapter2();
-  }
-
-  // chapter2 직업 인덱스 (CHAPTER2_QUESTIONS에서 "무슨 일 해?" 위치)
-  const occupationIdx = CHAPTER2_QUESTIONS.findIndex((q) => q.title.startsWith('무슨 일'));
-
-  function shouldSkipChapter3(idx: number): boolean {
+  function shouldSkipChapter3(idx: number, answers: string[] = ch3Answers): boolean {
     const q = CHAPTER3_QUESTIONS[idx];
     if (!q) return false;
     if (q.type === 'job') {
-      const occ = ch2Answers[occupationIdx];
-      return occ === 'student';
+      return answers[OCCUPATION_STEP_IDX] === 'student';
     }
     return false;
   }
 
-  function advanceChapter3FromStep(s: number) {
+  function advanceChapter2FromStep(s: number) {
+    if (s + 1 >= CHAPTER2_QUESTIONS.length) {
+      setPhase('intermission2');
+    } else {
+      setStep(s + 1);
+    }
+  }
+
+  function advanceChapter3FromStep(s: number, answers: string[] = ch3Answers) {
     let next = s + 1;
-    while (next < CHAPTER3_QUESTIONS.length && shouldSkipChapter3(next)) {
+    while (next < CHAPTER3_QUESTIONS.length && shouldSkipChapter3(next, answers)) {
       next++;
     }
     if (next >= CHAPTER3_QUESTIONS.length) {
@@ -527,162 +472,251 @@ export default function StartPage() {
     }
   }
 
+  // 입력형 step으로 돌아갈 때 input 상태 복원
+  function restoreInputForStep(ch: 1 | 2 | 3, idx: number) {
+    if (ch === 3) {
+      const q = CHAPTER3_QUESTIONS[idx];
+      const stored = ch3Answers[idx] || '';
+      if (q?.type === 'mbti') {
+        if (stored && stored.length === 4) setMbti([stored[0], stored[1], stored[2], stored[3]]);
+        else setMbti(['', '', '', '']);
+      } else if (q?.type === 'age') {
+        setAge(stored);
+      } else if (q?.type === 'height') {
+        setHeight(stored);
+      } else if (q?.type === 'job') {
+        setJobDetail(stored);
+      }
+    }
+  }
+
+  function handleSelect(value: string) {
+    const q = questions[step];
+
+    // chapter2 종교 분기 (sub-step: pref → self → other)
+    if (phase === 'chapter2' && step === RELIGION_STEP_IDX && religionSubStep === 'pref') {
+      persistAnswer('상대 종교는 중요해?', value);
+      setAnswerAt(2, step, value);
+      if (value === 'pref_no_religion') {
+        // 무교 선호 → 본인 종교 입력은 SKIP. 이전에 답했던 self 값은 무효화하고 백엔드도 동기화
+        if (religionSelfAnswer !== null) {
+          persistAnswer('넌 종교가 뭐야?', '');
+          setReligionSelfAnswer(null);
+          setReligionOther('');
+        }
+        setTimeout(() => advanceChapter2FromStep(step), 100);
+      } else {
+        // same/any → 본인 종교 5지선다 화면
+        setTimeout(() => setReligionSubStep('self'), 100);
+      }
+      return;
+    }
+    if (phase === 'chapter2' && step === RELIGION_STEP_IDX && religionSubStep === 'self') {
+      if (value === 'other_religion') {
+        setReligionSubStep('other');
+        return;
+      }
+      persistAnswer('넌 종교가 뭐야?', value);
+      setReligionSelfAnswer(value);
+      setTimeout(() => {
+        setReligionSubStep('pref');
+        advanceChapter2FromStep(step);
+      }, 100);
+      return;
+    }
+
+    persistAnswer(q.title.replace('\n', ' '), value);
+
+    if (phase === 'chapter1') {
+      setAnswerAt(1, step, value);
+      // 성별은 /loading 카드 분기에 사용 — sessionStorage에 저장
+      if (step === 0 && (value === 'male' || value === 'female') && typeof window !== 'undefined') {
+        sessionStorage.setItem('sto_user_gender', value);
+      }
+      setTimeout(() => {
+        if (step + 1 >= CHAPTER1_QUESTIONS.length) {
+          setPhase('intermission1');
+        } else {
+          setStep((s) => s + 1);
+        }
+      }, 100);
+    } else if (phase === 'chapter2') {
+      // 시·도에서 "그 외 지역" 선택 → 자유 입력 모드로 전환
+      if (step === SIDO_STEP_IDX && value === 'other_region') {
+        setOtherRegionInput(true);
+        return;
+      }
+      setAnswerAt(2, step, value);
+      setTimeout(() => advanceChapter2FromStep(step), 100);
+    } else if (phase === 'chapter3') {
+      // 학생 분기는 ch3Answers를 즉시 봐야 하므로 nextAnswers를 advance에 직접 전달
+      const nextAnswers = [...ch3Answers];
+      nextAnswers[step] = value;
+      setCh3Answers(nextAnswers);
+      setTimeout(() => advanceChapter3FromStep(step, nextAnswers), 100);
+    }
+  }
+
+  function handleMbtiPick(idx: number, letter: string) {
+    const next = [...mbti];
+    next[idx] = letter;
+    setMbti(next);
+    if (next.every((l) => l)) {
+      const combined = next.join('');
+      persistAnswer('MBTI 뭐야?', combined);
+      setAnswerAt(3, step, combined);
+      setTimeout(() => advanceChapter3FromStep(step), 200);
+    }
+  }
+
+  function handleMbtiUnknown() {
+    persistAnswer('MBTI 뭐야?', 'unknown');
+    setAnswerAt(3, step, 'unknown');
+    advanceChapter3FromStep(step);
+  }
+
+  function handleAgeSubmit() {
+    const n = parseInt(age, 10);
+    if (!n || n < 14 || n > 99) return;
+    persistAnswer('넌 나이가 어떻게 돼?', String(n));
+    setAnswerAt(3, step, String(n));
+    advanceChapter3FromStep(step);
+  }
+
+  function handleHeightSubmit() {
+    const n = parseInt(height, 10);
+    if (!n || n < 130 || n > 220) return;
+    persistAnswer('키가 어떻게 돼?', String(n));
+    setAnswerAt(3, step, String(n));
+    advanceChapter3FromStep(step);
+  }
+
   function handleJobSubmit() {
     const trimmed = jobDetail.trim();
     if (!trimmed) return;
     persistAnswer('직업이 정확히 뭐야?', trimmed);
-    setCh3Answers((p) => [...p, trimmed]);
+    setAnswerAt(3, step, trimmed);
     advanceChapter3FromStep(step);
   }
 
   function handleOtherRegionSubmit() {
     const trimmed = otherRegion.trim();
     if (!trimmed) return;
-    const value = `other_region:${trimmed}`;
-    persistAnswer('어디쯤 살아?', value);
-    setCh2Answers((p) => [...p, value]);
+    const stored = `other_region:${trimmed}`;
+    persistAnswer('어디쯤 살아?', stored);
+    setAnswerAt(2, step, stored);
     setOtherRegionInput(false);
-    advanceChapter2();
+    advanceChapter2FromStep(step);
   }
 
-  function handleSelfDescPick(value: string) {
-    if (selfDescriptions.includes(value)) {
-      setSelfDescriptions((p) => p.filter((v) => v !== value));
-      return;
-    }
-    if (selfDescriptions.length >= 3) return;
-    const next = [...selfDescriptions, value];
-    setSelfDescriptions(next);
-    if (next.length === 3) {
-      const combined = next.join(',');
-      const q = questions[step];
-      persistAnswer(q.title.replace('\n', ' '), combined);
-      setCh3Answers((p) => [...p, combined]);
-      advanceChapter3FromStep(step);
-    }
-  }
-
-  function handleReligionSubmit() {
-    const trimmed = religion.trim();
+  function handleReligionOtherSubmit() {
+    const trimmed = religionOther.trim();
     if (!trimmed) return;
-    const value = `same_religion:${trimmed}`;
-    persistAnswer('종교는 중요해?', value);
-    setCh3Answers((p) => [...p, value]);
-    setReligionInput(false);
-    advanceChapter3FromStep(step);
+    const value = `other:${trimmed}`;
+    persistAnswer('넌 종교가 뭐야?', value);
+    setReligionSelfAnswer(value);
+    setTimeout(() => {
+      setReligionSubStep('pref');
+      setReligionOther('');
+      advanceChapter2FromStep(step);
+    }, 100);
   }
 
   function handleBack() {
-    if (otherRegionInput) {
+    // 시·도 "그 외 지역" 입력 모드 → 시·도 선택 화면으로 복귀
+    if (phase === 'chapter2' && step === SIDO_STEP_IDX && otherRegionInput) {
       setOtherRegionInput(false);
       return;
     }
-    if (religionInput) {
-      setReligionInput(false);
+    // 종교 sub-step 안 → 한 단계 뒤로 (답변은 보존)
+    if (phase === 'chapter2' && step === RELIGION_STEP_IDX && religionSubStep === 'other') {
+      setReligionSubStep('self');
       return;
     }
+    if (phase === 'chapter2' && step === RELIGION_STEP_IDX && religionSubStep === 'self') {
+      setReligionSubStep('pref');
+      return;
+    }
+
     if (phase === 'chapter1' && step > 0) {
       setStep((s) => s - 1);
-      setCh1Answers((p) => p.slice(0, -1));
-    } else if (phase === 'picky') {
+      return;
+    }
+    if (phase === 'intermission1') {
       setPhase('chapter1');
       setStep(CHAPTER1_QUESTIONS.length - 1);
-      setCh1Answers((p) => p.slice(0, -1));
-    } else if (phase === 'bridge') {
-      setPhase('picky');
-    } else if (phase === 'chapter2' && step > 0) {
-      const prev = CHAPTER2_QUESTIONS[step - 1];
-      if (prev?.type === 'mbti') {
-        setMbti(['', '', '', '']);
-      } else if (prev?.type === 'age') {
-        setAge('');
-      } else if (prev?.type === 'height') {
-        setHeight('');
-      }
-      setStep((s) => s - 1);
-      setCh2Answers((p) => p.slice(0, -1));
-    } else if (phase === 'chapter2' && step === 0) {
-      setPhase('bridge');
-    } else if (phase === 'intermission') {
-      const lastQ = CHAPTER2_QUESTIONS[CHAPTER2_QUESTIONS.length - 1];
-      if (lastQ?.type === 'mbti') setMbti(['', '', '', '']);
-      else if (lastQ?.type === 'age') setAge('');
-      else if (lastQ?.type === 'height') setHeight('');
+      return;
+    }
+    if (phase === 'chapter2' && step > 0) {
+      const target = step - 1;
+      restoreInputForStep(2, target);
+      // 종교 step으로 돌아가는 거면 sub-step pref로 (pref 답변 노출)
+      if (target === RELIGION_STEP_IDX) setReligionSubStep('pref');
+      setStep(target);
+      return;
+    }
+    if (phase === 'chapter2' && step === 0) {
+      setPhase('intermission1');
+      return;
+    }
+    if (phase === 'intermission2') {
+      const target = CHAPTER2_QUESTIONS.length - 1;
+      restoreInputForStep(2, target);
       setPhase('chapter2');
-      setStep(CHAPTER2_QUESTIONS.length - 1);
-      setCh2Answers((p) => p.slice(0, -1));
-    } else if (phase === 'chapter3' && step > 0) {
+      setStep(target);
+      return;
+    }
+    if (phase === 'chapter3' && step > 0) {
       let prev = step - 1;
       while (prev > 0 && shouldSkipChapter3(prev)) {
         prev--;
       }
+      restoreInputForStep(3, prev);
       setStep(prev);
-      setCh3Answers((p) => p.slice(0, -1));
-      setSelfDescriptions([]);
-      setJobDetail('');
-    } else if (phase === 'chapter3' && step === 0) {
-      setPhase('intermission');
-    } else if (phase === 'photo') {
-      if (path === 'detailed') {
-        let prev = CHAPTER3_QUESTIONS.length - 1;
-        while (prev > 0 && shouldSkipChapter3(prev)) {
-          prev--;
-        }
-        setPhase('chapter3');
-        setStep(prev);
-        setCh3Answers((p) => p.slice(0, -1));
-      } else {
-        setPhase('intermission');
+      return;
+    }
+    if (phase === 'chapter3' && step === 0) {
+      setPhase('intermission2');
+      return;
+    }
+    if (phase === 'photo') {
+      let prev = CHAPTER3_QUESTIONS.length - 1;
+      while (prev > 0 && shouldSkipChapter3(prev)) {
+        prev--;
       }
-    } else if (phase === 'message') {
+      restoreInputForStep(3, prev);
+      setPhase('chapter3');
+      setStep(prev);
+      return;
+    }
+    if (phase === 'message') {
       setPhase('photo');
+      return;
     }
-  }
-
-  function handlePickySubmit() {
-    if (picky.trim() && guestUid) {
-      api(`/${guestUid}/answer`, {
-        method: 'PATCH',
-        body: JSON.stringify({ question: '까다로운 기준', answer: picky.trim() }),
-      }).catch(() => {});
-    }
-    trackPicky(picky.trim());
-    setPhase('bridge');
   }
 
   function handleStartChapter2() {
     setStep(0);
     setCh2Answers([]);
-    setMbti(['', '', '', '']);
-    setAge('');
-    setHeight('');
-    setOtherRegion('');
+    setReligionSubStep('pref');
+    setReligionOther('');
+    setReligionSelfAnswer(null);
     setOtherRegionInput(false);
+    setOtherRegion('');
     setPhase('chapter2');
   }
 
-  function handlePathChoice(chosen: 'quick' | 'detailed') {
-    setPath(chosen);
-    if (guestUid) {
-      api(`/${guestUid}/path`, {
-        method: 'PATCH',
-        body: JSON.stringify({ path: chosen }),
-      }).catch(() => {});
-    }
-    trackAnswer('경로 선택', chosen, 'intermission');
-    if (chosen === 'quick') {
-      router.push('/loading');
-    } else {
-      setStep(0);
-      setCh3Answers([]);
-      setReligion('');
-      setReligionInput(false);
-      setSelfDescriptions([]);
-      setJobDetail('');
-      setPhase('chapter3');
-    }
+  function handleStartChapter3() {
+    setStep(0);
+    setCh3Answers([]);
+    setJobDetail('');
+    setMbti(['', '', '', '']);
+    setAge('');
+    setHeight('');
+    setPhase('chapter3');
   }
 
+  // ── Photo handlers ──
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -726,366 +760,248 @@ export default function StartPage() {
       >
         <BackNav onBack={handleBack} />
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <h1
-          className="font-bold text-center mb-3"
-          style={{
-            color: C.ink,
-            fontSize: 'clamp(32px, 6vw, 48px)',
-            lineHeight: '1.25',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          마지막!
-          <br />
-          <span style={{ color: C.accent }}>사진 한 장</span>
-        </h1>
-        <p className="text-center text-base mb-8 opacity-70 max-w-sm" style={{ color: C.ink }}>
-          네 허락 없이 절대 공개 안 해!
-          <br />
-          누군가 너와 비슷한 스타일을 찾는다면,
-          <br />
-          너에게 알려줄게
-        </p>
+          <h1
+            className="font-bold text-center mb-3"
+            style={{
+              color: C.ink,
+              fontSize: 'clamp(32px, 6vw, 48px)',
+              lineHeight: '1.25',
+              letterSpacing: '-0.5px',
+            }}
+          >
+            마지막!
+            <br />
+            <span style={{ color: C.accent }}>사진 한 장</span>
+          </h1>
+          <p className="text-center text-base mb-8 opacity-70 max-w-sm" style={{ color: C.ink }}>
+            네 허락 없이 절대 공개 안 해!
+            <br />
+            누군가 너와 비슷한 스타일을 찾는다면,
+            <br />
+            너에게 알려줄게
+          </p>
 
-        {photo ? (
-          <div className="mb-6">
-            <img
-              src={photo}
-              alt="업로드한 사진"
-              className="w-40 h-40 rounded-2xl object-cover"
-              style={{ border: `2px solid ${C.ink}` }}
+          {photo ? (
+            <div className="mb-6">
+              <img
+                src={photo}
+                alt="업로드한 사진"
+                className="w-40 h-40 rounded-2xl object-cover"
+                style={{ border: `2px solid ${C.ink}` }}
+              />
+            </div>
+          ) : null}
+
+          <div className="flex flex-col gap-3 w-full max-w-xs">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
             />
-          </div>
-        ) : null}
-
-        <div className="flex flex-col gap-3 w-full max-w-xs">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handlePhotoChange}
-            className="hidden"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full rounded-2xl transition-all hover:-translate-y-0.5"
-            style={{
-              color: C.ink,
-              background: '#FFFFFF',
-              border: `2px solid ${C.ink}`,
-              boxShadow: `3px 3px 0 ${C.ink}`,
-            }}
-          >
-            {photo ? (
-              <div className="flex items-center justify-center px-5 py-4 font-semibold text-base">
-                다른 사진 선택
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center gap-2 px-5 py-7">
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.8}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
-                  <circle cx="12" cy="13" r="4" />
-                </svg>
-                <span className="font-bold text-base">사진 올리기</span>
-                <span
-                  className="text-xs font-semibold"
-                  style={{ color: C.accent }}
-                >
-                  사진 올리면 매칭률이 6.8배 올라가!
-                </span>
-              </div>
-            )}
-          </button>
-          <button
-            onClick={handlePhotoSubmit}
-            className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
-            style={{
-              color: C.ink,
-              background: C.gold,
-              border: `2px solid ${C.ink}`,
-              boxShadow: `4px 4px 0 ${C.ink}`,
-            }}
-          >
-            {photo ? '완료' : '나중에 할게'}
-          </button>
-        </div>
-        </div>
-      </main>
-    );
-  }
-
-  // ── Message screen ──
-  if (phase === 'message') {
-    return (
-      <main
-        className="min-h-screen flex flex-col"
-        style={{ background: C.bg }}
-      >
-        <BackNav onBack={handleBack} />
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <h1
-          className="font-bold text-center mb-3"
-          style={{
-            color: C.ink,
-            fontSize: 'clamp(32px, 6vw, 48px)',
-            lineHeight: '1.25',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          마지막으로,
-        </h1>
-        <p className="text-center text-lg mb-8 opacity-70" style={{ color: C.ink }}>
-          나한테 하고 싶은 말 있어?
-        </p>
-
-        <div className="w-full max-w-md flex flex-col gap-4">
-          <div className="relative">
-            <textarea
-              value={message}
-              onChange={(e) => {
-                if (e.target.value.length <= 2000) setMessage(e.target.value);
-              }}
-              placeholder="편하게 써줘 (선택)"
-              rows={5}
-              className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg resize-none"
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full rounded-2xl transition-all hover:-translate-y-0.5"
               style={{
                 color: C.ink,
                 background: '#FFFFFF',
                 border: `2px solid ${C.ink}`,
+                boxShadow: `3px 3px 0 ${C.ink}`,
               }}
-            />
-            <span
-              className="absolute bottom-3 right-4 text-xs"
-              style={{ color: C.ink, opacity: 0.4 }}
             >
-              {message.length} / 2,000
-            </span>
-          </div>
-          <button
-            onClick={handleMessageSubmit}
-            className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
-            style={{
-              color: C.ink,
-              background: C.gold,
-              border: `2px solid ${C.ink}`,
-              boxShadow: `4px 4px 0 ${C.ink}`,
-            }}
-          >
-            {message.trim() ? '보내기' : '괜찮아, 넘어갈게'}
-          </button>
-        </div>
-        </div>
-      </main>
-    );
-  }
-
-  // ── Picky screen ──
-  if (phase === 'picky') {
-    return (
-      <main
-        className="min-h-screen flex flex-col"
-        style={{ background: C.bg }}
-      >
-        <BackNav onBack={handleBack} />
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <h1
-          className="font-bold text-center whitespace-pre-line mb-3"
-          style={{
-            color: C.ink,
-            fontSize: 'clamp(32px, 6vw, 48px)',
-            lineHeight: '1.25',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          말하기 힘든{'\n'}
-          <span style={{ color: C.accent }}>나만의 까다로운 기준</span>이{'\n'}있다면?
-        </h1>
-        <p className="text-center text-base mb-8 opacity-70" style={{ color: C.ink }}>
-          한 줄만 적어도 매칭 정확도가 2.5배 올라가!
-        </p>
-
-        <div className="w-full max-w-md flex flex-col gap-4">
-          <textarea
-            value={picky}
-            onChange={(e) => {
-              if (e.target.value.length <= 500) setPicky(e.target.value);
-            }}
-            placeholder="예: 함께 책 이야기를 하는 사람이 좋아"
-            rows={4}
-            className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg resize-none"
-            style={{
-              color: C.ink,
-              background: '#FFFFFF',
-              border: `2px solid ${C.ink}`,
-            }}
-          />
-          <button
-            onClick={handlePickySubmit}
-            className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
-            style={{
-              color: C.ink,
-              background: C.gold,
-              border: `2px solid ${C.ink}`,
-              boxShadow: `4px 4px 0 ${C.ink}`,
-            }}
-          >
-            {picky.trim() ? '다음' : '딱히 없어'}
-          </button>
-        </div>
-        </div>
-      </main>
-    );
-  }
-
-  // ── Bridge screen ──
-  if (phase === 'bridge') {
-    return (
-      <main
-        className="min-h-screen flex flex-col"
-        style={{ background: C.dark, color: C.bg }}
-      >
-        <BackNav onBack={handleBack} dark />
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <h1
-          className="font-bold text-center mb-6"
-          style={{
-            fontSize: 'clamp(36px, 7vw, 56px)',
-            lineHeight: '1.25',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          고마워!
-        </h1>
-        <p
-          className="text-center text-lg sm:text-xl mb-12 leading-relaxed"
-          style={{ color: C.gold }}
-        >
-          너에 대해서도
-          <br />
-          좀 더 자세히 물어봐도 돼?
-        </p>
-        <button
-          onClick={handleStartChapter2}
-          className="inline-flex items-center px-10 py-4 rounded-full font-bold text-lg hover:-translate-y-0.5 transition-transform"
-          style={{
-            background: C.gold,
-            color: C.ink,
-            border: `2px solid ${C.gold}`,
-            boxShadow: `5px 5px 0 ${C.ink}`,
-          }}
-        >
-          좋아, 물어봐
-        </button>
-        </div>
-      </main>
-    );
-  }
-
-  // ── Intermission screen ──
-  if (phase === 'intermission') {
-    return (
-      <main
-        className="min-h-screen flex flex-col"
-        style={{ background: C.bg }}
-      >
-        <nav
-          className="flex items-center justify-between px-5 py-3.5"
-          style={{ borderBottom: `1.5px solid ${C.ink}` }}
-        >
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-1 font-semibold text-sm"
-            style={{ color: C.ink }}
-          >
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            이전
-          </button>
-          <span
-            className="text-xl font-bold tracking-tight"
-            style={{ color: C.ink, fontFamily: "'PP Editorial Old', serif" }}
-          >
-            casting
-          </span>
-          <div className="w-12" />
-        </nav>
-
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-          <div className="w-full max-w-md">
-            <h1
-              className="font-bold whitespace-pre-line mb-3"
+              {photo ? (
+                <div className="flex items-center justify-center px-5 py-4 font-semibold text-base">
+                  다른 사진 선택
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-2 px-5 py-7">
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.8}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                  <span className="font-bold text-base">사진 올리기</span>
+                  <span
+                    className="text-xs font-semibold"
+                    style={{ color: C.accent }}
+                  >
+                    사진 올리면 매칭률이 6.8배 올라가!
+                  </span>
+                </div>
+              )}
+            </button>
+            <button
+              onClick={handlePhotoSubmit}
+              className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
               style={{
                 color: C.ink,
-                fontSize: 'clamp(32px, 6vw, 48px)',
-                lineHeight: '1.25',
-                letterSpacing: '-0.5px',
+                background: C.gold,
+                border: `2px solid ${C.ink}`,
+                boxShadow: `4px 4px 0 ${C.ink}`,
               }}
             >
-              이제{'\n'}
-              <span style={{ color: C.accent }}>매칭 가능해!</span>
-            </h1>
-            <p className="mb-10 opacity-70 text-base" style={{ color: C.ink }}>
-              더 정확하게 매칭하려면
-              <br />
-              조금만 더 답해줄래?
-            </p>
+              {photo ? '완료' : '나중에 할게'}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => handlePathChoice('quick')}
-                className="w-full text-left px-5 py-4 rounded-2xl font-semibold text-base transition-all hover:-translate-y-0.5"
+  // ── Message screen (까다로운 기준 흡수 placeholder) ──
+  if (phase === 'message') {
+    return (
+      <main className="min-h-screen flex flex-col" style={{ background: C.bg }}>
+        <BackNav onBack={handleBack} />
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+          <h1
+            className="font-bold text-center mb-3"
+            style={{
+              color: C.ink,
+              fontSize: 'clamp(32px, 6vw, 48px)',
+              lineHeight: '1.25',
+              letterSpacing: '-0.5px',
+            }}
+          >
+            마지막으로,
+          </h1>
+          <p className="text-center text-lg mb-8 opacity-70" style={{ color: C.ink }}>
+            나한테 하고 싶은 말 있어?
+          </p>
+
+          <div className="w-full max-w-md flex flex-col gap-4">
+            <div className="relative">
+              <textarea
+                value={message}
+                onChange={(e) => {
+                  if (e.target.value.length <= 2000) setMessage(e.target.value);
+                }}
+                placeholder={
+                  ch1Answers[0] === 'female'
+                    ? '예) 난 아랍상이 좋아\n예) 난 ENTP랑 잘 맞더라\n예) 내 이상형을 더 말해주자면...'
+                    : ch1Answers[0] === 'male'
+                    ? '예) 난 귀엽게 생긴 사람이 좋아\n예) 내가 스케줄 근무라 상대도 비슷했으면 해\n예) 내 이상형을 더 말해주자면...'
+                    : '예) 내 이상형을 더 말해주자면...'
+                }
+                rows={6}
+                className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg resize-none"
                 style={{
                   color: C.ink,
                   background: '#FFFFFF',
                   border: `2px solid ${C.ink}`,
-                  boxShadow: `3px 3px 0 ${C.ink}`,
                 }}
+              />
+              <span
+                className="absolute bottom-3 right-4 text-xs"
+                style={{ color: C.ink, opacity: 0.4 }}
               >
-                <div className="flex items-center justify-between">
-                  <span>빠른 매칭 결과 보기</span>
-                  <span className="text-xs opacity-60">78% 정확도</span>
-                </div>
-              </button>
-              <button
-                onClick={() => handlePathChoice('detailed')}
-                className="w-full text-left px-6 py-5 rounded-2xl font-bold text-lg transition-all hover:-translate-y-0.5 relative"
-                style={{
-                  color: C.ink,
-                  background: C.gold,
-                  border: `2px solid ${C.ink}`,
-                  boxShadow: `4px 4px 0 ${C.ink}`,
-                }}
-              >
-                <span
-                  className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-xs font-bold"
-                  style={{
-                    background: C.accent,
-                    color: '#FFFFFF',
-                    border: `2px solid ${C.ink}`,
-                  }}
-                >
-                  추천
-                </span>
-                <div className="flex items-center justify-between">
-                  <span>
-                    더 정확하게 매칭하기{' '}
-                    <span className="opacity-60 text-xs font-medium">+1분</span>
-                  </span>
-                  <span className="text-sm opacity-70 font-semibold">95% 정확도</span>
-                </div>
-              </button>
+                {message.length} / 2,000
+              </span>
             </div>
+            <button
+              onClick={handleMessageSubmit}
+              className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform"
+              style={{
+                color: C.ink,
+                background: C.gold,
+                border: `2px solid ${C.ink}`,
+                boxShadow: `4px 4px 0 ${C.ink}`,
+              }}
+            >
+              {message.trim() ? '보내기' : '괜찮아, 넘어갈게'}
+            </button>
           </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Intermission 1 (Chapter 1 → Chapter 2) ──
+  if (phase === 'intermission1') {
+    return (
+      <main className="min-h-screen flex flex-col" style={{ background: C.dark, color: C.bg }}>
+        <BackNav onBack={handleBack} dark />
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+          <h1
+            className="font-bold text-center mb-6"
+            style={{
+              fontSize: 'clamp(36px, 7vw, 56px)',
+              lineHeight: '1.25',
+              letterSpacing: '-0.5px',
+            }}
+          >
+            우와, 빠른데?
+          </h1>
+          <p
+            className="text-center text-lg sm:text-xl mb-12 leading-relaxed"
+            style={{ color: C.gold }}
+          >
+            너에 대해
+            <br />
+            더 물어봐도 돼?
+          </p>
+          <button
+            onClick={handleStartChapter2}
+            className="inline-flex items-center px-10 py-4 rounded-full font-bold text-lg hover:-translate-y-0.5 transition-transform"
+            style={{
+              background: C.gold,
+              color: C.ink,
+              border: `2px solid ${C.gold}`,
+              boxShadow: `5px 5px 0 ${C.ink}`,
+            }}
+          >
+            오케이!
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Intermission 2 (Chapter 2 → Chapter 3) ──
+  if (phase === 'intermission2') {
+    return (
+      <main className="min-h-screen flex flex-col" style={{ background: C.dark, color: C.bg }}>
+        <BackNav onBack={handleBack} dark />
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+          <h1
+            className="font-bold whitespace-pre-line text-center mb-6"
+            style={{
+              fontSize: 'clamp(36px, 7vw, 56px)',
+              lineHeight: '1.25',
+              letterSpacing: '-0.5px',
+            }}
+          >
+            좋았어,{'\n'}마지막이야!
+          </h1>
+          <p
+            className="text-center text-lg sm:text-xl mb-12 leading-relaxed"
+            style={{ color: C.gold }}
+          >
+            딱 30초만
+            <br />
+            더 써보자
+          </p>
+          <button
+            onClick={handleStartChapter3}
+            className="inline-flex items-center px-10 py-4 rounded-full font-bold text-lg hover:-translate-y-0.5 transition-transform"
+            style={{
+              background: C.gold,
+              color: C.ink,
+              border: `2px solid ${C.gold}`,
+              boxShadow: `5px 5px 0 ${C.ink}`,
+            }}
+          >
+            오케이!
+          </button>
         </div>
       </main>
     );
@@ -1093,19 +1009,47 @@ export default function StartPage() {
 
   // ── Question step (chapter1 / chapter2 / chapter3) ──
   const currentQ = questions[step];
-  const isMbtiStep = phase === 'chapter2' && currentQ?.type === 'mbti';
-  const isAgeStep = phase === 'chapter2' && currentQ?.type === 'age';
-  const isHeightStep = phase === 'chapter2' && currentQ?.type === 'height';
-  const isMultiStep = phase === 'chapter3' && currentQ?.type === 'multi';
+  const isMbtiStep = phase === 'chapter3' && currentQ?.type === 'mbti';
+  const isAgeStep = phase === 'chapter3' && currentQ?.type === 'age';
+  const isHeightStep = phase === 'chapter3' && currentQ?.type === 'height';
   const isJobStep = phase === 'chapter3' && currentQ?.type === 'job';
-  const isOtherRegionStep = phase === 'chapter2' && currentQ?.title.startsWith('어디쯤') && otherRegionInput;
-  const isReligionStep = phase === 'chapter3' && step === 1 && religionInput;
+  const isSidoStep = phase === 'chapter2' && step === SIDO_STEP_IDX;
+  const isReligionSelfStep = phase === 'chapter2' && step === RELIGION_STEP_IDX && religionSubStep === 'self';
+  const isReligionOtherStep = phase === 'chapter2' && step === RELIGION_STEP_IDX && religionSubStep === 'other';
+
+  // 종교 분기에서 헤드라인 동적 변경
+  let displayTitle = currentQ?.title || '';
+  let displaySubtitle = currentQ?.subtitle || '';
+  if (isReligionSelfStep) {
+    const prefAnswer = ch2Answers[RELIGION_STEP_IDX]; // 종교 step의 pref 답변
+    displayTitle =
+      prefAnswer === 'pref_same_religion'
+        ? '넌 종교가\n뭐야?'
+        : '넌 종교\n있어?';
+    displaySubtitle = '';
+  } else if (isReligionOtherStep) {
+    displayTitle = '종교가\n뭐야?';
+    displaySubtitle = '편하게 적어줘';
+  } else if (isJobStep) {
+    // 직업군 답변에 따라 예시 placeholder 동적 변경
+    const occupation = ch3Answers[OCCUPATION_STEP_IDX];
+    if (occupation === 'office') displaySubtitle = '예: 마케팅 PM, UX 디자이너, 백엔드 개발자...';
+    else if (occupation === 'professional') displaySubtitle = '예: 변호사, 의사, 회계사, 약사...';
+    else if (occupation === 'public') displaySubtitle = '예: 7급 공무원, 교사, 경찰관...';
+    else if (occupation === 'freelance') displaySubtitle = '예: 카페 운영, 크리에이터, 일러스트레이터...';
+    else if (occupation === 'other_job') displaySubtitle = '어떤 일인지 자세히 적어줘!';
+  } else if (isSidoStep && otherRegionInput) {
+    displaySubtitle = '자세히 알려줘!';
+  }
+
+  // 성별 분기 옵션: optionsByGender 있으면 ch1Answers[0]으로 분기
+  const userGender = ch1Answers[0] === 'male' || ch1Answers[0] === 'female' ? ch1Answers[0] : null;
+  const renderOptions = currentQ?.optionsByGender && userGender
+    ? currentQ.optionsByGender[userGender]
+    : currentQ?.options;
 
   return (
-    <main
-      className="min-h-screen flex flex-col"
-      style={{ background: C.bg }}
-    >
+    <main className="min-h-screen flex flex-col" style={{ background: C.bg }}>
       <nav
         className="flex items-center justify-between px-5 py-3.5"
         style={{ borderBottom: `1.5px solid ${C.ink}` }}
@@ -1149,29 +1093,22 @@ export default function StartPage() {
                 letterSpacing: '-0.5px',
               }}
             >
-              {isReligionStep ? '종교가\n뭐야?' : currentQ.title}
+              {displayTitle}
             </h1>
             <p className="mb-10 text-base" style={{ color: C.ink }}>
-              <span className="opacity-60">
-                {isReligionStep ? '편하게 적어줘' : currentQ.subtitle}
-              </span>
-              {isMultiStep && (
-                <span className="ml-2 font-bold" style={{ color: C.accent }}>
-                  {selfDescriptions.length} / 3
-                </span>
-              )}
+              <span className="opacity-60">{displaySubtitle}</span>
             </p>
 
-            {isReligionStep ? (
+            {isReligionOtherStep ? (
               <div className="flex flex-col gap-3">
                 <input
                   type="text"
-                  value={religion}
+                  value={religionOther}
                   onChange={(e) => {
-                    if (e.target.value.length <= 30) setReligion(e.target.value);
+                    if (e.target.value.length <= 30) setReligionOther(e.target.value);
                   }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleReligionSubmit(); }}
-                  placeholder="예: 기독교, 불교, 가톨릭..."
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleReligionOtherSubmit(); }}
+                  placeholder="예: 가톨릭, 원불교..."
                   autoFocus
                   className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg"
                   style={{
@@ -1181,8 +1118,8 @@ export default function StartPage() {
                   }}
                 />
                 <button
-                  onClick={handleReligionSubmit}
-                  disabled={!religion.trim()}
+                  onClick={handleReligionOtherSubmit}
+                  disabled={!religionOther.trim()}
                   className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   style={{
                     color: C.ink,
@@ -1194,6 +1131,29 @@ export default function StartPage() {
                   다음
                 </button>
               </div>
+            ) : isReligionSelfStep ? (
+              <div className="flex flex-col gap-3">
+                {RELIGION_SELF_OPTIONS.map((opt) => {
+                  const selected =
+                    religionSelfAnswer === opt.value ||
+                    (opt.value === 'other_religion' && religionSelfAnswer?.startsWith('other:'));
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleSelect(opt.value)}
+                      className="w-full text-left px-5 py-4 rounded-2xl font-semibold text-base transition-all hover:-translate-y-0.5 active:translate-y-0"
+                      style={{
+                        color: selected ? '#FFFFFF' : C.ink,
+                        background: selected ? C.ink : '#FFFFFF',
+                        border: `2px solid ${C.ink}`,
+                        boxShadow: selected ? 'none' : `3px 3px 0 ${C.ink}`,
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
             ) : isAgeStep ? (
               <div className="flex flex-col gap-3">
                 <input
@@ -1203,6 +1163,15 @@ export default function StartPage() {
                   onChange={(e) => {
                     const v = e.target.value.replace(/\D/g, '').slice(0, 2);
                     setAge(v);
+                    // 2자리 입력 + 유효 범위면 100ms 뒤 자동 다음
+                    if (v.length === 2) {
+                      const n = parseInt(v, 10);
+                      if (n >= 14 && n <= 99) {
+                        persistAnswer('넌 나이가 어떻게 돼?', String(n));
+                        setAnswerAt(3, step, String(n));
+                        setTimeout(() => advanceChapter3FromStep(step), 100);
+                      }
+                    }
                   }}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleAgeSubmit(); }}
                   placeholder="예: 26"
@@ -1238,6 +1207,15 @@ export default function StartPage() {
                   onChange={(e) => {
                     const v = e.target.value.replace(/\D/g, '').slice(0, 3);
                     setHeight(v);
+                    // 3자리 입력 + 유효 범위면 100ms 뒤 자동 다음
+                    if (v.length === 3) {
+                      const n = parseInt(v, 10);
+                      if (n >= 130 && n <= 220) {
+                        persistAnswer('키가 어떻게 돼?', String(n));
+                        setAnswerAt(3, step, String(n));
+                        setTimeout(() => advanceChapter3FromStep(step), 100);
+                      }
+                    }
                   }}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleHeightSubmit(); }}
                   placeholder="예: 168"
@@ -1253,38 +1231,6 @@ export default function StartPage() {
                 <button
                   onClick={handleHeightSubmit}
                   disabled={!height || parseInt(height, 10) < 130 || parseInt(height, 10) > 220}
-                  className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-                  style={{
-                    color: C.ink,
-                    background: C.gold,
-                    border: `2px solid ${C.ink}`,
-                    boxShadow: `4px 4px 0 ${C.ink}`,
-                  }}
-                >
-                  다음
-                </button>
-              </div>
-            ) : isOtherRegionStep ? (
-              <div className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  value={otherRegion}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 50) setOtherRegion(e.target.value);
-                  }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleOtherRegionSubmit(); }}
-                  placeholder="예: 부산, 대구, 제주, 미국 LA..."
-                  autoFocus
-                  className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg"
-                  style={{
-                    color: C.ink,
-                    background: '#FFFFFF',
-                    border: `2px solid ${C.ink}`,
-                  }}
-                />
-                <button
-                  onClick={handleOtherRegionSubmit}
-                  disabled={!otherRegion.trim()}
                   className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   style={{
                     color: C.ink,
@@ -1328,18 +1274,48 @@ export default function StartPage() {
                   다음
                 </button>
               </div>
-            ) : isMultiStep ? (
-              <div>
-                <div className="grid grid-cols-2 gap-3">
+            ) : isSidoStep ? (
+              otherRegionInput ? (
+                <div className="flex flex-col gap-3">
+                  <input
+                    type="text"
+                    value={otherRegion}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 30) setOtherRegion(e.target.value);
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleOtherRegionSubmit(); }}
+                    placeholder="예: 전주, 대구, 제주도..."
+                    autoFocus
+                    className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg"
+                    style={{
+                      color: C.ink,
+                      background: '#FFFFFF',
+                      border: `2px solid ${C.ink}`,
+                    }}
+                  />
+                  <button
+                    onClick={handleOtherRegionSubmit}
+                    disabled={!otherRegion.trim()}
+                    className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                    style={{
+                      color: C.ink,
+                      background: C.gold,
+                      border: `2px solid ${C.ink}`,
+                      boxShadow: `4px 4px 0 ${C.ink}`,
+                    }}
+                  >
+                    다음
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
                   {currentQ.options?.map((opt) => {
-                    const selected = selfDescriptions.includes(opt.value);
-                    const disabled = !selected && selfDescriptions.length >= 3;
+                    const selected = ch2Answers[step] === opt.value;
                     return (
                       <button
                         key={opt.value}
-                        onClick={() => handleSelfDescPick(opt.value)}
-                        disabled={disabled}
-                        className="px-4 py-4 rounded-2xl font-semibold text-base transition-all hover:-translate-y-0.5 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        onClick={() => handleSelect(opt.value)}
+                        className="w-full text-left px-5 py-4 rounded-2xl font-semibold text-base transition-all hover:-translate-y-0.5 active:translate-y-0"
                         style={{
                           color: selected ? '#FFFFFF' : C.ink,
                           background: selected ? C.ink : '#FFFFFF',
@@ -1352,7 +1328,7 @@ export default function StartPage() {
                     );
                   })}
                 </div>
-              </div>
+              )
             ) : isMbtiStep ? (
               <div className="flex flex-col gap-4">
                 {MBTI_PAIRS.map(([a, b], idx) => (
@@ -1379,29 +1355,37 @@ export default function StartPage() {
                 ))}
                 <button
                   onClick={handleMbtiUnknown}
-                  className="mt-3 text-sm font-semibold underline opacity-60"
+                  className="w-full mt-2 text-sm font-medium underline opacity-50"
                   style={{ color: C.ink }}
                 >
-                  잘 모르겠어
+                  모르겠어
                 </button>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                {currentQ.options?.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => handleSelect(opt.value)}
-                    className="w-full text-left px-5 py-4 rounded-2xl font-semibold text-base transition-all hover:-translate-y-0.5 active:translate-y-0"
-                    style={{
-                      color: C.ink,
-                      background: '#FFFFFF',
-                      border: `2px solid ${C.ink}`,
-                      boxShadow: `3px 3px 0 ${C.ink}`,
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+                {renderOptions?.map((opt) => {
+                  const currentAnswer =
+                    phase === 'chapter1' ? ch1Answers[step]
+                    : phase === 'chapter2' ? ch2Answers[step]
+                    : phase === 'chapter3' ? ch3Answers[step]
+                    : null;
+                  const selected = currentAnswer === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleSelect(opt.value)}
+                      className="w-full text-left px-5 py-4 rounded-2xl font-semibold text-base transition-all hover:-translate-y-0.5 active:translate-y-0"
+                      style={{
+                        color: selected ? '#FFFFFF' : C.ink,
+                        background: selected ? C.ink : '#FFFFFF',
+                        border: `2px solid ${C.ink}`,
+                        boxShadow: selected ? 'none' : `3px 3px 0 ${C.ink}`,
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

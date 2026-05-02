@@ -23,7 +23,7 @@ const C = {
 interface Question {
   title: string;
   subtitle: string;
-  type?: 'choice' | 'mbti' | 'age' | 'height' | 'job' | 'major' | 'gu';
+  type?: 'choice' | 'mbti' | 'age' | 'height' | 'job';
   options?: { label: string; value: string }[];
   // 성별에 따라 옵션이 달라지는 경우 (이상형 키·체형, 본인 체형 등)
   optionsByGender?: {
@@ -32,63 +32,12 @@ interface Question {
   };
 }
 
-// 시/도별 구·시 옵션 (Q22→Q23 분기)
-const GU_OPTIONS: Record<string, { label: string; value: string }[]> = {
-  seoul: [
-    { label: '강남구', value: 'gangnam' }, { label: '강동구', value: 'gangdong' },
-    { label: '강북구', value: 'gangbuk' }, { label: '강서구', value: 'gangseo' },
-    { label: '관악구', value: 'gwanak' }, { label: '광진구', value: 'gwangjin' },
-    { label: '구로구', value: 'guro' }, { label: '금천구', value: 'geumcheon' },
-    { label: '노원구', value: 'nowon' }, { label: '도봉구', value: 'dobong' },
-    { label: '동대문구', value: 'dongdaemun' }, { label: '동작구', value: 'dongjak' },
-    { label: '마포구', value: 'mapo' }, { label: '서대문구', value: 'seodaemun' },
-    { label: '서초구', value: 'seocho' }, { label: '성동구', value: 'seongdong' },
-    { label: '성북구', value: 'seongbuk' }, { label: '송파구', value: 'songpa' },
-    { label: '양천구', value: 'yangcheon' }, { label: '영등포구', value: 'yeongdeungpo' },
-    { label: '용산구', value: 'yongsan' }, { label: '은평구', value: 'eunpyeong' },
-    { label: '종로구', value: 'jongno' }, { label: '중구', value: 'jung_s' },
-    { label: '중랑구', value: 'jungnang' },
-  ],
-  gyeonggi: [
-    { label: '수원시', value: 'suwon' }, { label: '성남시', value: 'seongnam' },
-    { label: '고양시', value: 'goyang' }, { label: '용인시', value: 'yongin' },
-    { label: '부천시', value: 'bucheon' }, { label: '안산시', value: 'ansan' },
-    { label: '안양시', value: 'anyang' }, { label: '남양주시', value: 'namyangju' },
-    { label: '화성시', value: 'hwaseong' }, { label: '평택시', value: 'pyeongtaek' },
-    { label: '의정부시', value: 'uijeongbu' }, { label: '시흥시', value: 'siheung' },
-    { label: '파주시', value: 'paju' }, { label: '광명시', value: 'gwangmyeong' },
-    { label: '김포시', value: 'gimpo' }, { label: '군포시', value: 'gunpo' },
-    { label: '광주시', value: 'gwangju_gg' }, { label: '이천시', value: 'icheon' },
-    { label: '양주시', value: 'yangju' }, { label: '오산시', value: 'osan' },
-    { label: '구리시', value: 'guri' }, { label: '안성시', value: 'anseong' },
-    { label: '포천시', value: 'pocheon' }, { label: '의왕시', value: 'uiwang' },
-    { label: '하남시', value: 'hanam' }, { label: '여주시', value: 'yeoju' },
-    { label: '동두천시', value: 'dongducheon' }, { label: '과천시', value: 'gwacheon' },
-    { label: '양평군', value: 'yangpyeong' }, { label: '가평군', value: 'gapyeong' },
-    { label: '연천군', value: 'yeoncheon' },
-  ],
-  incheon: [
-    { label: '중구', value: 'jung_i' }, { label: '동구', value: 'dong_i' },
-    { label: '미추홀구', value: 'michuhol' }, { label: '연수구', value: 'yeonsu' },
-    { label: '남동구', value: 'namdong' }, { label: '부평구', value: 'bupyeong' },
-    { label: '계양구', value: 'gyeyang' }, { label: '서구', value: 'seo_i' },
-    { label: '강화군', value: 'ganghwa' }, { label: '옹진군', value: 'ongjin' },
-  ],
-};
-
 const RELIGION_SELF_OPTIONS = [
   { label: '없어', value: 'none' },
   { label: '기독교', value: 'christian' },
   { label: '천주교', value: 'catholic' },
   { label: '불교', value: 'buddhist' },
   { label: '기타', value: 'other_religion' },
-];
-
-const PHOTO_SLOTS = [
-  { label: '내 사진', sub: '', required: true },
-  { label: '', sub: '', required: false },
-  { label: '', sub: '', required: false },
-  { label: '', sub: '', required: false },
 ];
 
 // ── Chapter 1 — 기본 + 이상형 외형 (5문항) ──
@@ -343,6 +292,17 @@ const MBTI_PAIRS: [string, string][] = [
   ['J', 'P'],
 ];
 
+// ── 정적 step 인덱스 (분기 로직에서 step 매칭 용) ──
+const RELIGION_STEP_IDX = CHAPTER2_QUESTIONS.findIndex(
+  (q) => q.options?.some((o) => o.value === 'pref_any_religion'),
+);
+const SIDO_STEP_IDX = CHAPTER2_QUESTIONS.findIndex(
+  (q) => q.options?.some((o) => o.value === 'seoul'),
+);
+const OCCUPATION_STEP_IDX = CHAPTER3_QUESTIONS.findIndex(
+  (q) => q.options?.some((o) => o.value === 'student'),
+);
+
 type Phase =
   | 'chapter1'
   | 'intermission1'
@@ -426,7 +386,6 @@ export default function StartPage() {
   const [age, setAge] = useState('');
   const [height, setHeight] = useState('');
   const [jobDetail, setJobDetail] = useState('');
-  const [majorDetail, setMajorDetail] = useState('');
   // 시·도 "그 외 지역" 선택 시 자유 입력 모드
   const [otherRegionInput, setOtherRegionInput] = useState(false);
   const [otherRegion, setOtherRegion] = useState('');
@@ -484,24 +443,11 @@ export default function StartPage() {
     });
   }
 
-  // ── Chapter 2 인덱스 헬퍼 ──
-  const RELIGION_STEP_IDX = CHAPTER2_QUESTIONS.findIndex(
-    (q) => q.options?.some((o) => o.value === 'pref_any_religion'),
-  );
-  const sidoCh2Idx = CHAPTER2_QUESTIONS.findIndex(
-    (q) => q.options?.some((o) => o.value === 'seoul'),
-  );
-
-  // ── Chapter 3 인덱스 헬퍼 ──
-  const occupationCh3Idx = CHAPTER3_QUESTIONS.findIndex(
-    (q) => q.options?.some((o) => o.value === 'student'),
-  );
-
   function shouldSkipChapter3(idx: number, answers: string[] = ch3Answers): boolean {
     const q = CHAPTER3_QUESTIONS[idx];
     if (!q) return false;
     if (q.type === 'job') {
-      return answers[occupationCh3Idx] === 'student';
+      return answers[OCCUPATION_STEP_IDX] === 'student';
     }
     return false;
   }
@@ -540,8 +486,6 @@ export default function StartPage() {
         setHeight(stored);
       } else if (q?.type === 'job') {
         setJobDetail(stored);
-      } else if (q?.type === 'major') {
-        setMajorDetail(stored);
       }
     }
   }
@@ -554,7 +498,12 @@ export default function StartPage() {
       persistAnswer('상대 종교는 중요해?', value);
       setAnswerAt(2, step, value);
       if (value === 'pref_no_religion') {
-        // 무교 → 본인 종교 SKIP
+        // 무교 선호 → 본인 종교 입력은 SKIP. 이전에 답했던 self 값은 무효화하고 백엔드도 동기화
+        if (religionSelfAnswer !== null) {
+          persistAnswer('넌 종교가 뭐야?', '');
+          setReligionSelfAnswer(null);
+          setReligionOther('');
+        }
         setTimeout(() => advanceChapter2FromStep(step), 100);
       } else {
         // same/any → 본인 종교 5지선다 화면
@@ -593,7 +542,7 @@ export default function StartPage() {
       }, 100);
     } else if (phase === 'chapter2') {
       // 시·도에서 "그 외 지역" 선택 → 자유 입력 모드로 전환
-      if (step === sidoCh2Idx && value === 'other_region') {
+      if (step === SIDO_STEP_IDX && value === 'other_region') {
         setOtherRegionInput(true);
         return;
       }
@@ -660,14 +609,6 @@ export default function StartPage() {
     advanceChapter2FromStep(step);
   }
 
-  function handleMajorSubmit() {
-    const trimmed = majorDetail.trim();
-    if (!trimmed) return;
-    persistAnswer('전공이 정확히 뭐야?', trimmed);
-    setAnswerAt(3, step, trimmed);
-    advanceChapter3FromStep(step);
-  }
-
   function handleReligionOtherSubmit() {
     const trimmed = religionOther.trim();
     if (!trimmed) return;
@@ -683,7 +624,7 @@ export default function StartPage() {
 
   function handleBack() {
     // 시·도 "그 외 지역" 입력 모드 → 시·도 선택 화면으로 복귀
-    if (phase === 'chapter2' && step === sidoCh2Idx && otherRegionInput) {
+    if (phase === 'chapter2' && step === SIDO_STEP_IDX && otherRegionInput) {
       setOtherRegionInput(false);
       return;
     }
@@ -759,6 +700,7 @@ export default function StartPage() {
     setCh2Answers([]);
     setReligionSubStep('pref');
     setReligionOther('');
+    setReligionSelfAnswer(null);
     setOtherRegionInput(false);
     setOtherRegion('');
     setPhase('chapter2');
@@ -768,7 +710,6 @@ export default function StartPage() {
     setStep(0);
     setCh3Answers([]);
     setJobDetail('');
-    setMajorDetail('');
     setMbti(['', '', '', '']);
     setAge('');
     setHeight('');
@@ -1072,9 +1013,7 @@ export default function StartPage() {
   const isAgeStep = phase === 'chapter3' && currentQ?.type === 'age';
   const isHeightStep = phase === 'chapter3' && currentQ?.type === 'height';
   const isJobStep = phase === 'chapter3' && currentQ?.type === 'job';
-  const isMajorStep = phase === 'chapter3' && currentQ?.type === 'major';
-  const isGuStep = false;
-  const isSidoStep = phase === 'chapter2' && step === sidoCh2Idx;
+  const isSidoStep = phase === 'chapter2' && step === SIDO_STEP_IDX;
   const isReligionSelfStep = phase === 'chapter2' && step === RELIGION_STEP_IDX && religionSubStep === 'self';
   const isReligionOtherStep = phase === 'chapter2' && step === RELIGION_STEP_IDX && religionSubStep === 'other';
 
@@ -1093,7 +1032,7 @@ export default function StartPage() {
     displaySubtitle = '편하게 적어줘';
   } else if (isJobStep) {
     // 직업군 답변에 따라 예시 placeholder 동적 변경
-    const occupation = ch3Answers[occupationCh3Idx];
+    const occupation = ch3Answers[OCCUPATION_STEP_IDX];
     if (occupation === 'office') displaySubtitle = '예: 마케팅 PM, UX 디자이너, 백엔드 개발자...';
     else if (occupation === 'professional') displaySubtitle = '예: 변호사, 의사, 회계사, 약사...';
     else if (occupation === 'public') displaySubtitle = '예: 7급 공무원, 교사, 경찰관...';
@@ -1102,8 +1041,6 @@ export default function StartPage() {
   } else if (isSidoStep && otherRegionInput) {
     displaySubtitle = '자세히 알려줘!';
   }
-
-  const guOptions: { label: string; value: string }[] = [];
 
   // 성별 분기 옵션: optionsByGender 있으면 ch1Answers[0]으로 분기
   const userGender = ch1Answers[0] === 'male' || ch1Answers[0] === 'female' ? ch1Answers[0] : null;
@@ -1231,8 +1168,8 @@ export default function StartPage() {
                       const n = parseInt(v, 10);
                       if (n >= 14 && n <= 99) {
                         persistAnswer('넌 나이가 어떻게 돼?', String(n));
-                        setAnswerAt(2, step, String(n));
-                        setTimeout(() => advanceChapter2FromStep(step), 100);
+                        setAnswerAt(3, step, String(n));
+                        setTimeout(() => advanceChapter3FromStep(step), 100);
                       }
                     }
                   }}
@@ -1275,8 +1212,8 @@ export default function StartPage() {
                       const n = parseInt(v, 10);
                       if (n >= 130 && n <= 220) {
                         persistAnswer('키가 어떻게 돼?', String(n));
-                        setAnswerAt(2, step, String(n));
-                        setTimeout(() => advanceChapter2FromStep(step), 100);
+                        setAnswerAt(3, step, String(n));
+                        setTimeout(() => advanceChapter3FromStep(step), 100);
                       }
                     }
                   }}
@@ -1337,61 +1274,6 @@ export default function StartPage() {
                   다음
                 </button>
               </div>
-            ) : isMajorStep ? (
-              <div className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  value={majorDetail}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 50) setMajorDetail(e.target.value);
-                  }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleMajorSubmit(); }}
-                  placeholder="예: 컴퓨터공학, 경영학..."
-                  autoFocus
-                  className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg"
-                  style={{
-                    color: C.ink,
-                    background: '#FFFFFF',
-                    border: `2px solid ${C.ink}`,
-                  }}
-                />
-                <button
-                  onClick={handleMajorSubmit}
-                  disabled={!majorDetail.trim()}
-                  className="w-full px-5 py-4 rounded-full font-bold text-base hover:-translate-y-0.5 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-                  style={{
-                    color: C.ink,
-                    background: C.gold,
-                    border: `2px solid ${C.ink}`,
-                    boxShadow: `4px 4px 0 ${C.ink}`,
-                  }}
-                >
-                  다음
-                </button>
-              </div>
-            ) : isGuStep ? (
-              <div className="flex flex-col gap-3">
-                <select
-                  value={ch3Answers[step] || ''}
-                  onChange={(e) => { if (e.target.value) handleSelect(e.target.value); }}
-                  className="w-full px-5 py-4 rounded-2xl text-base font-semibold outline-none appearance-none cursor-pointer"
-                  style={{
-                    color: C.ink,
-                    background: '#FFFFFF',
-                    border: `2px solid ${C.ink}`,
-                    boxShadow: `3px 3px 0 ${C.ink}`,
-                    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%232C1D07' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 1rem center',
-                    paddingRight: '3rem',
-                  }}
-                >
-                  <option value="" disabled>구·시를 선택해줘</option>
-                  {guOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
             ) : isSidoStep ? (
               otherRegionInput ? (
                 <div className="flex flex-col gap-3">
@@ -1428,7 +1310,7 @@ export default function StartPage() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {currentQ.options?.map((opt) => {
-                    const selected = ch3Answers[step] === opt.value;
+                    const selected = ch2Answers[step] === opt.value;
                     return (
                       <button
                         key={opt.value}

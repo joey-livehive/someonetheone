@@ -121,7 +121,7 @@ const CHAPTER1_QUESTIONS: Question[] = [
   },
 ];
 
-// ── Chapter 2 — 관계·라이프 선호 + 거주지 (8문항, 종교 분기 +1 / 시·도 자유입력) ──
+// ── Chapter 2 — 관계·라이프 선호 + 거주지 (9문항, 종교 분기 +1 / 시·도 자유입력) ──
 const CHAPTER2_QUESTIONS: Question[] = [
   {
     title: '얼마나 자주\n만나고 싶어?',

@@ -436,7 +436,7 @@ export default function CastingPromptTestPage() {
             </TrackSection>
 
             <TrackSection section="chapter3" reportId="PROMPT-TEST">
-              <Chapter3V2 userName="의뢰인" match={match} number="CHAPTER 2" />
+              <Chapter3V2 match={match} number="CHAPTER 2" />
             </TrackSection>
 
             <Chapter4Simulation match={match} number="CHAPTER 3" />

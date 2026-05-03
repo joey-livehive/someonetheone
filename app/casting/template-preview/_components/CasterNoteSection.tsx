@@ -1,4 +1,7 @@
+'use client';
+
 import { SafeText } from '@/components/report/SafeText';
+import { useTone } from '@/components/report/toneContext';
 
 interface CasterNoteSectionProps {
   headline: string;
@@ -6,6 +9,7 @@ interface CasterNoteSectionProps {
 }
 
 export function CasterNoteSection({ headline, charmBullets }: CasterNoteSectionProps) {
+  const tone = useTone();
   return (
     <div className="px-7 mt-8">
       <div className="relative bg-brand-bg-deep border-[1.5px] border-brand-line rounded-[18px] pt-[34px] px-[22px] pb-[22px]">
@@ -18,7 +22,7 @@ export function CasterNoteSection({ headline, charmBullets }: CasterNoteSectionP
         </div>
 
         <p className="font-display font-bold text-[17px] leading-[1.55] text-brand-ink mb-[18px]">
-          &ldquo;<SafeText>{headline}</SafeText>&rdquo; 어때?
+          &ldquo;<SafeText>{headline}</SafeText>&rdquo; {tone === 'formal' ? '어떠세요?' : '어때?'}
         </p>
 
         <ul className="space-y-[10px]">

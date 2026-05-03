@@ -257,7 +257,7 @@ export default function CastingTemplatePreviewPage() {
 
         {/* 4.5 매칭도 레이더 V2 */}
         <TrackSection section="chapter3" reportId={reportUid}>
-          <Chapter3V2 userName={MOCK_USER_NAME} match={MOCK_MATCH} number="CHAPTER 2" />
+          <Chapter3V2 match={MOCK_MATCH} number="CHAPTER 2" />
         </TrackSection>
 
         {/* 4.6 만약 두 사람이 만난다면 — 시뮬레이션 (mock scene image) */}

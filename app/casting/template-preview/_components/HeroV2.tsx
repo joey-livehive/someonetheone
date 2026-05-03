@@ -16,7 +16,7 @@ export function HeroV2({ userName }: { userName: string }) {
         className="font-display font-extrabold text-[34px] max-[380px]:text-[28px] leading-[1.25]
                    tracking-[-0.035em] text-brand-ink"
       >
-        {userName}님을 위해
+        {userName}{tone === 'formal' ? '님을' : '이를'} 위해
         <br />
         <span className="text-brand-orange">캐스팅</span>{' '}
         {tone === 'formal' ? '해왔어요' : '해왔어'}

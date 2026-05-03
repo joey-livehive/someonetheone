@@ -70,6 +70,25 @@ const LABELS: Record<string, string> = {
   freelance: '프리랜서',
   professional: '전문직',
   other_job: '기타',
+  // 지역 (시·도 코드 → 한국어)
+  seoul: '서울',
+  incheon: '인천',
+  gyeonggi: '경기',
+  busan: '부산',
+  daegu: '대구',
+  daejeon: '대전',
+  gwangju: '광주',
+  ulsan: '울산',
+  sejong: '세종',
+  gangwon: '강원',
+  chungbuk: '충북',
+  chungnam: '충남',
+  jeonbuk: '전북',
+  jeonnam: '전남',
+  gyeongbuk: '경북',
+  gyeongnam: '경남',
+  jeju: '제주',
+  other_region: '그 외 지역',
 };
 
 function label(code: string | undefined): string {
@@ -131,55 +150,66 @@ export function answersToCandidate(a: CastingAnswers, bundle?: CandidateBundle):
   };
 }
 
-// 6축 매칭 룰베이스 (간이 버전): 일치/통과 4개 골라줌
+// 6축 매칭 룰베이스 (간이 버전, prompt-test 전용).
+// 프로덕션은 radar.topAxes 를 그대로 PAIR BUNDLE 입력으로 넘기게 됨.
+// type 의미는 docs/casting-template/prompts/pair-bundle.md 와 동일:
+//   - match:    양쪽 답이 같거나 결이 일치
+//   - pass:     의뢰인 dealbreaker/선호를 후보가 통과 (예: 비흡연 선호 + 후보 비흡연)
+//   - mismatch: top 4 진입했으나 답 다름
+export type MatchedAxis = {
+  axis: string;
+  viewerAnswer: string;
+  candidateAnswer: string;
+  type: 'match' | 'pass' | 'mismatch';
+};
+
 export function deriveMatchedAxes(
   viewer: CastingAnswers,
   candidate: CastingAnswers
-): { axis: string; viewerAnswer: string; candidateAnswer: string; type: 'match' | 'pass' }[] {
-  const axes: { axis: string; viewerAnswer: string; candidateAnswer: string; type: 'match' | 'pass' }[] = [];
+): MatchedAxis[] {
+  const axes: MatchedAxis[] = [];
 
-  // 연락 빈도 일치
-  if (viewer['연락은 얼마나 자주가 좋아?'] && candidate['연락은 얼마나 자주가 좋아?']) {
-    axes.push({
-      axis: '연락 빈도',
-      viewerAnswer: label(viewer['연락은 얼마나 자주가 좋아?']),
-      candidateAnswer: label(candidate['연락은 얼마나 자주가 좋아?']),
-      type: viewer['연락은 얼마나 자주가 좋아?'] === candidate['연락은 얼마나 자주가 좋아?'] ? 'match' : 'pass',
-    });
-  }
+  const sameOrMismatch = (
+    axis: string,
+    key: keyof CastingAnswers
+  ): MatchedAxis | null => {
+    const v = viewer[key as string];
+    const c = candidate[key as string];
+    if (!v || !c) return null;
+    return {
+      axis,
+      viewerAnswer: label(v),
+      candidateAnswer: label(c),
+      type: v === c ? 'match' : 'mismatch',
+    };
+  };
 
-  // 진지함 정렬
-  if (viewer['넌 지금 얼마나 진지해?'] && candidate['넌 지금 얼마나 진지해?']) {
-    axes.push({
-      axis: '관계 진지함',
-      viewerAnswer: label(viewer['넌 지금 얼마나 진지해?']),
-      candidateAnswer: label(candidate['넌 지금 얼마나 진지해?']),
-      type: viewer['넌 지금 얼마나 진지해?'] === candidate['넌 지금 얼마나 진지해?'] ? 'match' : 'pass',
-    });
-  }
+  const contact = sameOrMismatch('연락 빈도', '연락은 얼마나 자주가 좋아?');
+  if (contact) axes.push(contact);
 
-  // 흡연 호환 (viewer의 선호 vs candidate의 본인)
+  const seriousness = sameOrMismatch('관계 진지함', '넌 지금 얼마나 진지해?');
+  if (seriousness) axes.push(seriousness);
+
+  // 흡연 호환 — dealbreaker 통과 케이스만 'pass' 로 노출. 실패면 axis 자체 생략 (사전 필터에서 차단되므로).
   const vSmokePref = viewer['연인이 담배 피운다면?'];
   const cSmokeSelf = candidate['넌 담배 피워?'];
   if (vSmokePref && cSmokeSelf) {
-    const pass = (vSmokePref === 'pref_smoke_no' || vSmokePref === 'pref_smoke_meh') && cSmokeSelf === 'no_smoke';
-    axes.push({
-      axis: '흡연 호환',
-      viewerAnswer: label(vSmokePref),
-      candidateAnswer: label(cSmokeSelf),
-      type: pass ? 'pass' : 'match',
-    });
+    const compat =
+      (vSmokePref === 'pref_smoke_no' && cSmokeSelf === 'no_smoke') ||
+      (vSmokePref === 'pref_smoke_meh' && cSmokeSelf !== 'heavy_smoke') ||
+      vSmokePref === 'pref_smoke_ok';
+    if (compat) {
+      axes.push({
+        axis: '흡연 호환',
+        viewerAnswer: label(vSmokePref),
+        candidateAnswer: label(cSmokeSelf),
+        type: 'pass',
+      });
+    }
   }
 
-  // 거주 지역
-  if (viewer['넌 어디쯤 사는데?'] && candidate['넌 어디쯤 사는데?']) {
-    axes.push({
-      axis: '거주 지역',
-      viewerAnswer: label(viewer['넌 어디쯤 사는데?']),
-      candidateAnswer: label(candidate['넌 어디쯤 사는데?']),
-      type: viewer['넌 어디쯤 사는데?'] === candidate['넌 어디쯤 사는데?'] ? 'match' : 'pass',
-    });
-  }
+  const region = sameOrMismatch('거주 지역', '넌 어디쯤 사는데?');
+  if (region) axes.push(region);
 
   return axes.slice(0, 4);
 }

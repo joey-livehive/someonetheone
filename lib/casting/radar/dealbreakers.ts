@@ -113,7 +113,7 @@ export function checkDealbreakers(viewer: CastingAnswers, candidate: CastingAnsw
         id: 'height',
         label: '키',
         passed,
-        reason: passed ? `의뢰인 180+ 선호 / 후보 ${candidateHeightCm}cm` : `의뢰인 180+ 선호 / 후보 ${candidateHeightCm}cm`,
+        reason: passed ? `의뢰인 180+ 선호 / 후보 ${candidateHeightCm}cm` : `의뢰인 180+ 선호 / 후보 ${candidateHeightCm}cm 미달`,
       });
     } else if (heightPref === 'pref_male_height_172_plus') {
       const passed = candidateHeightCm >= 172;

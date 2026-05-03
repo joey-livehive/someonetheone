@@ -27,6 +27,11 @@ export interface PairBundleInput {
     axis: string;
     viewerAnswer: string;
     candidateAnswer: string;
-    type: 'match' | 'pass';
+    /**
+     * - match: 양쪽 답이 같거나 결이 일치
+     * - pass: 의뢰인 dealbreaker/선호를 후보가 통과 (예: 비흡연 선호 + 후보 비흡연)
+     * - mismatch: top 4 진입했으나 답 다름 — 차이 자체를 보완 결로 푸는 카피
+     */
+    type: 'match' | 'pass' | 'mismatch';
   }[];
 }

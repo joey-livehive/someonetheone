@@ -15,7 +15,7 @@ const ABSTRACT_GYEOL = /[가-힣](?:한|는|운|진|순|긴|단|히)\s?결(?:이
 
 // "ENFP 특유의" / "ISFJ 특유의" — MBTI 클리셰 표현.
 const MBTI_CLICHE =
-  /\b(?:ENFP|ENFJ|ENTP|ENTJ|ESFP|ESFJ|ESTP|ESTJ|INFP|INFJ|INTP|INTJ|ISFP|ISFJ|ISTP|ISTJ)\s*(?:특유의?|답게의|타입의?)/i;
+  /\b(?:ENFP|ENFJ|ENTP|ENTJ|ESFP|ESFJ|ESTP|ESTJ|INFP|INFJ|INTP|INTJ|ISFP|ISFJ|ISTP|ISTJ)\s*(?:특유의?|타입의?)/i;
 
 function noForbiddenWords(s: string): boolean {
   if (FORBIDDEN_WORDS.some((w) => s.includes(w))) return false;

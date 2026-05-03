@@ -7,12 +7,11 @@ import { SafeText } from '@/components/report/SafeText';
 import { useTone } from '@/components/report/toneContext';
 
 interface Chapter3V2Props {
-  userName: string;
   match: MatchAnalysis;
   number?: string;
 }
 
-export function Chapter3V2({ userName, match, number = 'CHAPTER 3' }: Chapter3V2Props) {
+export function Chapter3V2({ match, number = 'CHAPTER 3' }: Chapter3V2Props) {
   const tone = useTone();
 
   const title = tone === 'formal' ? '왜 잘 맞는지 알려드릴게요' : '너랑 왜 잘 맞냐면';

@@ -121,7 +121,7 @@ const CHAPTER1_QUESTIONS: Question[] = [
   },
 ];
 
-// ── Chapter 2 — 관계·라이프 선호 + 거주지 (8문항, 종교 분기 +1 / 시·도 자유입력) ──
+// ── Chapter 2 — 관계·라이프 선호 + 거주지 (9문항, 종교 분기 +1 / 시·도 자유입력) ──
 const CHAPTER2_QUESTIONS: Question[] = [
   {
     title: '얼마나 자주\n만나고 싶어?',
@@ -141,6 +141,16 @@ const CHAPTER2_QUESTIONS: Question[] = [
       { label: '수시로 했으면', value: 'contact_anytime' },
       { label: '하루에 통화 1~2번', value: 'contact_1_2_day' },
       { label: '연락 잘 안 해도 편한 사이가 좋아', value: 'contact_relaxed' },
+    ],
+  },
+  {
+    title: '어떤 데이트가\n좋아?',
+    subtitle: '끌리는 거 하나만',
+    options: [
+      { label: '카페·영화·문화', value: 'culture' },
+      { label: '집에서 편하게', value: 'home' },
+      { label: '액티비티·야외', value: 'outdoor' },
+      { label: '술자리·핫플', value: 'nightlife' },
     ],
   },
   {
@@ -872,10 +882,12 @@ export default function StartPage() {
               letterSpacing: '-0.5px',
             }}
           >
-            마지막으로,
+            너에 대해
+            <br />
+            더 들려줄래?
           </h1>
           <p className="text-center text-lg mb-8 opacity-70" style={{ color: C.ink }}>
-            나한테 하고 싶은 말 있어?
+            너에 대해 소개해줄수록 매칭이 잘돼!
           </p>
 
           <div className="w-full max-w-md flex flex-col gap-4">
@@ -883,14 +895,14 @@ export default function StartPage() {
               <textarea
                 value={message}
                 onChange={(e) => {
-                  if (e.target.value.length <= 2000) setMessage(e.target.value);
+                  if (e.target.value.length <= 1000) setMessage(e.target.value);
                 }}
                 placeholder={
                   ch1Answers[0] === 'female'
-                    ? '예) 난 아랍상이 좋아\n예) 난 ENTP랑 잘 맞더라\n예) 내 이상형을 더 말해주자면...'
+                    ? '예) 주말엔 혼자 시간을 보내는 걸 즐겨! 집주변 산책을 특히 좋아해\n예) 첨엔 좀 낯가리는데 친해지면 진짜 잘 웃어\n예) 새로운 거 시도하는 걸 좋아해. 최근엔 기타 독학 중!'
                     : ch1Answers[0] === 'male'
-                    ? '예) 난 귀엽게 생긴 사람이 좋아\n예) 내가 스케줄 근무라 상대도 비슷했으면 해\n예) 내 이상형을 더 말해주자면...'
-                    : '예) 내 이상형을 더 말해주자면...'
+                    ? '예) 운동 좋아해 요즘은 수영 열심히 다니는 중\n예) 말수 적은 편이지만 그래서 진국이라는 소리도 자주 들어\n예) 일 끝나면 넷플릭스 정주행 자주 해. 최근엔 드라마 굿플레이스 보는 중'
+                    : '예) 평소 어떤 사람인지 편하게 들려줘!'
                 }
                 rows={6}
                 className="w-full px-5 py-4 rounded-2xl text-base font-medium outline-none transition-shadow focus:shadow-lg resize-none"
@@ -904,7 +916,7 @@ export default function StartPage() {
                 className="absolute bottom-3 right-4 text-xs"
                 style={{ color: C.ink, opacity: 0.4 }}
               >
-                {message.length} / 2,000
+                {message.length} / 1,000
               </span>
             </div>
             <button

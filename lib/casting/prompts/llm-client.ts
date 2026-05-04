@@ -44,7 +44,7 @@ export async function callLLM(input: CallInput): Promise<CallOutput> {
 // ── Gemini ───────────────────────────────────────────────────
 
 async function callGemini(input: CallInput): Promise<CallOutput> {
-  const modelName = input.model ?? 'gemini-2.5-flash';
+  const modelName = input.model ?? 'gemini-3-flash-preview';
   const client = new GoogleGenerativeAI(GEMINI_KEY);
   const model: GenerativeModel = client.getGenerativeModel({
     model: modelName,

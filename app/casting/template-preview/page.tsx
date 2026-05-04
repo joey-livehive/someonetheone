@@ -82,8 +82,8 @@ const MOCK_CANDIDATE: Candidate = {
   background:
     '시끌시끌한 자리보단 조용한 카페나 산책으로 한 주를 비우는 차분한 타입이에요. 주말이면 <b>집에서 영화 한 편이나 동네 산책</b>으로 자기만의 리듬을 챙기는 사람이라, 의뢰인님처럼 집에서 충전하시는 분과 자연스럽게 호흡이 맞을 거예요.',
   secretAppeal: '',
-  teaserPhoto: '/images/teaser/male-illustration.webp',
-  chapter2Photo: '/images/teaser/male-illustration.webp',
+  teaserPhoto: '/images/casting/casting_man.webp',
+  chapter2Photo: '/images/casting/casting_man.webp',
   mbti: 'ISFJ',
   height: '178cm',
   recommendation: CASTER_HEADLINE,

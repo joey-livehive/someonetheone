@@ -10,7 +10,7 @@ interface HuntBoxV2Props {
 // 우표(stamp) 스타일로 강조 — mustard pill + 살짝 회전 + drop shadow
 export function HuntBoxV2({ stats, footer }: HuntBoxV2Props) {
   const items: { n: number; unit: string; label: string }[] = [
-    { n: stats.offlineGyms, unit: '곳', label: '오프라인 헬스장' },
+    { n: stats.offlineGyms, unit: '곳', label: '헬스장' },
     { n: stats.instagramProfiles, unit: '명', label: 'Instagram 프로필' },
     { n: stats.linkedinProfiles, unit: '명', label: 'LinkedIn 프로필' },
     { n: stats.communities, unit: '곳', label: '동호회 · 모임' },

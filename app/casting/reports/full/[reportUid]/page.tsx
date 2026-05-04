@@ -17,6 +17,7 @@ import { ReportShell } from '@/components/report/ReportShell';
 import { TrackSection } from '@/components/report/TrackSection';
 import { MeetOrPassCta } from '@/components/report/MeetOrPassCta';
 import { getFixture } from '@/lib/casting/fixtures';
+import { oppositeCandidateImageForViewerGender } from '@/lib/casting/reportImages';
 
 const EMPTY_PERSONALIZED: PersonalizedContent = {
   chapter1Traits: { trait01Intro: '', trait02Intro: '', trait03Intro: '', trait04Intro: '' },
@@ -89,15 +90,13 @@ export default async function CastingMatchReportPage({
     personalized = getMockPersonalized(mockKey);
   }
 
-  // 모든 경로의 teaserCandidate.teaserPhoto/chapter2Photo 를 일러스트로 강제 교체.
-  // 의뢰인이 여성이면 남자 일러스트. 남성 의뢰인용 일러스트는 추후 추가 (현재는 그대로 둠).
-  const viewerGender = userAnswers.selfInfo?.gender;
-  const viewerIsFemale = viewerGender === '여자' || viewerGender === '여성' || viewerGender === 'female';
-  if (viewerIsFemale) {
+  // Full report has no partner gender field, so use the opposite of the viewer gender.
+  const candidateImage = oppositeCandidateImageForViewerGender(userAnswers.selfInfo?.gender, reportUid);
+  if (candidateImage) {
     data.teaserCandidate = {
       ...data.teaserCandidate,
-      teaserPhoto: '/images/teaser/male-illustration.webp',
-      chapter2Photo: '/images/teaser/male-illustration.webp',
+      teaserPhoto: candidateImage,
+      chapter2Photo: candidateImage,
     };
   }
 

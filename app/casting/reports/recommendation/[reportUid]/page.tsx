@@ -13,22 +13,11 @@ import { TeaserCardV2 } from '../../../template-preview/_components/TeaserCardV2
 import { Chapter2V2 } from '../../../template-preview/_components/Chapter2V2';
 import { ReadingCardV2 } from '../../../template-preview/_components/ReadingCardV2';
 import { Chapter3V2 } from '../../../template-preview/_components/Chapter3V2';
+import { candidateImageForGender } from '@/lib/casting/reportImages';
 
 export const dynamic = 'force-dynamic';
 
 const DEFAULT_CAFE_SCENE_IMAGE = '/images/simulation/c324be08-meeting.jpg';
-const MALE_CANDIDATE_IMAGE = '/images/teaser/f01-card1.webp';
-const FEMALE_CANDIDATE_IMAGE = '/images/teaser/m01-card1.webp';
-
-function candidateImageForGender(gender: unknown): string | null {
-  if (gender === 'female' || gender === '여자' || gender === '여성' || gender === 'F') {
-    return FEMALE_CANDIDATE_IMAGE;
-  }
-  if (gender === 'male' || gender === '남자' || gender === '남성' || gender === 'M') {
-    return MALE_CANDIDATE_IMAGE;
-  }
-  return null;
-}
 
 async function fetchCastingReport(reportUid: string, token?: string) {
   try {
@@ -61,7 +50,7 @@ export default async function CastingRecommendationReportPage({
 
   const candidateBundle = reportJson.candidate_bundle;
   const viewerBundle = reportJson.viewer_bundle;
-  const candidateGenderImage = candidateImageForGender(reportJson.partner?.self?.gender);
+  const candidateGenderImage = candidateImageForGender(reportJson.partner?.self?.gender, reportUid);
   const candidate = {
     ...reportJson.candidate,
     ...(candidateGenderImage

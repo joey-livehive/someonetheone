@@ -1,6 +1,7 @@
 // 캐스팅 신규 form 답변 (CastingAnswers) → 기존 v2 컴포넌트 prop 변환 헬퍼.
 
 import type { CandidateBundle, CastingAnswers } from '@/lib/casting/prompts/types';
+import { candidateImageForGender } from '@/lib/casting/reportImages';
 import type { Candidate } from '@/lib/report/types';
 import type { UserAnswers } from '@/lib/personalization/types';
 
@@ -34,6 +35,7 @@ const LABELS: Record<string, string> = {
   contact_2_3h: '2~3시간에 한 번',
   contact_relaxed: '여유롭게',
   any_frequency: '연락 빈도는 상관없어',
+  any_religion: '종교 무관',
   // 진지함
   serious_dating: '진지한 연애',
   casual_chat: '가벼운 대화부터',
@@ -52,6 +54,7 @@ const LABELS: Record<string, string> = {
   rarely_drink: '거의 안 마심',
   sometimes_drink: '가끔 마심',
   often_drink: '자주 마심',
+  never: '전혀 안 마심',
   // 본인 체형
   self_slim: '마른 편',
   self_average: '보통',
@@ -97,10 +100,6 @@ function label(code: string | undefined): string {
   return LABELS[code] ?? code;
 }
 
-function candidateImageForGender(gender: string | undefined): string {
-  return gender === 'female' ? '/images/teaser/m01-card1.webp' : '/images/teaser/f01-card1.webp';
-}
-
 // CastingAnswers → 기존 v2 ApplicationSummary 가 받는 UserAnswers 구조로 변환
 export function answersToUserAnswers(a: CastingAnswers): UserAnswers {
   return {
@@ -132,7 +131,7 @@ export function answersToUserAnswers(a: CastingAnswers): UserAnswers {
 // CastingAnswers + (선택) candidateBundle → TeaserCardV2 / Chapter2V2 가 쓰는 Candidate 객체
 export function answersToCandidate(a: CastingAnswers, bundle?: CandidateBundle): Candidate {
   const age = a['넌 나이가 어떻게 돼?'];
-  const candidateImage = candidateImageForGender(a['반가워! 성별이 어떻게 돼?']);
+  const candidateImage = candidateImageForGender(a['반가워! 성별이 어떻게 돼?'], age);
   return {
     nickname: '○○○',
     faceType: bundle?.teaserFaceType ?? '(faceType placeholder)',

@@ -63,6 +63,30 @@ const SELF_DESCRIPTION_LABELS: Record<string, string> = {
   smart: '똑똑해',
 };
 
+const ANSWER_LABELS: Record<string, string> = {
+  any_frequency: '연락 빈도 무관',
+  contact_anytime: '수시로 연락',
+  contact_2_3h: '2~3시간에 한 번',
+  contact_1_2_day: '하루 1~2번',
+  contact_relaxed: '여유롭게 연락',
+  any_religion: '종교 무관',
+  pref_any_religion: '종교 무관',
+  pref_no_religion: '무교 선호',
+  pref_same_religion: '같은 종교 선호',
+  never: '전혀 안 마셔',
+  rarely_drink: '거의 안 마셔',
+  sometimes_drink: '가끔 마셔',
+  often_drink: '자주 마셔',
+  no_smoke: '비흡연',
+  sometimes_smoke: '가끔 흡연',
+  heavy_smoke: '흡연',
+};
+
+function formatAnswer(raw: string): string {
+  if (raw.startsWith('other_region:')) return raw.replace('other_region:', '');
+  return ANSWER_LABELS[raw] ?? raw;
+}
+
 function formatPersonalityAnswer(key: PersonalityKey, raw: string): string {
   if (key === 'selfDescription') {
     return raw
@@ -71,19 +95,19 @@ function formatPersonalityAnswer(key: PersonalityKey, raw: string): string {
       .filter(Boolean)
       .join(', ');
   }
-  return raw;
+  return formatAnswer(raw);
 }
 
 export function ApplicationSummary({ userAnswers }: { userAnswers: UserAnswers }) {
   const idealRows = IDEAL_TYPE_QUESTIONS.flatMap(({ q, k }) => {
     const a = userAnswers.idealType[k];
-    return a ? [{ q, a, key: k as string }] : [];
+    return a ? [{ q, a: formatAnswer(a), key: k as string }] : [];
   });
 
   const selfRows = SELF_INFO_QUESTIONS.flatMap(({ q, ks }) => {
     for (const k of ks) {
       const a = userAnswers.selfInfo?.[k];
-      if (a) return [{ q, a, key: ks[0] as string }];
+      if (a) return [{ q, a: formatAnswer(a), key: ks[0] as string }];
     }
     return [];
   });

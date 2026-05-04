@@ -16,6 +16,8 @@ import { Chapter3V2 } from '../../../template-preview/_components/Chapter3V2';
 
 export const dynamic = 'force-dynamic';
 
+const DEFAULT_CAFE_SCENE_IMAGE = '/images/simulation/c324be08-meeting.jpg';
+
 async function fetchCastingReport(reportUid: string, token?: string) {
   try {
     const url = token
@@ -49,6 +51,7 @@ export default async function CastingRecommendationReportPage({
   const viewerBundle = reportJson.viewer_bundle;
   const candidate = reportJson.candidate;
   const match = reportJson.match;
+  const sceneImage = reportJson.scene_image ?? DEFAULT_CAFE_SCENE_IMAGE;
   const userAnswers = reportJson.user_answers ?? { idealType: {} };
   const userName = reportJson.user_name ?? '의뢰인';
   const huntStats = reportJson.hunt_stats ?? {
@@ -108,7 +111,7 @@ export default async function CastingRecommendationReportPage({
           <Chapter3V2 match={match} number="CHAPTER 2" />
         </TrackSection>
 
-        <Chapter4Simulation match={match} number="CHAPTER 3" />
+        <Chapter4Simulation match={match} number="CHAPTER 3" sceneImage={sceneImage} />
 
         <div className="px-7 mt-14 mb-3">
           <div className="border-t border-dashed border-brand-ink/30" />

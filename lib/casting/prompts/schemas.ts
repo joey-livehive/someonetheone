@@ -62,6 +62,7 @@ export const PersonContentSchema = z.object({
     .string()
     .min(120, { message: '4~5문장 필요' })
     .max(600)
+    .regex(BOLD_TAG, 'summary 는 <b>...</b> 강조 한 곳 포함')
     .refine(noForbiddenWords, { message: '금지어 사용' }),
   personality: z
     .string()
@@ -101,6 +102,7 @@ export const PairContentSchema = z.object({
     .string()
     .min(60, { message: '2~3문장 필요' })
     .max(300)
+    .regex(BOLD_TAG, 'matchOpening 은 <b>...</b> 강조 한 곳 포함')
     .refine(noForbiddenWords, { message: '금지어 사용' }),
   axisNotes: z.array(AxisNoteSchema).length(4),
   simulation: z

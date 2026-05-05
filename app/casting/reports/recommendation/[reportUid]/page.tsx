@@ -44,12 +44,13 @@ export default async function CastingRecommendationReportPage({
   const dbReport = await fetchCastingReport(reportUid, t || tokenParam);
   const reportJson = dbReport?.report_json;
 
-  if (!reportJson?.candidate_bundle || !reportJson?.viewer_bundle || !reportJson?.pair_bundle) {
+  if (!reportJson?.ownerPersonContent || !reportJson?.partnerPersonContent || !reportJson?.pairContent) {
     notFound();
   }
 
-  const candidateBundle = reportJson.candidate_bundle;
-  const viewerBundle = reportJson.viewer_bundle;
+  const ownerPersonContent = reportJson.ownerPersonContent;
+  const partnerPersonContent = reportJson.partnerPersonContent;
+  const pairContent = reportJson.pairContent;
   const candidateGenderImage = candidateImageForGender(reportJson.partner?.self?.gender, reportUid);
   const candidate = {
     ...reportJson.candidate,
@@ -78,8 +79,8 @@ export default async function CastingRecommendationReportPage({
         <HeroV2 userName={userName} />
 
         <CasterNoteSection
-          headline={candidateBundle.casterHeadline}
-          charmBullets={candidateBundle.casterCharmBullets}
+          headline={partnerPersonContent.casterHeadline}
+          charmBullets={partnerPersonContent.casterCharmBullets}
         />
 
         <HuntBoxV2
@@ -99,9 +100,9 @@ export default async function CastingRecommendationReportPage({
         <ReadingCardV2
           userName={userName}
           narratives={{
-            viewerInsight: viewerBundle.readingViewerInsight,
-            matchOpening: candidateBundle.readingMatchOpening,
-            candidateMatch: candidateBundle.readingCandidateMatch,
+            viewerInsight: ownerPersonContent.summary,
+            matchOpening: pairContent.matchOpening,
+            candidateMatch: partnerPersonContent.summary,
           }}
         />
 
@@ -110,9 +111,9 @@ export default async function CastingRecommendationReportPage({
             userName={userName}
             candidate={candidate}
             narratives={{
-              personality: candidateBundle.personality,
-              datingStyle: candidateBundle.datingStyle,
-              weekendStyle: candidateBundle.weekendStyle,
+              personality: partnerPersonContent.personality,
+              datingStyle: partnerPersonContent.datingStyle,
+              weekendStyle: partnerPersonContent.weekendStyle,
             }}
           />
         </TrackSection>

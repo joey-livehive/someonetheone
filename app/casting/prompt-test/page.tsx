@@ -1,6 +1,6 @@
 // 캐스팅 매칭 카드 LLM 프롬프트 실험 페이지.
-// PERSON 모드: 1명 페르소나로 candidateBundle + viewerBundle 한번에 생성 → 양쪽 슬롯 같은 출력으로 채워 미리보기.
-// PAIR  모드: viewer + candidate 페르소나 각각 → person 호출 2번(병렬) + pair 호출 1번 → 매칭 카드 풀 렌더.
+// PERSON 모드: 1명 페르소나로 PersonContent 생성.
+// PAIR  모드: owner + partner 페르소나 각각 → person 호출 2번(병렬) + pair 호출 1번 → 매칭 카드 풀 렌더.
 //
 // ⚠️ ANTHROPIC_API_KEY 미설정 시 mock fallback. 실제 출력은 [MOCK] prefix.
 
@@ -20,9 +20,8 @@ import {
   type DealbreakerCheck,
 } from '@/lib/casting/radar';
 import type {
-  PairBundleOutput,
-  CandidateBundle,
-  ViewerBundle,
+  PairContentOutput,
+  PersonContent,
   CastingAnswers,
 } from '@/lib/casting/prompts/types';
 import type { Candidate, MatchAnalysis } from '@/lib/report/types';
@@ -46,9 +45,9 @@ type Mode = 'person' | 'pair';
 interface GenState {
   loading: boolean;
   error: string | null;
-  viewerBundle: ViewerBundle | null;
-  candidateBundle: CandidateBundle | null;
-  pairBundle: PairBundleOutput | null;
+  ownerPersonContent: PersonContent | null;
+  partnerPersonContent: PersonContent | null;
+  pairContent: PairContentOutput | null;
   meta: { latencyMs: number; model: string }[];
   raw: string;
 }
@@ -91,9 +90,9 @@ export default function CastingPromptTestPage() {
   const [gen, setGen] = useState<GenState>({
     loading: false,
     error: null,
-    viewerBundle: null,
-    candidateBundle: null,
-    pairBundle: null,
+    ownerPersonContent: null,
+    partnerPersonContent: null,
+    pairContent: null,
     meta: [],
     raw: '',
   });
@@ -125,9 +124,9 @@ export default function CastingPromptTestPage() {
       data,
       latencyMs: Math.round(performance.now() - started),
       model: [
-        data?.report_json?.meta?.viewer_bundle_model,
-        data?.report_json?.meta?.candidate_bundle_model,
-        data?.report_json?.meta?.pair_bundle_model,
+        data?.report_json?.meta?.owner_person_content_model,
+        data?.report_json?.meta?.partner_person_content_model,
+        data?.report_json?.meta?.pair_content_model,
       ].filter(Boolean).join(' / ') || 'backend',
     };
   }
@@ -137,27 +136,27 @@ export default function CastingPromptTestPage() {
     try {
       const meta: GenState['meta'] = [];
       const rawParts: string[] = [];
-      let viewerBundle: ViewerBundle | null = null;
-      let candidateBundle: CandidateBundle | null = null;
-      let pairBundle: PairBundleOutput | null = null;
+      let ownerPersonContent: PersonContent | null = null;
+      let partnerPersonContent: PersonContent | null = null;
+      let pairContent: PairContentOutput | null = null;
 
       const r = await callBackendPreview({
         ownerAnswers: viewer.answers,
         partnerAnswers: candidate.answers,
       });
       const reportJson = r.data.report_json;
-      viewerBundle = reportJson.viewer_bundle;
-      candidateBundle = reportJson.candidate_bundle;
-      pairBundle = reportJson.pair_bundle;
+      ownerPersonContent = reportJson.ownerPersonContent;
+      partnerPersonContent = reportJson.partnerPersonContent;
+      pairContent = reportJson.pairContent;
       meta.push({ latencyMs: r.latencyMs, model: r.model });
       rawParts.push(`[backend/${mode}/${viewer.id}/${candidate.id}]\n${JSON.stringify(r.data, null, 2)}`);
 
       setGen({
         loading: false,
         error: null,
-        viewerBundle,
-        candidateBundle,
-        pairBundle,
+        ownerPersonContent,
+        partnerPersonContent,
+        pairContent,
         meta,
         raw: rawParts.join('\n\n---\n\n'),
       });
@@ -166,8 +165,8 @@ export default function CastingPromptTestPage() {
     }
   }
 
-  const candidateBundle = gen.candidateBundle;
-  const viewerBundle = gen.viewerBundle;
+  const ownerPersonContent = gen.ownerPersonContent;
+  const partnerPersonContent = gen.partnerPersonContent;
 
   // 결정론 radar 점수 — LLM 무관, persona 선택 즉시 계산
   const radar: PairRadar = useMemo(
@@ -180,15 +179,15 @@ export default function CastingPromptTestPage() {
   );
   const dealbreakerOk = allDealbreakersPassed(dealbreakers);
 
-  // 우측 매칭 카드 렌더용 데이터 — bundle 없으면 placeholder
+  // 우측 매칭 카드 렌더용 데이터 — content 없으면 placeholder
   const candidateForCard: Candidate = useMemo(() => {
-    return answersToCandidate(candidate.answers, candidateBundle ?? undefined);
-  }, [candidate, candidateBundle]);
+    return answersToCandidate(candidate.answers, partnerPersonContent ?? undefined);
+  }, [candidate, partnerPersonContent]);
   const userAnswers = useMemo(() => answersToUserAnswers(viewer.answers), [viewer]);
 
   const totalLatency = gen.meta.reduce((a, m) => a + m.latencyMs, 0);
 
-  // 매칭 데이터 — radar 는 결정론, notes/simulation 은 LLM PAIR BUNDLE 출력
+  // 매칭 데이터 — radar 는 결정론, notes/simulation 은 LLM pair content 출력
   const match: MatchAnalysis = useMemo(() => {
     return {
       matchRate: radar.matchRate,
@@ -199,15 +198,15 @@ export default function CastingPromptTestPage() {
         candidateActual: radar.candidateActual,
       },
       simulation:
-        gen.pairBundle?.chapter3Simulation ??
-        '아직 PAIR BUNDLE 출력이 없습니다. PAIR 모드에서 Generate 해보세요.',
+        gen.pairContent?.simulation ??
+        '아직 pair content 출력이 없습니다. PAIR 모드에서 Generate 해보세요.',
       notes:
-        gen.pairBundle?.chapter3Notes.map((n) => `<b>${n.axis}</b> — ${n.narrative}`) ??
+        gen.pairContent?.axisNotes.map((n) => `<b>${n.axis}</b> — ${n.narrative}`) ??
         radar.topAxes.map(
           (t) => `<b>${t.label.replace(/\n/g, ' ')}</b> — pairScore ${t.pairScore.toFixed(1)} (radar 룰 기반 placeholder)`
         ),
     };
-  }, [radar, gen.pairBundle]);
+  }, [radar, gen.pairContent]);
 
   return (
     <div className="min-h-screen bg-zinc-50 flex">
@@ -229,8 +228,8 @@ export default function CastingPromptTestPage() {
           </div>
           <p className="text-[11px] text-zinc-500 mt-2">
             {mode === 'person'
-              ? 'PERSON: 1명 페르소나로 후보+의뢰인 카피 동시 생성 (LLM 1회)'
-              : 'PAIR: viewer + candidate 각각 person 생성 → pair 호출 (LLM 3회)'}
+              ? 'PERSON: 1명 페르소나로 PersonContent 생성'
+              : 'PAIR: owner + partner 각각 person 생성 → pair 호출 (LLM 3회)'}
           </p>
         </Section>
 
@@ -331,13 +330,13 @@ export default function CastingPromptTestPage() {
           {showPromptEditor && (
             <div className="mt-3 space-y-4">
               <PromptField
-                label="PERSON BUNDLE system prompt"
+                label="PERSON CONTENT system prompt"
                 value={personPrompt}
                 defaultValue={DEFAULT_PERSON_SYSTEM_PROMPT}
                 onChange={setPersonPrompt}
               />
               <PromptField
-                label="PAIR BUNDLE system prompt"
+                label="PAIR CONTENT system prompt"
                 value={pairPrompt}
                 defaultValue={DEFAULT_PAIR_SYSTEM_PROMPT}
                 onChange={setPairPrompt}
@@ -373,9 +372,9 @@ export default function CastingPromptTestPage() {
             <HeroV2 userName="의뢰인" />
 
             <CasterNoteSection
-              headline={candidateBundle?.casterHeadline ?? '(여기에 캐스터의 한마디가 표시됩니다 — Generate 클릭)'}
+              headline={partnerPersonContent?.casterHeadline ?? '(여기에 캐스터의 한마디가 표시됩니다 — Generate 클릭)'}
               charmBullets={
-                candidateBundle?.casterCharmBullets ?? [
+                partnerPersonContent?.casterCharmBullets ?? [
                   '(매력 포인트 1)',
                   '(매력 포인트 2)',
                   '(매력 포인트 3)',
@@ -400,10 +399,10 @@ export default function CastingPromptTestPage() {
             <ReadingCardV2
               userName="의뢰인"
               narratives={{
-                viewerInsight: viewerBundle?.readingViewerInsight ?? '(의뢰인 인격 분석이 여기에 표시됩니다)',
+                viewerInsight: ownerPersonContent?.summary ?? '(owner 인사이트가 여기에 표시됩니다)',
                 matchOpening:
-                  candidateBundle?.readingMatchOpening ?? '(매칭 다리 카피가 여기에 표시됩니다)',
-                candidateMatch: candidateBundle?.readingCandidateMatch ?? '(후보 인물평이 여기에 표시됩니다)',
+                  gen.pairContent?.matchOpening ?? '(매칭 다리 카피가 여기에 표시됩니다)',
+                candidateMatch: partnerPersonContent?.summary ?? '(partner 인물평이 여기에 표시됩니다)',
               }}
             />
 
@@ -412,9 +411,9 @@ export default function CastingPromptTestPage() {
                 userName="의뢰인"
                 candidate={candidateForCard}
                 narratives={{
-                  personality: candidateBundle?.personality ?? '(성격 묘사 placeholder)',
-                  datingStyle: candidateBundle?.datingStyle ?? '(연애 스타일 placeholder)',
-                  weekendStyle: candidateBundle?.weekendStyle ?? '(주말 모습 placeholder)',
+                  personality: partnerPersonContent?.personality ?? '(성격 묘사 placeholder)',
+                  datingStyle: partnerPersonContent?.datingStyle ?? '(연애 스타일 placeholder)',
+                  weekendStyle: partnerPersonContent?.weekendStyle ?? '(주말 모습 placeholder)',
                 }}
               />
             </TrackSection>

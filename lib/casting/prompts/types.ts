@@ -3,30 +3,29 @@
 // 02-prompt-design.md / docs/casting-template/prompts/*.md 와 1:1 매핑.
 
 export type {
-  CandidateBundle,
-  ViewerBundle,
-  PersonBundleOutput,
-  Chapter3Note,
-  PairBundleOutput,
+  PersonContent,
+  PersonContentOutput,
+  AxisNote,
+  PairContentOutput,
 } from './schemas';
-import type { CandidateBundle, ViewerBundle } from './schemas';
+import type { PersonContent } from './schemas';
 
 export type CastingAnswers = Record<string, string>;
 
-export interface PersonBundleInput {
+export interface PersonContentInput {
   answers: CastingAnswers;
   /** 사진 URL (선택) — Vision 입력으로 사용 가능 */
   photoUrl?: string;
 }
 
-export interface PairBundleInput {
-  viewer: { answers: CastingAnswers; viewerBundle?: ViewerBundle };
-  candidate: { answers: CastingAnswers; candidateBundle?: CandidateBundle };
+export interface PairContentInput {
+  owner: { answers: CastingAnswers; personContent?: PersonContent };
+  partner: { answers: CastingAnswers; personContent?: PersonContent };
   /** 백엔드가 미리 골라준 매칭 축 4개 (룰베이스) */
   matchedAxes: {
     axis: string;
-    viewerAnswer: string;
-    candidateAnswer: string;
+    ownerAnswer: string;
+    partnerAnswer: string;
     /**
      * - match: 양쪽 답이 같거나 결이 일치
      * - pass: 의뢰인 dealbreaker/선호를 후보가 통과 (예: 비흡연 선호 + 후보 비흡연)

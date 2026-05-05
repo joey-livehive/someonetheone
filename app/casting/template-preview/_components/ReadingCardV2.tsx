@@ -4,14 +4,14 @@ import { useTone } from '@/components/report/toneContext';
 import { SafeText } from '@/components/report/SafeText';
 
 export interface ReadingCardV2Narratives {
-  /** 의뢰인 인격 분석 (4~5문장, viewerBundle.readingViewerInsight, LLM 생성) */
+  /** owner 인격 분석 (4~5문장, ownerPersonContent.summary, LLM 생성) */
   viewerInsight: string;
   /**
-   * 의뢰인 분석 → 후보 인물평 사이를 잇는 다리 카피 (2~3문장, candidateBundle.readingMatchOpening).
+   * owner 분석 → partner 인물평 사이를 잇는 다리 카피 (2~3문장, pairContent.matchOpening).
    * "그래서 이 사람이 잘 어울릴 것 같아요" 의 풍부한 버전.
    */
   matchOpening: string;
-  /** 후보 인물평 (4~5문장, candidateBundle.readingCandidateMatch, viewer 참조 금지) */
+  /** partner 인물평 (4~5문장, partnerPersonContent.summary) */
   candidateMatch: string;
 }
 

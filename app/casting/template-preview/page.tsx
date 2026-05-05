@@ -163,9 +163,9 @@ const MOCK_MATCH: MatchAnalysis = {
 };
 
 // ReadingCardV2 narratives — 5블록 구조 (lead/viewerInsight/matchOpening/candidateMatch/outro).
-// viewerInsight: viewerBundle.readingViewerInsight (LLM C, viewer-only, 4~5문장)
-// matchOpening:  candidateBundle.readingMatchOpening (LLM B, candidate-only, 2~3문장)
-// candidateMatch: candidateBundle.readingCandidateMatch (LLM B, candidate-only, 4~5문장)
+// ownerInsight: ownerPersonContent.summary (LLM person, 4~5문장)
+// matchOpening: pairContent.matchOpening (LLM pair, 2~3문장)
+// partnerInsight: partnerPersonContent.summary (LLM person, 4~5문장)
 const MOCK_READING_CARD = {
   viewerInsight:
     '본인을 소개하실 때 <b>"수시로 연락했으면"</b>과 <b>"맞춤법 잘 지키는 사람"</b>이라고 하셨는데, 이 두 표현이 의뢰인님이 어떤 분인지 잘 보여줘요. 사소한 표현 하나, 매일의 안부 한 줄 같은 디테일에서 진심을 발견하는 분이에요. 그래서 큰 이벤트로 한 번에 마음을 표현하는 사람보다는, 매일의 안부와 단정한 말투로 천천히 마음을 보여주는 사람과 호흡이 잘 맞으세요. 의뢰인님 자신도 그런 식으로 사람을 챙기실 분이라, 오래갈수록 따뜻함이 쌓이는 관계를 만드실 거예요.',

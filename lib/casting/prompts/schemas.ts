@@ -1,5 +1,5 @@
 // 캐스팅 매칭 카드 LLM 출력 검증 스키마.
-// docs/casting-template/prompts/{person-bundle,pair-bundle}.md 의 Zod 스키마 코드화.
+// docs/casting-template/prompts/{person-content,pair-content}.md 의 Zod 스키마 코드화.
 
 import { z } from 'zod';
 
@@ -26,9 +26,9 @@ function noForbiddenWords(s: string): boolean {
 
 const META_PHRASES = /자유서술/;
 
-// ── PERSON BUNDLE ──────────────────────────────────────────
+// -- PERSON CONTENT ---------------------------------------------------------
 
-export const CandidateBundleSchema = z.object({
+export const PersonContentSchema = z.object({
   casterHeadline: z
     .string()
     .min(10)
@@ -58,6 +58,11 @@ export const CandidateBundleSchema = z.object({
     .min(8)
     .max(24)
     .refine(noForbiddenWords, { message: '금지어 사용' }),
+  summary: z
+    .string()
+    .min(120, { message: '4~5문장 필요' })
+    .max(600)
+    .refine(noForbiddenWords, { message: '금지어 사용' }),
   personality: z
     .string()
     .min(120, { message: '4~5문장 필요' })
@@ -73,46 +78,14 @@ export const CandidateBundleSchema = z.object({
     .min(120, { message: '4~5문장 필요' })
     .max(600)
     .refine(noForbiddenWords, { message: '금지어 사용' }),
-  readingMatchOpening: z
-    .string()
-    .min(60, { message: '2~3문장 필요' })
-    .max(300)
-    // 다리 카피라 "의뢰인님" 호명은 OK (예외). 단 의뢰인의 구체적 답변/속성 참조는 시스템 프롬프트에서 금지.
-    .refine(noForbiddenWords, { message: '금지어 사용' }),
-  readingCandidateMatch: z
-    .string()
-    .min(120, { message: '4~5문장 필요' })
-    .max(600)
-    .refine((s) => !s.includes('의뢰인'), { message: 'candidateBundle 에 "의뢰인" 단어 금지' })
-    .refine(noForbiddenWords, { message: '금지어 사용' }),
 });
 
-export const ViewerBundleSchema = z.object({
-  readingViewerInsight: z
-    .string()
-    .min(120, { message: '4~5문장 필요' })
-    .max(600)
-    .refine((s) => !/이 사람|이 분|후보/.test(s), {
-      message: 'viewerBundle 에 후보 참조 금지',
-    })
-    .refine((s) => !META_PHRASES.test(s), {
-      message: '"자유서술" 같은 메타 단어 금지 — "본인을 소개하실 때" 식으로 자연스럽게',
-    })
-    .refine(noForbiddenWords, { message: '금지어 사용' }),
-});
+export type PersonContentOutput = z.infer<typeof PersonContentSchema>;
+export type PersonContent = PersonContentOutput;
 
-export const PersonBundleSchema = z.object({
-  candidateBundle: CandidateBundleSchema,
-  viewerBundle: ViewerBundleSchema,
-});
+// -- PAIR CONTENT -----------------------------------------------------------
 
-export type CandidateBundle = z.infer<typeof CandidateBundleSchema>;
-export type ViewerBundle = z.infer<typeof ViewerBundleSchema>;
-export type PersonBundleOutput = z.infer<typeof PersonBundleSchema>;
-
-// ── PAIR BUNDLE ────────────────────────────────────────────
-
-export const Chapter3NoteSchema = z.object({
+export const AxisNoteSchema = z.object({
   axis: z.string().min(2).max(20),
   narrative: z
     .string()
@@ -123,9 +96,14 @@ export const Chapter3NoteSchema = z.object({
     .refine((s) => !META_PHRASES.test(s), { message: '"자유서술" 메타 단어 금지' }),
 });
 
-export const PairBundleSchema = z.object({
-  chapter3Notes: z.array(Chapter3NoteSchema).length(4),
-  chapter3Simulation: z
+export const PairContentSchema = z.object({
+  matchOpening: z
+    .string()
+    .min(60, { message: '2~3문장 필요' })
+    .max(300)
+    .refine(noForbiddenWords, { message: '금지어 사용' }),
+  axisNotes: z.array(AxisNoteSchema).length(4),
+  simulation: z
     .string()
     .min(200, { message: '6~8문장 필요' })
     .max(1000)
@@ -134,5 +112,5 @@ export const PairBundleSchema = z.object({
     .refine(noForbiddenWords, { message: '금지어 사용' }),
 });
 
-export type Chapter3Note = z.infer<typeof Chapter3NoteSchema>;
-export type PairBundleOutput = z.infer<typeof PairBundleSchema>;
+export type AxisNote = z.infer<typeof AxisNoteSchema>;
+export type PairContentOutput = z.infer<typeof PairContentSchema>;

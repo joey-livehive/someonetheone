@@ -1,6 +1,6 @@
 // 캐스팅 신규 form 답변 (CastingAnswers) → 기존 v2 컴포넌트 prop 변환 헬퍼.
 
-import type { CandidateBundle, CastingAnswers } from '@/lib/casting/prompts/types';
+import type { PersonContent, CastingAnswers } from '@/lib/casting/prompts/types';
 import { candidateImageForGender } from '@/lib/casting/reportImages';
 import type { Candidate } from '@/lib/report/types';
 import type { UserAnswers } from '@/lib/personalization/types';
@@ -128,13 +128,13 @@ export function answersToUserAnswers(a: CastingAnswers): UserAnswers {
   };
 }
 
-// CastingAnswers + (선택) candidateBundle → TeaserCardV2 / CandidateDetailSection 가 쓰는 Candidate 객체
-export function answersToCandidate(a: CastingAnswers, bundle?: CandidateBundle): Candidate {
+// CastingAnswers + (선택) partner PersonContent → TeaserCardV2 / CandidateDetailSection 가 쓰는 Candidate 객체
+export function answersToCandidate(a: CastingAnswers, content?: PersonContent): Candidate {
   const age = a['넌 나이가 어떻게 돼?'];
   const candidateImage = candidateImageForGender(a['반가워! 성별이 어떻게 돼?'], age);
   return {
     nickname: '○○○',
-    faceType: bundle?.teaserFaceType ?? '(faceType placeholder)',
+    faceType: content?.teaserFaceType ?? '(faceType placeholder)',
     ageRange: age ? `${age}세` : '20대 후반',
     ageDetail: '',
     occupation: a['직업이 정확히 뭐야?'] || label(a['넌 어떤 일 해?']) || '회사원',
@@ -150,26 +150,26 @@ export function answersToCandidate(a: CastingAnswers, bundle?: CandidateBundle):
     detailPhoto: candidateImage,
     mbti: a['MBTI 뭐야?'],
     height: a['키가 어떻게 돼?'] ? `${a['키가 어떻게 돼?']}cm` : undefined,
-    recommendation: bundle?.casterHeadline ?? '(Generate 클릭 시 LLM 출력으로 채워짐)',
+    recommendation: content?.casterHeadline ?? '(Generate 클릭 시 LLM 출력으로 채워짐)',
   };
 }
 
 // 6축 매칭 룰베이스 (간이 버전, prompt-test 전용).
-// 프로덕션은 radar.topAxes 를 그대로 PAIR BUNDLE 입력으로 넘기게 됨.
-// type 의미는 docs/casting-template/prompts/pair-bundle.md 와 동일:
+// 프로덕션은 radar.topAxes 를 그대로 pair content 입력으로 넘기게 됨.
+// type 의미는 docs/casting-template/prompts/pair-content.md 와 동일:
 //   - match:    양쪽 답이 같거나 결이 일치
-//   - pass:     의뢰인 dealbreaker/선호를 후보가 통과 (예: 비흡연 선호 + 후보 비흡연)
+//   - pass:     owner dealbreaker/선호를 partner가 통과 (예: 비흡연 선호 + partner 비흡연)
 //   - mismatch: top 4 진입했으나 답 다름
 export type MatchedAxis = {
   axis: string;
-  viewerAnswer: string;
-  candidateAnswer: string;
+  ownerAnswer: string;
+  partnerAnswer: string;
   type: 'match' | 'pass' | 'mismatch';
 };
 
 export function deriveMatchedAxes(
-  viewer: CastingAnswers,
-  candidate: CastingAnswers
+  owner: CastingAnswers,
+  partner: CastingAnswers
 ): MatchedAxis[] {
   const axes: MatchedAxis[] = [];
 
@@ -177,13 +177,13 @@ export function deriveMatchedAxes(
     axis: string,
     key: keyof CastingAnswers
   ): MatchedAxis | null => {
-    const v = viewer[key as string];
-    const c = candidate[key as string];
+    const v = owner[key as string];
+    const c = partner[key as string];
     if (!v || !c) return null;
     return {
       axis,
-      viewerAnswer: label(v),
-      candidateAnswer: label(c),
+      ownerAnswer: label(v),
+      partnerAnswer: label(c),
       type: v === c ? 'match' : 'mismatch',
     };
   };
@@ -195,8 +195,8 @@ export function deriveMatchedAxes(
   if (seriousness) axes.push(seriousness);
 
   // 흡연 호환 — dealbreaker 통과 케이스만 'pass' 로 노출. 실패면 axis 자체 생략 (사전 필터에서 차단되므로).
-  const vSmokePref = viewer['연인이 담배 피운다면?'];
-  const cSmokeSelf = candidate['넌 담배 피워?'];
+  const vSmokePref = owner['연인이 담배 피운다면?'];
+  const cSmokeSelf = partner['넌 담배 피워?'];
   if (vSmokePref && cSmokeSelf) {
     const compat =
       (vSmokePref === 'pref_smoke_no' && cSmokeSelf === 'no_smoke') ||
@@ -205,8 +205,8 @@ export function deriveMatchedAxes(
     if (compat) {
       axes.push({
         axis: '흡연 호환',
-        viewerAnswer: label(vSmokePref),
-        candidateAnswer: label(cSmokeSelf),
+        ownerAnswer: label(vSmokePref),
+        partnerAnswer: label(cSmokeSelf),
         type: 'pass',
       });
     }

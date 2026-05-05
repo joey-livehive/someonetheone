@@ -94,7 +94,7 @@ async function callAnthropic(input: CallInput): Promise<CallOutput> {
   const t0 = Date.now();
   const res = await client.messages.create({
     model: modelName,
-    // PERSON BUNDLE 은 9 필드(4~5문장 narratives 다수)라 2000 으로는 자주 잘림 — Gemini 와 동일하게 8000.
+    // Person content는 9 필드(4~5문장 narratives 다수)라 2000 으로는 자주 잘림 — Gemini 와 동일하게 8000.
     max_tokens: input.maxTokens ?? 8000,
     system: input.systemPrompt,
     messages: [{ role: 'user', content: userContent }],

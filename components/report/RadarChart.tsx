@@ -4,6 +4,12 @@ import { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import { MatchAnalysis } from '@/lib/report/types';
 
+const MIN_VISIBLE_RADAR_VALUE = 5.5;
+
+function visibleRadarValues(values: number[]) {
+  return values.map((value) => Math.max(MIN_VISIBLE_RADAR_VALUE, value));
+}
+
 export function RadarChart({ data }: { data: MatchAnalysis['radarData'] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -19,7 +25,7 @@ export function RadarChart({ data }: { data: MatchAnalysis['radarData'] }) {
         datasets: [
           {
             label: '일치도',
-            data: data.values,
+            data: visibleRadarValues(data.values),
             backgroundColor: 'rgba(236, 106, 61, 0.3)',
             borderColor: '#EC6A3D',
             borderWidth: 2,

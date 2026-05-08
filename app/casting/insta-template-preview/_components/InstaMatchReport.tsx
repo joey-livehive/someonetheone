@@ -182,10 +182,8 @@ function buildCandidate(content: InstaContent, photo: string, location?: string)
 
 // 4 양극 값(0~100) → 페이지 고정 라벨이 박힌 BipolarAxis[].
 // 라벨은 product 결정이라 LLM 출력에 두지 않고 여기서 부여.
-//
 // 스키마 컨벤션: bipolarValues 의 각 값은 "우측 라벨 비율" (0=fully 좌측, 100=fully 우측).
 //   ex) energy=45 → 외향 45%, 내향 55%. → leftPercent(내향) = 100 - 45 = 55.
-// 4축 모두 동일 패턴이라 단일 식으로 정리.
 function buildBipolarAxes(content: InstaContent): BipolarAxis[] {
   const v = content.bipolarValues;
   return [

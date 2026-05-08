@@ -44,7 +44,7 @@
 | Chapter 1 personality | `personality` | |
 | Chapter 1 datingStyle | `datingStyle` | |
 | Chapter 1 feedCharm (✨ 매력) | `feedCharm` | weekendStyle 자리 대체 |
-| Chapter 2 4축 막대 | `bipolarValues` × 4 | 좌측 비율 0~100 정수 |
+| Chapter 2 4축 막대 | `bipolarValues.{energy,judgment,selfExpression,behavior}` | 우측 라벨 비율 0~100 정수. 입력 `trait_axes`(사전 분석)에서 v3 프롬프트가 변환 |
 | Chapter 2 매칭 노트 | `spectrumNotes[]` | 2~4개 |
 | Chapter 3 시뮬레이션 | `simulation` | |
 | CTA 1번 단계 안내 | (정적) "스토리 태그/DM…" | step1Note prop |

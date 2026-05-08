@@ -20,10 +20,10 @@ const LS_KEY_SYSTEM_PROMPT = 'casting.insta-prompt-test.systemPrompt';
 const LS_KEY_CANDIDATE_JSON = 'casting.insta-prompt-test.candidateJson';
 
 const DEFAULT_HUNT_STATS = {
-  offlineGyms: 0,
-  instagramProfiles: 64,
-  linkedinProfiles: 0,
-  communities: 0,
+  offlineGyms: 4,
+  instagramProfiles: 142,
+  linkedinProfiles: 18,
+  communities: 7,
 };
 
 const DEFAULT_CANDIDATE: InstaCandidateInput = {
@@ -142,154 +142,204 @@ export default function CastingInstaPromptTestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg text-brand-ink">
-      {/* 컨트롤 패널 */}
-      <div className="border-b border-brand-line/30 bg-brand-cream/40">
-        <div className="max-w-[1080px] mx-auto px-5 py-4">
-          <div className="flex items-center gap-3 flex-wrap mb-3">
-            <h1 className="font-display font-bold text-[18px]">인스타 매칭 프롬프트 테스트</h1>
-            <a
-              href="/casting/insta-template-preview"
-              className="text-[12px] underline text-brand-ink-mute"
-            >
-              디자인 검수 페이지 ↗
-            </a>
-            <span className="ml-auto text-[12px] text-brand-ink-mute">
-              {gen.meta &&
-                `${gen.meta.provider} · ${gen.meta.model} · ${gen.meta.latencyMs}ms`}
-            </span>
-          </div>
+    <div className="min-h-screen bg-zinc-50 flex">
+      {/* 좌측 패널 */}
+      <aside className="w-[400px] shrink-0 bg-white border-r border-zinc-200 p-5 overflow-y-auto sticky top-0 h-screen">
+        <h1 className="text-[18px] font-bold text-zinc-900 mb-1">Insta Prompt Test</h1>
+        <p className="text-[12px] text-zinc-500 mb-3">
+          의뢰인 페르소나 + 인스타 후보 raw 로 InstaContent 를 생성해 매칭 카드로 라이브 렌더
+        </p>
+        <a
+          href="/casting/insta-template-preview"
+          className="inline-block text-[11px] underline text-zinc-500 mb-5"
+        >
+          디자인 검수 페이지 ↗
+        </a>
 
-          <div className="grid md:grid-cols-2 gap-3">
-            {/* 의뢰인 fixture */}
-            <div>
-              <label className="block text-[12px] text-brand-ink-soft mb-1">의뢰인 페르소나</label>
-              <select
-                value={viewerId}
-                onChange={(e) => setViewerId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-brand-line bg-white text-[13px]"
-              >
-                {PERSONA_FIXTURES.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-[11px] text-brand-ink-mute leading-snug">
-                {viewer.oneLiner}
+        <Section title="Viewer (의뢰인)">
+          <PersonaPicker value={viewerId} onChange={setViewerId} />
+        </Section>
+
+        <Section title="Candidate raw (JSON)">
+          <textarea
+            value={candidateJson}
+            onChange={(e) => setCandidateJson(e.target.value)}
+            rows={12}
+            className="w-full text-[10px] font-mono p-2 border border-zinc-300 rounded resize-y focus:border-zinc-900 focus:outline-none"
+            spellCheck={false}
+          />
+          {!candidateParsed.ok && (
+            <div className="mt-1 text-[10px] text-red-700">JSON 오류: {candidateParsed.error}</div>
+          )}
+          <button
+            type="button"
+            onClick={() => setCandidateJson(JSON.stringify(DEFAULT_CANDIDATE, null, 2))}
+            className="mt-1 text-[10px] text-zinc-500 underline"
+          >
+            Reset to default
+          </button>
+        </Section>
+
+        <button
+          onClick={onGenerate}
+          disabled={gen.loading || !candidateParsed.ok}
+          className="w-full mt-2 py-3 rounded-lg bg-zinc-900 text-white font-semibold disabled:opacity-40 hover:bg-zinc-800"
+        >
+          {gen.loading ? 'Generating…' : 'Generate'}
+        </button>
+
+        {gen.error && (
+          <div className="mt-3 p-3 rounded bg-red-50 border border-red-200 text-red-800 text-[12px]">
+            <div className="font-semibold mb-0.5">에러</div>
+            <div>{gen.error}</div>
+            {gen.errorDetail !== undefined && showRaw && (
+              <pre className="mt-2 text-[10px] overflow-x-auto bg-white/60 p-2 rounded whitespace-pre-wrap break-all">
+                {JSON.stringify(gen.errorDetail, null, 2)}
+              </pre>
+            )}
+          </div>
+        )}
+
+        {gen.meta && (
+          <div className="mt-4 text-[11px] text-zinc-600 space-y-1">
+            <div>📡 {gen.meta.provider} · {gen.meta.model} ({gen.meta.latencyMs}ms)</div>
+          </div>
+        )}
+
+        <div className="mt-5 pt-4 border-t border-zinc-200">
+          <button
+            onClick={() => setShowPromptEditor((v) => !v)}
+            className="text-[12px] font-semibold text-zinc-700 hover:text-zinc-900"
+          >
+            {showPromptEditor ? '▼' : '▶'} System Prompt 편집
+          </button>
+          {showPromptEditor && (
+            <div className="mt-3 space-y-4">
+              <PromptField
+                label="INSTA CONTENT system prompt"
+                value={systemPrompt}
+                defaultValue={DEFAULT_INSTA_SYSTEM_PROMPT}
+                onChange={setSystemPrompt}
+              />
+              <p className="text-[10px] text-zinc-500">
+                💾 변경사항은 localStorage 에 자동 저장됩니다. Generate 시 이 프롬프트가 그대로 LLM 에 전달됩니다.
               </p>
             </div>
-
-            {/* 후보 JSON */}
-            <div>
-              <label className="block text-[12px] text-brand-ink-soft mb-1">
-                인스타 후보 raw (JSON)
-              </label>
-              <textarea
-                value={candidateJson}
-                onChange={(e) => setCandidateJson(e.target.value)}
-                rows={6}
-                className="w-full px-3 py-2 rounded-lg border border-brand-line bg-white text-[12px] font-mono"
-                spellCheck={false}
-              />
-              {!candidateParsed.ok && (
-                <p className="mt-1 text-[11px] text-brand-urgent">
-                  JSON 오류: {candidateParsed.error}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* 토글 + 액션 */}
-          <div className="mt-3 flex items-center gap-3 flex-wrap">
-            <button
-              type="button"
-              onClick={onGenerate}
-              disabled={gen.loading || !candidateParsed.ok}
-              className="px-4 py-2 rounded-lg bg-brand-ink text-brand-cream font-display font-bold text-[13px] disabled:opacity-50"
-            >
-              {gen.loading ? '생성 중…' : 'Generate'}
-            </button>
-            <label className="flex items-center gap-1.5 text-[12px] text-brand-ink-soft">
-              <input
-                type="checkbox"
-                checked={showPromptEditor}
-                onChange={(e) => setShowPromptEditor(e.target.checked)}
-              />
-              system prompt 편집
-            </label>
-            <label className="flex items-center gap-1.5 text-[12px] text-brand-ink-soft">
-              <input
-                type="checkbox"
-                checked={showRaw}
-                onChange={(e) => setShowRaw(e.target.checked)}
-              />
-              raw response
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                setSystemPrompt(DEFAULT_INSTA_SYSTEM_PROMPT);
-                setCandidateJson(JSON.stringify(DEFAULT_CANDIDATE, null, 2));
-              }}
-              className="text-[12px] underline text-brand-ink-mute"
-            >
-              기본값 복원
-            </button>
-          </div>
-
-          {showPromptEditor && (
-            <div className="mt-3">
-              <label className="block text-[12px] text-brand-ink-soft mb-1">
-                system prompt
-              </label>
-              <textarea
-                value={systemPrompt}
-                onChange={(e) => setSystemPrompt(e.target.value)}
-                rows={20}
-                className="w-full px-3 py-2 rounded-lg border border-brand-line bg-white text-[12px] font-mono"
-                spellCheck={false}
-              />
-            </div>
           )}
+        </div>
 
-          {gen.error && (
-            <div className="mt-3 p-3 rounded-lg bg-brand-urgent/10 border border-brand-urgent/40 text-[12px] text-brand-ink leading-relaxed">
-              <div className="font-bold mb-1">에러</div>
-              <div>{gen.error}</div>
-              {gen.errorDetail !== undefined && showRaw && (
-                <pre className="mt-2 text-[11px] overflow-x-auto bg-white/60 p-2 rounded">
-                  {JSON.stringify(gen.errorDetail, null, 2)}
-                </pre>
-              )}
-            </div>
-          )}
-
-          {showRaw && gen.raw && !gen.error && (
-            <pre className="mt-3 text-[11px] overflow-x-auto bg-white p-2 rounded border border-brand-line max-h-[200px]">
-              {JSON.stringify(gen.raw, null, 2)}
+        <div className="mt-5">
+          <button
+            onClick={() => setShowRaw((v) => !v)}
+            className="text-[11px] text-zinc-500 underline"
+          >
+            {showRaw ? 'Hide' : 'Show'} raw JSON
+          </button>
+          {showRaw && (
+            <pre className="mt-2 p-3 bg-zinc-900 text-zinc-100 text-[10px] rounded overflow-auto max-h-[400px] whitespace-pre-wrap break-all">
+              {gen.raw ? JSON.stringify(gen.raw, null, 2) : '(empty)'}
             </pre>
           )}
         </div>
-      </div>
+      </aside>
 
-      {/* 라이브 프리뷰 */}
-      {gen.content ? (
-        <InstaMatchReport
-          reportUid="INSTA-PROMPT-TEST"
-          publishedAt={new Date().toISOString().slice(0, 10).replace(/-/g, '.')}
-          viewerName="의뢰인"
-          viewerAnswers={viewerUserAnswers}
-          huntStats={DEFAULT_HUNT_STATS}
-          content={gen.content}
-          candidatePhoto={candidateParsed.data?.photoUrls[0]}
-          candidateLocation={candidateParsed.data?.hints?.location}
-        />
-      ) : (
-        <div className="max-w-[1080px] mx-auto px-5 py-12 text-center text-[13px] text-brand-ink-mute">
-          Generate 버튼을 누르면 결과가 여기에 라이브로 렌더돼요.
-        </div>
+      {/* 우측: 매칭 카드 라이브 프리뷰 */}
+      <main className="flex-1 overflow-y-auto">
+        {gen.content ? (
+          <InstaMatchReport
+            reportUid="INSTA-PROMPT-TEST"
+            publishedAt={new Date().toISOString().slice(0, 10).replace(/-/g, '.')}
+            viewerName="의뢰인"
+            viewerAnswers={viewerUserAnswers}
+            huntStats={DEFAULT_HUNT_STATS}
+            content={gen.content}
+            candidatePhoto={candidateParsed.data?.photoUrls[0]}
+            candidateLocation={candidateParsed.data?.hints?.location}
+          />
+        ) : (
+          <div className="max-w-[480px] mx-auto pt-20 px-7 text-center text-[13px] text-zinc-500">
+            Generate 버튼을 누르면 결과가 여기에 라이브로 렌더돼요.
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-4">
+      <div className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5">{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function PromptField({
+  label,
+  value,
+  defaultValue,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  defaultValue: string;
+  onChange: (v: string) => void;
+}) {
+  const isModified = value !== defaultValue;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-[11px] font-semibold text-zinc-600">{label}</label>
+        <button
+          onClick={() => onChange(defaultValue)}
+          disabled={!isModified}
+          className="text-[10px] text-zinc-500 underline disabled:opacity-30"
+        >
+          Reset to default
+        </button>
+      </div>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={20}
+        className="w-full text-[10px] font-mono p-2 border border-zinc-300 rounded resize-y focus:border-zinc-900 focus:outline-none"
+      />
+      {isModified && (
+        <div className="mt-0.5 text-[10px] text-amber-700">⚠ default 와 다른 상태</div>
       )}
+    </div>
+  );
+}
+
+function PersonaPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      {PERSONA_FIXTURES.map((p) => (
+        <label
+          key={p.id}
+          className={`block p-2.5 rounded border cursor-pointer text-[12px] ${
+            value === p.id ? 'border-zinc-900 bg-zinc-50' : 'border-zinc-200 hover:border-zinc-400'
+          }`}
+        >
+          <input
+            type="radio"
+            name="persona"
+            value={p.id}
+            checked={value === p.id}
+            onChange={() => onChange(p.id)}
+            className="sr-only"
+          />
+          <div className="font-medium text-zinc-900">{p.label}</div>
+          <div className="text-zinc-500 mt-0.5">{p.oneLiner}</div>
+        </label>
+      ))}
     </div>
   );
 }

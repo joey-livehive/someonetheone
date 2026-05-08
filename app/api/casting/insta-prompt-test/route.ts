@@ -31,6 +31,32 @@ function buildUserPrompt(input: InstaContentInput): string {
   lines.push(JSON.stringify(viewer.answers, null, 2));
   lines.push('```');
   lines.push('');
+
+  // 정규화 LLM 출력 (있으면 그걸 우선 dump — 새 prompt 가 이 형태를 기대)
+  const c = candidate as InstaCandidateInput & {
+    structured?: unknown;
+    confidence?: unknown;
+    trait_axes?: unknown;
+    self_text?: string;
+    atmosphere_tags?: string[];
+    reviewer_summary?: string;
+  };
+  const hasNormalized = c.structured || c.trait_axes || c.self_text || c.atmosphere_tags || c.reviewer_summary;
+  if (hasNormalized) {
+    lines.push('# 인스타그램 후보 — 사전 분석 (정규화 LLM 출력)');
+    lines.push('```json');
+    lines.push(JSON.stringify({
+      structured: c.structured,
+      confidence: c.confidence,
+      trait_axes: c.trait_axes,
+      self_text: c.self_text,
+      atmosphere_tags: c.atmosphere_tags,
+      reviewer_summary: c.reviewer_summary,
+    }, null, 2));
+    lines.push('```');
+    lines.push('');
+  }
+
   lines.push('# 인스타그램 후보 raw 데이터');
   if (candidate.handle) lines.push(`handle: @${candidate.handle}`);
   if (candidate.bio) {

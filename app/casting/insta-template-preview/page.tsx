@@ -8,11 +8,14 @@ import type { UserAnswers } from '@/lib/personalization/types';
 import type { InstaContent } from '@/lib/casting/insta/schema';
 import { InstaMatchReport } from './_components/InstaMatchReport';
 
+// 4채널 다 채워서 "찾아본 흔적" 표시 — 내부 pool 의 _hunt_stats(report_uid) 와 동일 패턴.
+// 인스타 매칭은 instagramProfiles 비중을 키워(예: 100~300) 출처 강조.
+// 운영 시 backend 에 _insta_hunt_stats() 결정론적 시드 함수로 채워질 자리.
 const MOCK_HUNT_STATS = {
-  offlineGyms: 0,
-  instagramProfiles: 64,
-  linkedinProfiles: 0,
-  communities: 0,
+  offlineGyms: 4,
+  instagramProfiles: 142,
+  linkedinProfiles: 18,
+  communities: 7,
 };
 
 const MOCK_USER_ANSWERS: UserAnswers = {
@@ -72,7 +75,7 @@ const MOCK_INSTA_CONTENT: InstaContent = {
   feedCharm:
     '인스타 피드 전체에서 결이 일관되게 흘러요. <b>차분하고 단정한 톤</b>이 흐트러지지 않고, 전시·필름 사진처럼 <b>취향이 또렷한</b> 콘텐츠로 큐레이션돼 있어요. 옷이나 소품 디테일에서도 미감이 자연스럽게 묻어나고, 캡션은 <b>짧고 절제</b>돼 있어서 자기 결이 분명한 인상을 줘요. 의뢰인님이 좋아하시는 <b>분위기 있는 사람</b>의 결이에요.',
 
-  // bipolarValues: 0=좌측 라벨 fully, 100=우측 라벨 fully. 우측 비율과 동치.
+  // bipolarValues: value = 우측 라벨 비율. 화면은 leftPercent = 100 - value.
   bipolarValues: {
     energy: 45,         // 외향 45% → 내향 55%
     judgment: 40,       // 이성 40% → 감성 60%

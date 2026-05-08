@@ -31,7 +31,7 @@ const Narrative = z
   .max(600)
   .refine(noForbiddenWords, { message: '금지어 사용' });
 
-/** 4축 양극 막대 — 좌측 라벨 비율 (0~100). 라벨은 페이지가 고정으로 결정. */
+/** 4축 양극 막대 — 우측 라벨 비율(0~100). 라벨은 페이지가 고정으로 결정. */
 export const InstaBipolarValuesSchema = z.object({
   /** 0=내향적, 100=외향적 */
   energy: z.number().min(0).max(100),

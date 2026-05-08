@@ -8,6 +8,7 @@ export interface BipolarAxis {
   axisName: string;
   leftLabel: string;
   rightLabel: string;
+  /** 0~100. 좌측 라벨 비율. 우측은 100 - leftPercent. */
   leftPercent: number;
 }
 
@@ -16,9 +17,6 @@ interface Chapter3InstaSpectrumProps {
   notes?: string[];
   number?: string;
 }
-
-const BAR_FILL_COLOR = '#EC6A3D';
-const BAR_TRACK_COLOR = '#E8DDC4';
 
 export function Chapter3InstaSpectrum({
   axes,
@@ -36,11 +34,11 @@ export function Chapter3InstaSpectrum({
   return (
     <ChapterCard number={number} title={title} lead={lead}>
       <div className="mt-3 flex flex-col gap-7">
-        {axes.map((axis, i) => {
-          const left = Math.max(0, Math.min(100, axis.leftPercent));
+        {axes.map((axis) => {
+          const left = Math.round(Math.max(0, Math.min(100, axis.leftPercent)));
           const right = 100 - left;
           return (
-            <div key={i}>
+            <div key={axis.axisName}>
               <div className="grid grid-cols-3 items-end mb-2 text-[13px] text-brand-ink-soft">
                 <div className="text-left">{axis.leftLabel}</div>
                 <div className="text-center font-display font-bold text-[15px] text-brand-ink">
@@ -49,14 +47,13 @@ export function Chapter3InstaSpectrum({
                 <div className="text-right">{axis.rightLabel}</div>
               </div>
               <div
-                className="relative h-5 rounded-full overflow-hidden"
-                style={{ backgroundColor: BAR_TRACK_COLOR }}
+                className="relative h-5 rounded-full overflow-hidden bg-brand-blur-bg"
                 role="img"
                 aria-label={`${axis.axisName}: ${axis.leftLabel} ${left}%, ${axis.rightLabel} ${right}%`}
               >
                 <div
-                  className="absolute left-0 top-0 h-full rounded-full transition-[width]"
-                  style={{ width: `${left}%`, backgroundColor: BAR_FILL_COLOR }}
+                  className="absolute left-0 top-0 h-full rounded-full bg-brand-orange"
+                  style={{ width: `${left}%` }}
                 />
               </div>
               <div className="grid grid-cols-2 mt-1.5 text-[13px] font-display font-bold text-brand-ink">
@@ -73,8 +70,7 @@ export function Chapter3InstaSpectrum({
           {notes.map((note, i) => (
             <div
               key={i}
-              className="bg-brand-bg-deep border-l-[3px] px-3.5 py-[11px] rounded-lg text-[13.5px] text-brand-ink-soft leading-[1.6] [&_b]:font-display [&_b]:text-brand-ink"
-              style={{ borderLeftColor: BAR_FILL_COLOR }}
+              className="bg-brand-bg-deep border-l-[3px] border-brand-orange px-3.5 py-[11px] rounded-lg text-[13.5px] text-brand-ink-soft leading-[1.6] [&_b]:font-display [&_b]:text-brand-ink"
             >
               <SafeText>{note}</SafeText>
             </div>

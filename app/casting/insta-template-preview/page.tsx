@@ -1,10 +1,15 @@
 // 인스타그램 발견 후보용 매칭 페이지 — 디자인 검수 페이지.
 // 라우트: /casting/insta-template-preview
-// 차이점 (vs template-preview):
-//   - Chapter3V2(radar) → Chapter3InstaSpectrum(양극 막대 4축)
-//   - 인스타 후보는 CastingAnswers 가 없으므로 6축 점수 산출 불가
-//   - HuntBox 는 instagramProfiles 비중을 키워 출처 강조
-//   - Chapter4Simulation 의 match 는 simulation 텍스트만 사용
+//
+// 차이점 (vs /casting/template-preview):
+//   1) Chapter3V2(radar 6축) → Chapter3InstaSpectrum(양극 막대 4축)
+//      이유: 인스타 후보는 CastingAnswers 가 없어 양쪽 점수 기반 radar 산출 불가
+//   2) HuntBoxV2.sourceLabel='인스타그램' (default '캐스팅 내부 POOL' 대체)
+//   3) TeaserCardV2.recommendationFootnote — 인스타 추정값 안내(*73% 정확도)
+//   4) CandidateDetailSection.feedCharm — '📅 주말' 슬롯을 '✨ 매력' 산문으로 교체
+//   5) MeetOrPassCta.step1Note — 1번 단계 아래 빨간 보조(스토리·DM 연락 안내)
+//
+// Chapter4Simulation 은 match.simulation 텍스트만 사용 — 더미 MatchAnalysis 로 충족
 
 import type { UserAnswers } from '@/lib/personalization/types';
 import type { Candidate, MatchAnalysis } from '@/lib/report/types';
@@ -27,7 +32,7 @@ import { Chapter3InstaSpectrum, type BipolarAxis } from './_components/Chapter3I
 const MOCK_USER_NAME = '의뢰인';
 const MOCK_PUBLISHED_AT = '2026.05.07';
 
-// 인스타 출처 강조 — 발견 경로의 대부분이 인스타
+// 인스타 단독 출처 — 다른 채널은 0 (HuntBox 헤더 sourceLabel='인스타그램'으로 보강)
 const MOCK_HUNT_STATS = {
   offlineGyms: 0,
   instagramProfiles: 64,
@@ -142,7 +147,7 @@ const MOCK_CASTER_NOTE = {
   ],
 };
 
-const MOCK_CHAPTER2_NARRATIVES = {
+const MOCK_CHAPTER1_NARRATIVES = {
   personality:
     '디자이너답게 <b>시각적 디테일</b>에 예민하고, 자기 취향이 단단한 분이에요. 인스타 피드 전체에서 결이 일관되게 보여서, 만났을 때도 동일한 분위기가 이어질 가능성이 높아요. 큰 자리보단 <b>한두 명과의 깊은 대화</b>를 더 편하게 여기는 결이 사진에서 자연스럽게 묻어나요.',
   datingStyle:
@@ -205,7 +210,7 @@ export default function CastingInstaTemplatePreviewPage() {
           <CandidateDetailSection
             userName={MOCK_USER_NAME}
             candidate={MOCK_CANDIDATE}
-            narratives={MOCK_CHAPTER2_NARRATIVES}
+            narratives={MOCK_CHAPTER1_NARRATIVES}
             feedCharm={MOCK_FEED_CHARM}
           />
         </TrackSection>

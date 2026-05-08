@@ -91,10 +91,7 @@ export function MeetOrPassCta({ reportId, initialCta, step1Note }: Props) {
                 <div className="flex-1">
                   <span>{step}</span>
                   {index === 0 && step1Note && (
-                    <div
-                      className="mt-1.5 pl-2.5 border-l-2 text-[12.5px] leading-[1.55]"
-                      style={{ borderLeftColor: '#F87171', color: '#FCA5A5' }}
-                    >
+                    <div className="mt-1.5 pl-2.5 border-l-2 border-red-400 text-red-300 text-[12.5px] leading-[1.55]">
                       {step1Note}
                     </div>
                   )}

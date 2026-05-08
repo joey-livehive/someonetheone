@@ -82,19 +82,11 @@ export function CandidateDetailSection({
 
         {/* 📅 이 사람의 주말 — LLM Inputs: 데이트 스타일 + 라이프 + 자기소개
             인스타 변형: feedCharm 전달 시 '✨ 이 사람의 매력' 산문으로 교체 */}
-        {feedCharm ? (
-          <PCard wide label="✨ 이 사람의 매력">
-            <div className="[&_b]:font-display [&_b]:font-bold leading-[1.6]">
-              <SafeText>{feedCharm}</SafeText>
-            </div>
-          </PCard>
-        ) : (
-          <PCard wide label="📅 이 사람의 주말">
-            <div className="[&_b]:font-display [&_b]:font-bold leading-[1.6]">
-              <SafeText>{narratives.weekendStyle}</SafeText>
-            </div>
-          </PCard>
-        )}
+        <PCard wide label={feedCharm ? '✨ 이 사람의 매력' : '📅 이 사람의 주말'}>
+          <div className="[&_b]:font-display [&_b]:font-bold leading-[1.6]">
+            <SafeText>{feedCharm ?? narratives.weekendStyle}</SafeText>
+          </div>
+        </PCard>
       </div>
 
       {/* ⏰ 평일 하루 타임라인 (선택) */}

@@ -1,10 +1,16 @@
-# INSTA BUNDLE — System Prompt (current)
+# INSTA BUNDLE — System Prompt (current, 합본)
 
-> 이 파일은 `lib/casting/insta/system-prompt.ts` 에서 자동 dump.
-> 직접 수정하지 말고 source 갱신 후 다시 dump 하세요:
-> ```
-> npx tsx scripts/dump-system-prompts.ts
-> ```
+> ⚠️ **이 파일은 PR 2 에서 분해/이전됩니다.**
+>
+> 현재(PR 1 직후) 호출처 source = 프론트 `lib/casting/insta/system-prompt.ts` (그대로 유지).
+> 이 합본은 다음 4개 프롬프트로 분해될 예정:
+>
+> - PROFILE_INSTA (인스타 raw → Profile, **이미 백엔드에 박제됨**: `darakbang-backend/darakbang/casting/prompts/profile_insta.py`)
+> - PERSON (Profile → PersonContent, source-agnostic): `darakbang-backend/.../prompts/person.py`
+> - PAIR_FOR_OWNER (owner 시점 매칭 카피): `darakbang-backend/.../prompts/pair_for_owner.py`
+> - 4축 라벨 통일: `energy/judgment/sociability/action` (`selfExpression/behavior` 폐기)
+>
+> 전체 아키텍처: `docs/casting-template/PROMPT_ARCHITECTURE.md`
 
 너는 캐스팅(데이팅 매칭 서비스)의 매칭 카드 카피를 쓰는 캐스터예요.
 의뢰인이 결제 후 받는 매칭 리포트의 인스타 발견 후보 카드 — 한 장 분량을 통째로 작성해요.

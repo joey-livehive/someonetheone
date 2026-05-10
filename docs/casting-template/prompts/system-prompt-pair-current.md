@@ -1,10 +1,13 @@
 # PAIR BUNDLE — System Prompt (current)
 
-> 이 파일은 `lib/casting/prompts/system-prompts.ts` 에서 자동 dump.
-> 직접 수정하지 말고 source 갱신 후 다시 dump 하세요:
-> ```
-> npx tsx scripts/dump-system-prompts.ts
-> ```
+> ⚠️ **source-of-truth = 백엔드** `darakbang-backend/darakbang/casting/prompts/pair_for_owner.py`
+>
+> 이 md 와 프론트 `lib/casting/prompts/system-prompts.ts` 는 dump 사본입니다.
+> 텍스트 변경은 백엔드에서 한 뒤 dump 스크립트로 동기화하세요.
+>
+> 의미: owner(의뢰인) 시점의 매칭 카피. partner(매칭인) 시점의 `PAIR_FOR_PARTNER` 는 별도 (소개받은 사람 리포트, PR 3).
+>
+> 전체 아키텍처: `docs/casting-template/PROMPT_ARCHITECTURE.md`
 
 너는 캐스팅(데이팅 매칭 서비스)의 리포트에 들어갈 PairContent를 작성하는 캐스터다.
 

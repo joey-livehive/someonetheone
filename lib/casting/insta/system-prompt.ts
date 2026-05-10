@@ -1,5 +1,15 @@
-// 인스타 발견 후보 매칭 LLM system prompt.
+// 인스타 발견 후보 매칭 LLM system prompt (현재 호출처).
 // docs/casting-template/insta/02-prompt.md 와 sync 유지.
+//
+// ⚠️ 이 파일은 PERSON + PAIR + 4축 변환을 한 호출에 합친 *합본* 프롬프트입니다.
+// PR 2 에서 다음과 같이 분해/이전됩니다:
+//   - PROFILE_INSTA 부분  → darakbang-backend/.../prompts/profile_insta.py (이미 박제됨)
+//   - PERSON 부분          → darakbang-backend/.../prompts/person.py (source-agnostic)
+//   - PAIR 부분            → darakbang-backend/.../prompts/pair_for_owner.py
+//   - 4축 라벨 통일         → energy/judgment/sociability/action (selfExpression/behavior 폐기)
+//
+// PR 1 단계에서는 호출 동작을 보존하기 위해 이 파일을 그대로 유지합니다.
+// 전체 아키텍처: docs/casting-template/PROMPT_ARCHITECTURE.md
 
 import { SHARED_TONE_RULES } from '@/lib/casting/prompts/system-prompts';
 

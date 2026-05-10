@@ -7,7 +7,7 @@
 >
 > - PROFILE_INSTA (인스타 raw → Profile, **이미 백엔드에 박제됨**: `darakbang-backend/darakbang/casting/prompts/profile_insta.py`)
 > - PERSON (Profile → PersonContent, source-agnostic): `darakbang-backend/.../prompts/person.py`
-> - PAIR_BUYER (의뢰인 시점 매칭 카피): `darakbang-backend/.../prompts/pair_buyer.py`
+> - PAIR_FOR_OWNER (owner 시점 매칭 카피): `darakbang-backend/.../prompts/pair_for_owner.py`
 > - 4축 라벨 통일: `energy/judgment/sociability/action` (`selfExpression/behavior` 폐기)
 >
 > 전체 아키텍처: `docs/casting-template/PROMPT_ARCHITECTURE.md`

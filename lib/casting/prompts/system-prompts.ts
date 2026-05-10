@@ -1,7 +1,7 @@
 // 캐스팅 리포트 LLM system prompt 기본값 (프론트 dump 사본).
 //
 // ⚠️ source-of-truth 는 백엔드:
-//   darakbang-backend/darakbang/casting/prompts/{person,pair_buyer,_shared_tone}.py
+//   darakbang-backend/darakbang/casting/prompts/{person,pair_for_owner,_shared_tone}.py
 //
 // 이 파일은 /casting/prompt-test 페이지의 textarea default 값으로만 쓰이고,
 // 실제 LLM 호출은 백엔드 `/casting/admin/recommendation-reports/preview`

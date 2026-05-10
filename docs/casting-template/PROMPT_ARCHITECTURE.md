@@ -85,8 +85,8 @@ internal 설문   ──┐
 |---|---|---|---|---|---|
 | 1 | **PROFILE_INSTA** | 인스타 raw (handle/bio/posts/photos, vision) | `Profile` (structured + confidence + trait_axes + self_text + atmosphere_tags + posts_meta + reviewer_summary) | partner.source=insta 일 때 1회/사람 (캐시) | `darakbang-backend/darakbang/casting/prompts/profile_insta.py` |
 | 2 | **PERSON** | `Profile` (source 무관) | `PersonContent` (casterHeadline / casterCharmBullets / faceType / personality / datingStyle / lifeStyle / bipolarValues / spectrumNotes) | 1회/사람 (캐시) | `darakbang-backend/darakbang/casting/prompts/person.py` |
-| 3 | **PAIR_FOR_OWNER** | owner/partner `PersonContent` × 2 + radar 점수 | `PairContent` (matchOpening / axisNotes[4] / simulation, owner 시점) | 1회/connection (perspective=owner) | `darakbang-backend/darakbang/casting/prompts/pair_for_owner.py` |
-| 4 | **PAIR_FOR_PARTNER** | owner/partner `PersonContent` × 2 + radar 점수 | `PairContent` (introOpening / axisNotes[4] / simulation, partner 시점) | 1회/connection (perspective=partner) | `darakbang-backend/darakbang/casting/prompts/pair_for_partner.py` |
+| 3 | **PAIR_FOR_OWNER** | owner/partner `PersonContent` × 2 + radar 점수 | `PairContent` (opening / axisNotes[4] / simulation, owner 시점) | 1회/connection (perspective=owner) | `darakbang-backend/darakbang/casting/prompts/pair_for_owner.py` |
+| 4 | **PAIR_FOR_PARTNER** | owner/partner `PersonContent` × 2 + radar 점수 | `PairContent` (opening / axisNotes[4] / simulation, partner 시점) | 1회/connection (perspective=partner) | `darakbang-backend/darakbang/casting/prompts/pair_for_partner.py` |
 
 **internal source 의 trait_axes 산출은 LLM 이 아닌 deterministic 코드** (`internal_adapter`). 즉 LLM 프롬프트는 정확히 4개.
 
@@ -289,7 +289,7 @@ type PersonContent = {
 
 ```ts
 type PairContent = {
-  /** owner 시점이면 'matchOpening', partner 시점이면 'introOpening'. 단일 필드명 'opening' 으로 가도 됨 */
+  /** owner/partner 시점 모두 단일 필드명 'opening' 사용 */
   opening: string
   axisNotes: [AxisNote, AxisNote, AxisNote, AxisNote]
   simulation: string
@@ -298,7 +298,7 @@ type PairContent = {
 type AxisNote = { axis: AxisName; narrative: string }
 ```
 
-→ 두 PAIR 프롬프트가 같은 출력 스키마 (`opening` 으로 통일) 를 만들도록 PR 2 에서 정렬. PR 1 단계에서는 이름 차이 (`matchOpening` vs `introOpening`) 를 프롬프트에 그대로 두고, PR 2 에서 `opening` 으로 통일.
+→ 두 PAIR 프롬프트가 같은 출력 스키마 (`opening`) 를 사용한다.
 
 ### 6.5 `ConnectionReport` (Layer 4, 단일 모델)
 
@@ -436,7 +436,7 @@ return ConnectionReport(perspective='partner', owner=..., partner=..., pair=pair
 
 ## 10. Open Questions (PR 2/3 에서 결정)
 
-- [ ] `PairContent.opening` 단일 필드명 채택 vs `matchOpening` / `introOpening` 분리 유지 — PR 2 에서 출력 스키마 통합 시점에 결정.
+- [x] `PairContent.opening` 단일 필드명 채택 (`matchOpening` / `introOpening` 분리 안 함).
 - [ ] 인스타 후보 PROFILE_INSTA 결과의 캐싱 키·TTL (handle + posts_hash 기반?).
 - [ ] 미래 설문 v2 에서 4축 직접 측정 항목 추가 — 지금 internal trait_axes 신호가 약함. 별 PR.
 - [ ] PAIR_FOR_PARTNER v1 의 권력 관계 카피 톤 — PR 3 에서 데이터 1쌍 LLM 호출해보고 다듬기.

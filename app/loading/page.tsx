@@ -84,7 +84,7 @@ export default function LoadingPage() {
     stopPolling();
     pollRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE}/casting/preview/reports/${reportId}`);
+        const res = await fetch(`${API_BASE}/casting/preview-reports/${reportId}`);
         if (!res.ok) return;
         const data = await res.json();
         if (data.status === 'ready') {
@@ -111,7 +111,7 @@ export default function LoadingPage() {
     if (!guestUid) return;
 
     try {
-      const res = await fetch(`${API_BASE}/casting/preview/reports`, {
+      const res = await fetch(`${API_BASE}/casting/preview-reports`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ guest_uid: guestUid, version: '20' }),
@@ -146,7 +146,7 @@ export default function LoadingPage() {
     setStage('waiting');
 
     try {
-      const res = await fetch(`${API_BASE}/casting/preview/reports/${current.reportId}/retry`, {
+      const res = await fetch(`${API_BASE}/casting/preview-reports/${current.reportId}/retry`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

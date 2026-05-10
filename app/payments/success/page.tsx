@@ -9,35 +9,46 @@ import { castingFetch } from '@/lib/casting/api';
 function SuccessInner() {
   const params = useSearchParams();
   const [status, setStatus] = useState<'confirming' | 'done' | 'error'>('confirming');
+  const [emailSentTo, setEmailSentTo] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [resendError, setResendError] = useState('');
 
   useEffect(() => {
-    const orderId = params.get('orderId');
+    const orderIdParam = params.get('orderId');
     const paymentKey = params.get('paymentKey');
     const amount = params.get('amount');
 
-    if (!orderId || !amount) {
+    if (!orderIdParam || !amount) {
       setStatus('error');
       return;
     }
+    setOrderId(orderIdParam);
 
-    castingFetch('/casting/payments/toss/confirm', {
+    castingFetch<{
+      status: string;
+      order_id: string;
+      signup_required?: boolean;
+      email_sent_to?: string | null;
+    }>('/casting/payments/toss/confirm', {
       method: 'POST',
       body: JSON.stringify({
         payment_key: paymentKey,
-        order_id: orderId,
+        order_id: orderIdParam,
         amount: Number(amount),
       }),
     })
-      .then((data: any) => {
+      .then((data) => {
         if (data.status === 'success') {
+          setEmailSentTo(data.email_sent_to ?? null);
           setStatus('done');
-          track('purchase_complete', { orderId, amount: Number(amount) }, {
+          track('purchase_complete', { orderId: orderIdParam, amount: Number(amount) }, {
             pixel: 'Purchase',
             pixelData: {
               value: Number(amount),
               currency: 'KRW',
               content_ids: ['someonetheone'],
-              content_name: orderId,
+              content_name: orderIdParam,
             },
           });
         } else {
@@ -46,6 +57,20 @@ function SuccessInner() {
       })
       .catch(() => setStatus('error'));
   }, [params]);
+
+  const onResend = async () => {
+    if (!emailSentTo || !orderId) return;
+    setResendStatus('sending');
+    setResendError('');
+    try {
+      // 마스킹된 email 만 알고 있으므로, 사용자 입력 없이 재발송하려면 별도 endpoint 필요.
+      // 대신 /casting/auth/login 페이지로 보내서 본인이 email 다시 입력하도록 유도.
+      window.location.href = '/casting/auth/login';
+    } catch {
+      setResendError('재발송에 실패했어요.');
+      setResendStatus('error');
+    }
+  };
 
   if (status === 'done') {
     return (
@@ -58,51 +83,57 @@ function SuccessInner() {
           </div>
           <h1 className="font-bold text-[22px] text-[#1C1A17] mb-2">결제 완료!</h1>
           <p className="text-[#4A443B] text-[15px] leading-[1.6]">
-            의뢰인님께 딱 맞는<br />
-            매칭 카드를 보내드릴게요!
+            마지막 단계예요 — 이메일로 가입을 완료해주세요.
           </p>
         </div>
 
-        <div className="mx-auto max-w-[320px] bg-[#1C1A17] rounded-[32px] p-[6px] shadow-[0_18px_40px_rgba(28,26,23,0.18)]">
-          <div className="bg-white rounded-[26px] overflow-hidden">
-            <div className="px-5 pt-2.5 pb-1.5 text-[11px] text-[#1C1A17] font-semibold flex justify-between">
-              <span>9:41</span>
-              <span>●●● 100%</span>
+        <div className="mx-auto max-w-[360px] bg-white rounded-[18px] p-5 border border-[#1C1A17]/10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-[#E37A3A] flex items-center justify-center text-white text-[18px]">
+              📨
             </div>
-            <div className="px-4 pb-3 pt-1 border-b border-black/5 flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-[#E37A3A] flex items-center justify-center text-white text-[15px]">
-                💌
-              </div>
-              <div className="flex-1 text-left">
-                <div className="font-semibold text-[13px] text-[#1C1A17]">캐스팅</div>
-                <div className="text-[10px] text-[#8A8275] tabular-nums">070-7694-7070</div>
-              </div>
-            </div>
-            <div className="p-4">
-              <div className="bg-[#EFEDEB] rounded-[18px] rounded-bl-[6px] px-4 py-3 text-[13px] leading-[1.7] text-[#1C1A17] text-left whitespace-pre-line">
-{`[캐스팅] 당신의 캐스티를 소개합니다 🌏
-[Web발신]
-당신이 원하던 그 사람은
-소개팅 앱에 없어요 👀
-
-지난 번 제출해주신 답변을 바탕으로
-의뢰인님께 딱 맞는 상대를
-찾아왔답니다
-
-지금 바로 당신의 캐스티를 소개합니다!
-상대방 카드 확인하기:
-https://casting.publicvoid.im/...`}
-              </div>
+            <div>
+              <div className="font-semibold text-[15px] text-[#1C1A17]">가입 링크를 보냈어요</div>
+              {emailSentTo && (
+                <div className="text-[13px] text-[#4A443B] mt-0.5">{emailSentTo}</div>
+              )}
             </div>
           </div>
+          <ol className="space-y-2.5 text-[13.5px] text-[#1C1A17] leading-[1.55]">
+            <li className="flex gap-2.5">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-[#1C1A17] text-white text-[11px] font-bold flex items-center justify-center">1</span>
+              <span>받은 메일에 있는 <b>“가입 완료”</b> 버튼을 눌러주세요.</span>
+            </li>
+            <li className="flex gap-2.5">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-[#1C1A17] text-white text-[11px] font-bold flex items-center justify-center">2</span>
+              <span>로그인되면 매칭 카드 페이지로 자동 이동돼요.</span>
+            </li>
+            <li className="flex gap-2.5">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-[#1C1A17] text-white text-[11px] font-bold flex items-center justify-center">3</span>
+              <span>매칭 카드 준비에 <b>2~3일</b>이 걸려요. 준비되면 안내드려요.</span>
+            </li>
+          </ol>
         </div>
 
-        <div className="mx-auto max-w-[320px] mt-5 bg-[#EDE5D2] border border-[#1C1A17]/10 rounded-[14px] p-4 text-center">
+        <div className="mx-auto max-w-[360px] mt-4 bg-[#EDE5D2] border border-[#1C1A17]/10 rounded-[14px] p-4 text-center">
           <p className="text-[13px] text-[#1C1A17] leading-[1.65]">
-            📨 <b>2~3일 안</b>에 위와 같은 문자가 도착해요.
+            메일이 안 보이면 <b>스팸함</b>도 확인해주세요.
             <br />
-            <span className="text-[#4A443B]">스팸함도 꼭 확인해주세요!</span>
+            링크는 <b>24시간</b> 후 만료됩니다.
           </p>
+        </div>
+
+        <div className="mx-auto max-w-[360px] mt-4 text-center">
+          <button
+            onClick={onResend}
+            disabled={resendStatus === 'sending'}
+            className="text-[13px] text-[#4A443B] underline disabled:opacity-50"
+          >
+            메일이 안 와요 — 다시 보내기
+          </button>
+          {resendError && (
+            <p className="text-red-600 text-[12px] mt-2">{resendError}</p>
+          )}
         </div>
 
         <p className="mt-6 text-center text-[12px] text-[#8A8275]">

@@ -137,7 +137,7 @@ export type AxisNote = {
   narrative: string;
 };
 
-export type PairContent = {
+export type ConnectionContent = {
   opening: string;
   axisNotes: AxisNote[];
   simulation: string;
@@ -178,7 +178,7 @@ export type ConnectionReport = {
   perspective: Perspective;
   owner: ConnectionParticipant;
   partner: ConnectionParticipant;
-  pair: PairContent;
+  content: ConnectionContent;
   radar: RadarResult;
   meta: ConnectionReportMeta;
 };

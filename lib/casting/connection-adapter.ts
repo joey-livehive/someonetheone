@@ -77,7 +77,7 @@ export function adaptReadingCard(report: ConnectionReport): {
 } {
   return {
     viewerInsight: report.owner.person_content.personality,
-    matchOpening: report.pair.opening,
+    matchOpening: report.content.opening,
     candidateMatch: report.partner.person_content.datingStyle,
   };
 }
@@ -96,7 +96,7 @@ export function adaptChapter2Narratives(report: ConnectionReport): {
 }
 
 export function adaptMatchAnalysis(report: ConnectionReport): MatchAnalysis {
-  const { radar, pair } = report;
+  const { radar, content } = report;
   const labels = radar.axes.map(a => a.label);
   // radar.axes.values 는 owner/partner 각 0~100. MatchAnalysis.values 는 0~10 스케일
   // (radar-rules.md). 두 점수의 평균을 10 스케일로.
@@ -108,8 +108,8 @@ export function adaptMatchAnalysis(report: ConnectionReport): MatchAnalysis {
     matchRate: Math.round(radar.score),
     topPercent: radar.top_percent ?? 0,
     radarData: { labels, values },
-    simulation: pair.simulation,
-    notes: pair.axisNotes.map(n => n.narrative),
+    simulation: content.simulation,
+    notes: content.axisNotes.map(n => n.narrative),
   };
 }
 

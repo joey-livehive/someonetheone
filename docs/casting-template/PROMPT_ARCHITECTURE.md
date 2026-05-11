@@ -224,13 +224,14 @@ type Profile = {
 }
 ```
 
-### 7.2 `IdealCriteria` / `PersonContent` / `PairContent`
-(PR 1 `casting/profile/schema.py` 의 Pydantic 정의. v5 에서 `PairContent.axisNotes` 제거 — § 7.3 참조)
+### 7.2 `IdealCriteria` / `PersonContent` / `ConnectionContent`
+(PR 1 `casting/profile/schema.py` 의 Pydantic 정의. v5 에서 `pair → connection` 어휘 통일 + `axisNotes` 위계 이전 — § 7.3 참조)
 
-**v5 변경**: `PairContent` 는 narrative-only 로 정리.
+**v5 변경**: `PairContent` → `ConnectionContent` rename + narrative-only 로 정리.
+실제 구현은 PR 2 commit 3c-1 (rename) + 3c-2-a (axisNotes 위계 이전) 에서 박힘.
 
 ```ts
-type PairContent = {
+type ConnectionContent = {
   opening: string       // 매칭/소개 카피 도입부 (owner 시점 = matchOpening, partner 시점 = introOpening 통합)
   simulation: string    // 첫 만남 시뮬레이션 (카페 기본)
   // axisNotes 는 v5 에서 ConnectionReport.axisNotes 로 끌어올려짐
@@ -245,7 +246,7 @@ type ConnectionReport = {
   perspective: 'owner' | 'partner'
   owner:   { profile: Profile; person_content: PersonContent; ideal: IdealCriteria }
   partner: { profile: Profile; person_content: PersonContent; ideal?: IdealCriteria }
-  pair: PairContent
+  content: ConnectionContent
   // v5: radar 와 axisNotes 는 alternate (둘 중 하나만 의미값. 다른 한 쪽은 null).
   //   - partner.source='internal' 시: radar 채움, axisNotes=null  → 프론트 정량 차트 렌더
   //   - partner.source='insta'    시: axisNotes 채움, radar=null  → 프론트 4축 narrative 렌더

@@ -36,7 +36,7 @@ export function CoupleTestimonials() {
       <Section>
         <SectionLabel>CASE RECORDS</SectionLabel>
         <SectionTitle>
-          <HL>SomeOneTheOne</HL>에서
+          <HL>casting</HL>에서
           <br />
           성사된 만남들.
         </SectionTitle>

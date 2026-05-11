@@ -2,7 +2,7 @@
 
 ## 0. 목적
 
-`casting`은 **someonetheone의 업그레이드 버전**. 같은 서비스의 새 이름이며, 매칭/외부풀/리포트 시스템이 추가된 형태. 따라서 본 문서는 별개 서비스 도입이 아니라 **기존 데이터를 새 스키마로 전환(transition)**하는 절차다.
+`casting`은 **기존 개인화 리포트 흐름의 업그레이드 버전**. 같은 서비스의 새 이름이며, 매칭/외부풀/리포트 시스템이 추가된 형태. 따라서 본 문서는 별개 서비스 도입이 아니라 **기존 데이터를 새 스키마로 전환(transition)**하는 절차다.
 
 전환의 본질:
 - 기존 `theone_*` 테이블 데이터 → `casting_*` 테이블로 1:1 매핑
@@ -12,7 +12,7 @@
 - personalize 리포트(`theone_reports`)는 deliver 책임 끝까지 유지하되, 신규 가입자는 casting 흐름으로
 
 연관 문서:
-- 설계: `someonetheone/MATCHING_DESIGN.md`
+- 설계: `casting/MATCHING_DESIGN.md`
 - 스키마 SQL: `darakbang-backend/migrations/casting_schema.sql`
 - 모델: `darakbang-backend/darakbang/casting/models.py`
 
@@ -53,8 +53,8 @@
 |---|---|---|
 | `theone` DB 스키마 | **변경 없음** | (장기) deprecate, read-only |
 | `theone` 데이터 | **변경 없음** (read-only) | 보존 + casting과 1:1 매핑 |
-| someonetheone 백엔드 (`darakbang/someonetheone/`) | **변경 없음** (기존 사용자 deliver 책임) | (장기) 신규 가입 차단, deliver만 |
-| someonetheone 프론트 (`/report/*`) | **변경 없음** | (장기) deprecate |
+| 기존 개인화 리포트 백엔드 | **변경 없음** (기존 사용자 deliver 책임) | (장기) 신규 가입 차단, deliver만 |
+| 기존 개인화 리포트 프론트 (`/report/*`) | **변경 없음** | (장기) deprecate |
 | `theone_orders` webhook | **변경 없음** (기존 personalize 리포트 그대로 발급) | deprecate |
 | 공통 인프라 (`config/config.py`, `darakbang/database.py`) | **추가 only** (CASTING_DB_*, casting_engine) | 그대로 |
 | `casting` DB | **신규 생성** | 메인 |
@@ -491,7 +491,7 @@ theone DB는 모든 단계에서 read-only이므로 롤백해도 원본 100% 보
 - [ ] `casting_schema.sql` 스키마 검토
 - [ ] `darakbang/casting/models.py` SQLModel 검토
 - [ ] DB 운영자(SRE)와 prod RDS 신규 DB 생성 일정 협의
-- [ ] casting domain 또는 라우트 결정 (`casting.publicvoid.im` vs `someonetheone.publicvoid.im/casting`)
+- [ ] casting domain 또는 라우트 결정 (`casting.publicvoid.im` 권장)
 - [ ] PIPA 대응 카피 / 약관 / privacy policy 초안
 
 ### Phase 1 — 인프라 (Day 1)
@@ -707,7 +707,7 @@ DROP DATABASE casting;
 3. **동의 모델** — 옵트인 (첫 진입 동의 후 매칭 풀 진입) vs 옵트아웃 (즉시 매칭 풀, 사용자가 거부 가능)
    → **옵트인 추천**. 기본 이관은 `draft`, 참여 선택 후 `ready`
 4. **prod casting RDS 인스턴스** — 신규 instance vs 기존 RDS의 별도 DB
-5. **frontend 도메인** — `casting.publicvoid.im` 신규 vs `someonetheone.publicvoid.im` 그대로 사용 vs path 분리
+5. **frontend 도메인** — `casting.publicvoid.im` 신규 vs 기존 도메인 유지 vs path 분리
 6. **결제 PG 통합** — 기존 toss/iamport 그대로 사용 가정
 7. **personalize 서비스 deprecate 일정** — 신규 가입 차단 시점, 기존 결제 deliver 종료 시점
 8. **마케팅 메시지** — "서비스 업그레이드" 안내 카피

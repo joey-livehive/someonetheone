@@ -1,4 +1,4 @@
-# someonetheone 설문 구성 (V2)
+# casting 설문 구성 (V2)
 
 `/start` 페이지 진입부터 `/loading` 이동까지 전체 흐름과 문항을 정리한 문서.
 

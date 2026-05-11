@@ -1,6 +1,6 @@
-# someonetheone — 전체 앱 구조 & 디자인 핸드오프
+# casting — 전체 앱 구조 & 디자인 핸드오프
 
-> **목적**: `/start` 를 포함한 someonetheone 전체 앱의 라우트 / 플로우 / 디자인 시스템을 정리. 다른 AI 에 디자인 재설계를 위임하기 위한 입력 문서.
+> **목적**: `/start` 를 포함한 casting 전체 앱의 라우트 / 플로우 / 디자인 시스템을 정리. 다른 AI 에 디자인 재설계를 위임하기 위한 입력 문서.
 >
 > **주의**:
 > - 리포트 상세 페이지(`/report/[reportId]`)는 별도 문서 `REPORT_HANDOFF.md` 참조. 본 문서는 **리포트 외 전 영역**과 전체 맥락을 다룸.
@@ -57,7 +57,7 @@ intro(9문항) → picky(자유서술) → phone → bridge → detail(7문항) 
 
 ### 3.2 네비게이션
 
-- 공통 상단 bar: 이전 버튼(`handleBack` 으로 phase 역순 이동) + `someonetheone` 로고 + spacer
+- 공통 상단 bar: 이전 버튼(`handleBack` 으로 phase 역순 이동) + `casting` 로고 + spacer
 - `phase ∈ {bridge, photo, message, picky, done}` 은 **전용 레이아웃** (상단 bar 없는 중앙 정렬)
 
 ### 3.3 트래킹
@@ -112,7 +112,7 @@ tailwind `sto-*` 색상. **현재 주 플로우와 톤이 완전히 다름** —
 - `Gowun Dodum` (body sans 한글) — `--font-gowun`
 - `Gaegu` (손글씨 캡션) — `--font-gaegu`
 - `A2Z` (local OTF, sans 등록) — 거의 미사용
-- `PP Editorial Old` (local OTF) — **`someonetheone` 로고 워드마크 전용**
+- `PP Editorial Old` (local OTF) — **`casting` 로고 워드마크 전용**
 
 ### 4.5 시각 모티프 (현재)
 
@@ -168,7 +168,7 @@ components/
 ```
 
 - **Node**: 20.19.x / **npm**: 10.x
-- **도메인**: `someonetheone.publicvoid.im`
+- **도메인**: `casting.publicvoid.im`
 
 ---
 

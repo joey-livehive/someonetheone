@@ -50,7 +50,7 @@ function SuccessInner() {
             pixelData: {
               value: Number(amount),
               currency: 'KRW',
-              content_ids: ['someonetheone'],
+              content_ids: ['casting'],
               content_name: orderIdParam,
             },
           });

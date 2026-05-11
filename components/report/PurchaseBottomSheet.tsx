@@ -97,7 +97,7 @@ export function PurchaseBottomSheet({ open, onClose, reportId }: PurchaseBottomS
       pixelData: {
         value: selected.discountedPrice,
         currency: 'KRW',
-        content_ids: ['someonetheone'],
+        content_ids: ['casting'],
         content_name: `report_${reportId}_${selected.id}`,
       },
     });

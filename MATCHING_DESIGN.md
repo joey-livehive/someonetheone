@@ -2,7 +2,7 @@
 
 ## 0. 개요
 
-`casting`은 someonetheone과 별개로 운영되는 **실제 매칭/소개** 서비스. 별도 MySQL DB(`casting`), 별도 백엔드 모듈(`darakbang/casting/`), 별도 API prefix(`/casting/`), 별도 도메인 가능(`casting.publicvoid.im`).
+`casting`은 기존 개인화 리포트 흐름과 분리해 운영되는 **실제 매칭/소개** 서비스. 별도 MySQL DB(`casting`), 별도 백엔드 모듈(`darakbang/casting/`), 별도 API prefix(`/casting/`), 별도 도메인 가능(`casting.publicvoid.im`).
 
 사용자가 본인 정보 + 이상형을 입력하고 결제하면, 시스템이 회원 풀과 외부 풀(인스타·트위터·운영자 큐레이션 등)에서 임계값 통과 후보를 찾아 결제 크레딧만큼 매칭 리포트를 생성·전달한다. 리포트는 처음부터 unlock된 상태로 제공되며, 사용자는 분석을 보고 좋아요/패스/연결 시도 액션을 취한다. 외부 후보의 경우 회사가 SNS DM으로 연결을 시도한다.
 
@@ -97,7 +97,7 @@ UID prefix:
 
 ### DB 분리
 
-별도 MySQL DB: `casting`. someonetheone과 완전 격리.
+별도 MySQL DB: `casting`. 기존 개인화 리포트 DB와 완전 격리.
 
 ```python
 # config/database.py
@@ -179,7 +179,7 @@ UNIQUE(viewer_guest_uid, candidate_uid, candidate_source, match_batch_id)
 ```
 darakbang-backend/
   darakbang/
-    casting/                    # 신규 모듈 (someonetheone와 독립)
+    casting/                    # 신규 모듈 (기존 개인화 리포트 흐름과 독립)
       __init__.py
       models.py                 # SQLModel + Enum
       router.py                 # /casting/* 라우터
@@ -818,7 +818,7 @@ class CastingMatchReview:
 
 ## 12. API 엔드포인트
 
-모든 endpoint는 `/casting/` prefix. someonetheone과 완전 분리.
+모든 endpoint는 `/casting/` prefix. 기존 개인화 리포트 흐름과 완전 분리.
 
 ### 인증 / 가입
 ```
@@ -944,7 +944,7 @@ SOURCE_POLICY = { ... }   # 위 8절 참조
 5. **PIPA 대응 세부 UX** — 외부 데이터 고지 + 통합/삭제 선택권은 필수. 화면 문구와 보존기간 세부 정책 확정 필요
 6. **리뷰 태그 set** — 표준화된 태그 vocabulary 정의
 7. **사진 face embedding** — InsightFace 등 라이브러리 도입 시점
-8. **someonetheone과의 관계** — 두 서비스의 사용자 동일성 인식 여부 (별도 풀 vs 통합 풀)
+8. **기존 개인화 리포트 흐름과의 관계** — 사용자 동일성 인식 여부 (별도 풀 vs 통합 풀)
 
 ---
 

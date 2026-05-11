@@ -1,5 +1,5 @@
 /**
- * Meta Pixel + DB 이벤트 트래킹 — someonetheone
+ * Meta Pixel + DB 이벤트 트래킹 — casting
  */
 
 declare global {
@@ -72,7 +72,7 @@ function devLog(label: string, params?: Record<string, unknown>) {
 export function trackPageView(pageName: string) {
   if (typeof window !== 'undefined' && window.fbq) {
     window.fbq('track', 'ViewContent', {
-      content_ids: ['someonetheone'], content_type: 'product', content_name: pageName,
+      content_ids: ['casting'], content_type: 'product', content_name: pageName,
     });
   }
   sendEvent('page_view', pageName);
@@ -82,7 +82,7 @@ export function trackPageView(pageName: string) {
 /** Lead — "이상형 알려주기" 버튼 클릭 */
 export function trackLead() {
   if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', 'Lead', { content_ids: ['someonetheone'], content_type: 'product', content_name: 'start' });
+    window.fbq('track', 'Lead', { content_ids: ['casting'], content_type: 'product', content_name: 'start' });
   }
   sendEvent('click', 'cta_start');
   devLog('[Event] Lead / cta_start');
@@ -104,7 +104,7 @@ export function trackPicky(value: string) {
 export function trackCompleteRegistration(email: string) {
   if (typeof window !== 'undefined' && window.fbq) {
     window.fbq('track', 'CompleteRegistration', {
-      content_ids: ['someonetheone'], content_type: 'product', content_name: 'email', status: true,
+      content_ids: ['casting'], content_type: 'product', content_name: 'email', status: true,
     });
   }
   sendEvent('submit', 'email', { email });
@@ -115,7 +115,7 @@ export function trackCompleteRegistration(email: string) {
 export function trackPhone(phone: string) {
   if (typeof window !== 'undefined' && window.fbq) {
     window.fbq('track', 'Contact', {
-      content_ids: ['someonetheone'], content_type: 'product', content_name: 'phone',
+      content_ids: ['casting'], content_type: 'product', content_name: 'phone',
     });
   }
   sendEvent('submit', 'phone', { phone });
@@ -138,7 +138,7 @@ export function trackMessage(hasMessage: boolean) {
 export function trackSubmitApplication() {
   if (typeof window !== 'undefined' && window.fbq) {
     window.fbq('track', 'SubmitApplication', {
-      content_ids: ['someonetheone'], content_type: 'product', content_name: 'complete',
+      content_ids: ['casting'], content_type: 'product', content_name: 'complete',
     });
   }
   sendEvent('complete', 'survey_done');

@@ -59,7 +59,7 @@ export function CastingProcess() {
       <Section tight>
         <SectionLabel>BEHIND THE SCENES</SectionLabel>
         <SectionTitle>
-          <HL>SomeOneTheOne</HL>에서
+          <HL>casting</HL>에서
           <br />
           사람을 찾는 방식.
         </SectionTitle>

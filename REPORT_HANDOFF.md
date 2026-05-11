@@ -1,4 +1,4 @@
-# someonetheone 리포트 상세 페이지 — 현재 상태 작업지시서
+# casting 리포트 상세 페이지 — 현재 상태 작업지시서
 
 > **목적**: 존댓말 버전 리포트 (`STO-2604-F02`, `STO-2604-M02`)의 현재 구현 상태를 다른 AI에 전달해 **디자인 재설계**를 받기 위함.
 >
@@ -23,7 +23,7 @@ A=답변 중간 수준, B=자유응답 포함, C=본인 정보만.
 ## 2. 프로젝트 구조
 
 ```
-someonetheone/
+casting/
 ├── app/
 │   ├── globals.css                          # 브랜드 토큰(--bg, --ink, --orange 등) + blur-text/reveal-base 유틸
 │   ├── layout.tsx                            # Hahmlet/Gowun Dodum/Gaegu 폰트 로드 + Meta Pixel
@@ -223,7 +223,7 @@ someonetheone/
   {
     value: selected.discountedPrice,       // 39900 | 69900 | 99900
     currency: 'KRW',
-    content_ids: ['someonetheone'],
+    content_ids: ['casting'],
     content_name: `report_${reportId}_${selected.id}`
   }
   ```

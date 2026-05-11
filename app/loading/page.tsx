@@ -563,7 +563,7 @@ function RadarPanel({ t }: { t: number }) {
         marginBottom: '8px',
       }}
     >
-      {/* someonetheone 톤 카드 박스 */}
+      {/* casting 톤 카드 박스 */}
       <div
         className="relative rounded-3xl p-5 flex items-center justify-center"
         style={{
@@ -739,7 +739,7 @@ function BarPanel({ t }: { t: number; startedAt?: number }) {
   );
 }
 
-/* ────────── Cards (auto-rotate, someonetheone 톤) ────────── */
+/* ────────── Cards (auto-rotate, casting 톤) ────────── */
 function CardPanel({ cards }: { cards: CardData[] }) {
   const [idx, setIdx] = useState(0);
   const [animating, setAnimating] = useState(false);

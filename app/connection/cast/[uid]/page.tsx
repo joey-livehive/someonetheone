@@ -41,6 +41,7 @@ import {
   adaptSpectrumNotes,
   adaptUserAnswers,
   adaptViewerInsight,
+  ownerHasRealPhoto,
 } from '@/lib/casting/connection-adapter';
 
 // partner 페이지 한정 fixed 카피 — receiver 톤 (PR #17 의 ReceiverMatchReport 기반)
@@ -82,6 +83,8 @@ export default async function PartnerCastPage({ params }: PageProps) {
   const isInstaPartner = report.partner.profile.source === 'insta';
   // partner.source=insta 면 partner 는 설문 답변한 적 없음 → ApplicationSummary 생략.
   const showApplicationSummary = !isInstaPartner;
+  // 실 owner 사진이 있을 때만 blur — default placeholder 는 그대로 노출.
+  const blurOwnerPhoto = ownerHasRealPhoto(report);
   const partnerInsight = adaptViewerInsight(report, 'partner');
   const bipolarAxes = adaptBipolarAxes(report);
   const spectrumNotes = adaptSpectrumNotes(report);
@@ -109,6 +112,7 @@ export default async function PartnerCastPage({ params }: PageProps) {
             candidate={ownerCandidate}
             sectionLabel={RECEIVER_COPY.teaserSectionLabel}
             sectionTitle={RECEIVER_COPY.teaserSectionTitle}
+            blurPhoto={blurOwnerPhoto}
           />
         </TrackSection>
 

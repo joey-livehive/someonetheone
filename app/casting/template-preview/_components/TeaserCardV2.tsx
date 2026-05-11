@@ -27,6 +27,11 @@ interface TeaserCardV2Props {
   sectionLabel?: string;
   /** 상단 SectionTitle 카피 override. <HL> 강조 부분만 highlight 로 받음. */
   sectionTitle?: { plain: string; highlight: string };
+  /**
+   * 사진에 blur 처리 적용 여부. cast page(partner 시점)에서 owner 실사진 노출 시
+   * 신원 보호용으로 사용. default photo(성별별 placeholder) 에는 미적용.
+   */
+  blurPhoto?: boolean;
 }
 
 // TeaserCard v2 — 4행 메타 레이아웃
@@ -42,6 +47,7 @@ export function TeaserCardV2({
   recommendationFootnote,
   sectionLabel,
   sectionTitle,
+  blurPhoto,
 }: TeaserCardV2Props) {
   const tone = useTone();
   const labelText = sectionLabel ?? '캐스팅 된 사람!';
@@ -70,7 +76,7 @@ export function TeaserCardV2({
                 priority
                 sizes="(max-width: 480px) 100vw, 480px"
                 draggable={false}
-                className="object-cover select-none"
+                className={`object-cover select-none${blurPhoto ? ' [filter:blur(14px)] scale-110' : ''}`}
                 style={{
                   pointerEvents: 'none',
                   WebkitUserSelect: 'none',

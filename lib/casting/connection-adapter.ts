@@ -140,6 +140,14 @@ function participantToCandidate(
 }
 
 /**
+ * owner 가 실제 업로드한 사진이 있는지. cast page(partner 시점) 의 blur 결정용.
+ * 성별별 default placeholder 는 blur 대상이 아니다.
+ */
+export function ownerHasRealPhoto(report: ConnectionReport): boolean {
+  return !!report.owner.profile.photos?.[0]?.url;
+}
+
+/**
  * ReadingCard 의 viewerInsight 카피. perspective 별 prefix 톤 강제.
  * - 'owner'   : owner.personality 그대로 (의뢰인 자기 분석)
  * - 'partner' : partner.personality + "당신은 이런 분" prefix (인스타/내부 분기)

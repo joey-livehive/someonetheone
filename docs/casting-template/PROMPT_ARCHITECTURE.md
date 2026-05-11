@@ -329,6 +329,7 @@ dead 삭제는 정확성이 생명 → PR 분리로 안전 핀.
 - ✅ **라우트 = `/connection/{uid}/casting` + `/connection/{uid}/cast`** (캐스팅 brand + 영문법 정확).
 - ✅ FILTER_INSTA 신규 프롬프트 (`FILTER_<SOURCE>` 패턴 — 미래 확장 대비).
 - ✅ Lazy 정책: PROFILE_INSTA eager / PERSON·PAIR lazy + DB 캐시.
+- ✅ `PairContent.opening` 단일 필드명 채택 (owner/partner 시점 모두 `opening`, `matchOpening`/`introOpening` 분리 안 함). (jk @ 7e0ac46)
 
 ---
 
@@ -337,7 +338,6 @@ dead 삭제는 정확성이 생명 → PR 분리로 안전 핀.
 - [ ] FILTER_INSTA 의 입출력 스키마 + 비용 특성 (vision 사용 여부, 풀당 호출 비용)
 - [ ] PROFILE_INSTA 캐싱 키 (handle + posts_hash?) / TTL
 - [ ] DB 캐시 vs 메모리 캐시 vs 어댑터 패턴 — PR 2 Step 0 에서 결정
-- [ ] `PairContent.opening` 단일 필드명 채택 (PR 2 Step 2 에서)
 - [ ] 미래 설문 v2 에서 4축 직접 측정 항목 추가 — 별 PR
 - [ ] 미리보기 라우트 처리 (개발용 유지 vs PR 3 dead 삭제)
 

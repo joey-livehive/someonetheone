@@ -102,8 +102,8 @@ internal 설문   ──►   전화번호 들어옴 → ready                  
 | 1 | **FILTER_INSTA** | 인스타 raw (handle/bio/포스트/사진) | `{ready: bool, reason?: string}` | 풀링 직후 1회/사람 (배치) | `darakbang-backend/.../prompts/filter_insta.py` (PR 2 신규) |
 | 2 | **PROFILE_INSTA** | ready=true 인스타 raw | `Profile` | FILTER_INSTA 통과 직후 **eager** | `darakbang-backend/.../prompts/profile_insta.py` ✅ |
 | 3 | **PERSON** | `Profile` (source 무관) | `PersonContent` | 매칭 페이지 첫 호출 시 **lazy** + DB 캐시 | `darakbang-backend/.../prompts/person.py` ✅ |
-| 4 | **PAIR_FOR_OWNER** | owner/partner `PersonContent` × 2 + radar | `PairContent` (owner 시점) | `/connection/casting/{uid}` 첫 호출 시 **lazy** + DB 캐시 | `darakbang-backend/.../prompts/pair_for_owner.py` ✅ |
-| 5 | **PAIR_FOR_PARTNER** | owner/partner `PersonContent` × 2 + radar | `PairContent` (partner 시점) | `/connection/cast/{uid}` 첫 호출 시 **lazy** + DB 캐시 | `darakbang-backend/.../prompts/pair_for_partner.py` ✅ |
+| 4 | **CONNECTION_FOR_OWNER** | owner/partner `PersonContent` × 2 + radar | `ConnectionContent` (owner 시점) | `/connection/casting/{uid}` 첫 호출 시 **lazy** + DB 캐시 | `darakbang-backend/.../prompts/connection_for_owner.py` ✅ |
+| 5 | **CONNECTION_FOR_PARTNER** | owner/partner `PersonContent` × 2 + radar | `ConnectionContent` (partner 시점) | `/connection/cast/{uid}` 첫 호출 시 **lazy** + DB 캐시 | `darakbang-backend/.../prompts/connection_for_partner.py` ✅ |
 
 ✅ = PR 1 에 박힘. PR 2 에서 호출처 연결.
 
@@ -123,8 +123,8 @@ internal 설문   ──►   전화번호 들어옴 → ready                  
 | **partner Profile (insta)** | LLM + vision (큰 비용) | ready=true 직후 **eager** | DB 영속 |
 | owner PersonContent | LLM 1회 | `/connection/casting/{uid}` 첫 호출 시 **lazy** | DB 캐시 (Profile.uid 기준) |
 | partner PersonContent | LLM 1회 | 〃 | 〃 |
-| PairContent (owner 시점) | LLM 1회 | `/connection/casting/{uid}` 첫 호출 시 **lazy** | DB 캐시 (connection_uid 기준) |
-| PairContent (partner 시점) | LLM 1회 | `/connection/cast/{uid}` 첫 호출 시 **lazy** (owner 가 "받기" 누른 후에 partner 가 페이지 받음) | DB 캐시 (connection_uid 기준) |
+| ConnectionContent (owner 시점) | LLM 1회 | `/connection/casting/{uid}` 첫 호출 시 **lazy** | DB 캐시 (connection_uid 기준) |
+| ConnectionContent (partner 시점) | LLM 1회 | `/connection/cast/{uid}` 첫 호출 시 **lazy** (owner 가 "받기" 누른 후에 partner 가 페이지 받음) | DB 캐시 (connection_uid 기준) |
 
 **핵심 원칙**: *"key 값이 비었으면 그때 생성, 한 번 만들면 캐시"*.
 
@@ -145,7 +145,8 @@ internal 설문   ──►   전화번호 들어옴 → ready                  
 | `sociability` | 좁고 깊게 | 넓고 폭넓게 | 인간관계 폭 |
 | `action` | 안정 추구 | 모험 추구 | 행동 성향 |
 
-→ 인스타 합본 출력의 `selfExpression / behavior` 라벨은 **deprecated**. PR 2 에서 컴포넌트 통일.
+→ 인스타 합본 출력의 `selfExpression / behavior` 라벨은 **deprecated**.
+→ **v5 통일 완료** (PR 2 commit 3c-2-a): 운영 라우트 (`/connection/casting/{uid}`) 는 `energy / judgment / sociability / action` 4축만 사용. 옛 라벨 잔존은 dev/admin 도구 (`/casting/insta-template-preview`, `/casting/receiver-template-preview` 등) 에만 — **PR 3 dead 영역**.
 
 ### 6.2 산출 방식
 

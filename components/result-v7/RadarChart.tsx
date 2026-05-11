@@ -26,7 +26,7 @@ export function RadarChart({ data }: { data: MatchAnalysis['radarData'] }) {
         datasets: [
           {
             label: '일치도',
-            data: visibleRadarValues(data.values),
+            data: visibleRadarValues(data.values ?? []),
             backgroundColor: 'rgba(201,169,97,0.3)',
             borderColor: '#C9A961',
             borderWidth: 2,

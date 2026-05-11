@@ -5,11 +5,18 @@ interface HuntBoxV2Props {
   stats: ReportData['huntStats'];
   footer?: ReactNode;
   sourceLabel?: string;
+  /** sourceLabel 바로 아래 안내 카피 (인스타 케이스의 연락 시도 안내 등). */
+  sourceFootnote?: ReactNode;
 }
 
 // HuntBox v2 매칭 페이지 전용. v1 HuntBox와 동일하지만 "찾은 장소: 캐스팅 내부 POOL" 부분을
 // 우표(stamp) 스타일로 강조 — mustard pill + 살짝 회전 + drop shadow
-export function HuntBoxV2({ stats, footer, sourceLabel = '캐스팅 내부 POOL' }: HuntBoxV2Props) {
+export function HuntBoxV2({
+  stats,
+  footer,
+  sourceLabel = '캐스팅 내부 POOL',
+  sourceFootnote,
+}: HuntBoxV2Props) {
   const items: { n: number; unit: string; label: string }[] = [
     { n: stats.offlineGyms, unit: '곳', label: '오프라인' },
     { n: stats.instagramProfiles, unit: '명', label: 'Instagram 프로필' },
@@ -42,6 +49,7 @@ export function HuntBoxV2({ stats, footer, sourceLabel = '캐스팅 내부 POOL'
           >
             {sourceLabel}
           </div>
+          {sourceFootnote}
         </div>
 
         <div className="pt-3 border-t border-dashed border-brand-ink/20">

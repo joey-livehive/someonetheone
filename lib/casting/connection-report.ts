@@ -199,21 +199,13 @@ export class ConnectionReportFetchError extends Error {
   }
 }
 
-/**
- * Owner 시점 ConnectionReport 를 백엔드에서 가져온다.
- *
- * Next.js server component 에서 호출한다. 캐시는 짧게 (revalidate 30s) —
- * 실제 cache 는 백엔드의 person/pair JSON 캐시가 담당하므로 프론트는 짧게
- * 가져와도 LLM 재호출 위험 없음.
- */
-export async function fetchOwnerConnectionReport(
+async function _fetchConnectionReport(
+  path: string,
   uid: string,
 ): Promise<ConnectionReport> {
   const res = await fetch(
-    `${CASTING_API_BASE}/casting/connection/casting/${encodeURIComponent(uid)}`,
-    {
-      next: { revalidate: 30 },
-    },
+    `${CASTING_API_BASE}${path}${encodeURIComponent(uid)}`,
+    { next: { revalidate: 30 } },
   );
   if (!res.ok) {
     let detail = res.statusText;
@@ -226,4 +218,25 @@ export async function fetchOwnerConnectionReport(
     throw new ConnectionReportFetchError(res.status, detail);
   }
   return (await res.json()) as ConnectionReport;
+}
+
+/**
+ * Owner 시점 ConnectionReport (`/casting/{uid}`).
+ *
+ * Next.js server component 에서 호출한다. revalidate 30s — 백엔드 LLM 캐시가
+ * 진실의 소스이므로 짧은 revalidate 안전.
+ */
+export async function fetchOwnerConnectionReport(
+  uid: string,
+): Promise<ConnectionReport> {
+  return _fetchConnectionReport('/casting/connection/casting/', uid);
+}
+
+/**
+ * Partner 시점 ConnectionReport (`/cast/{uid}`) — 소개받은 사람 리포트.
+ */
+export async function fetchPartnerConnectionReport(
+  uid: string,
+): Promise<ConnectionReport> {
+  return _fetchConnectionReport('/casting/connection/cast/', uid);
 }

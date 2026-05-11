@@ -1,18 +1,18 @@
-// Partner 시점 소개받은 사람 리포트 (PR #17 의 ReceiverMatchReport 패턴 반영).
+// Partner 시점 소개받은 사람 리포트 (PR #17 의 ReceiverMatchReport 패턴).
 //
 // 라우트: /connection/cast/{uid}
 // perspective: 'partner' — "당신을 마음에 들어한 분이 있어요" 안내 톤
 //
 // owner(의뢰인) 정보를 partner 에게 소개. 화면 흐름:
-//   - ReceiverHero (partner 가 받는 안내 톤 hero)
+//   - ReceiverHero (받는 안내 톤)
 //   - CasterNoteSection (owner 매력 3 bullet)
 //   - HuntBox 없음 (의뢰인이 직접 캐스팅한 흐름 → 찾아온 경로 부적절)
-//   - TeaserCard (owner 사진 + 메타) — owner 사진 있으면 blur, 없으면 성별별 default
+//   - TeaserCard — owner 실제 사진 있으면 blur 처리 / 없으면 성별별 default
 //   - ReadingCard (receiver 톤 fixed copy)
 //   - CandidateDetailSection (owner narrative)
-//   - Chapter3InstaSpectrum (4축 양극 막대) — perspective 무관 4축 사용
-//   - Chapter4Simulation (첫 만남 시뮬레이션)
-//   - ApplicationSummary (partner 본인 답변, receiver 톤 override)
+//   - Chapter3: internal → Chapter3V2(radar 6축), insta → Chapter3InstaSpectrum(4축)
+//   - Chapter4Simulation
+//   - ApplicationSummary — partner.source=insta 면 생략 (답변한 적 없음)
 //   - MeetOrPassCta mode="receiver"
 
 import { notFound } from 'next/navigation';
@@ -34,13 +34,13 @@ import {
   ConnectionReportFetchError,
   fetchPartnerConnectionReport,
 } from '@/lib/casting/connection-report';
-import type { Candidate } from '@/lib/report/types';
-import type { ConnectionReport } from '@/lib/casting/connection-report';
 import {
   adaptBipolarAxes,
   adaptMatchAnalysis,
+  adaptOwnerCandidate,
   adaptSpectrumNotes,
   adaptUserAnswers,
+  adaptViewerInsight,
 } from '@/lib/casting/connection-adapter';
 
 // partner 페이지 한정 fixed 카피 — receiver 톤 (PR #17 의 ReceiverMatchReport 기반)
@@ -57,24 +57,7 @@ const RECEIVER_COPY = {
   chapter1Lead:
     '그럼 이 분이 어떤 사람인지 더 자세히 볼까요? 만나신다면 어떤 분일지 미리 알려드릴게요.',
   chapter2Lead: '이 분의 4가지 성향 축을 정리해봤어요.',
-  summaryHeaderLabel: '📋 답변 정리',
-  summaryHeading: '당신의 취향',
-  summarySubheading: '당신이 남겨 주신 그대로 담아왔어요.',
 } as const;
-
-const DEFAULT_PHOTO_BY_GENDER = {
-  male: '/images/casting/casting_man.webp',
-  female: '/images/casting/casting_woman_1.webp',
-} as const;
-
-const OCCUPATION_LABEL: Record<string, string> = {
-  student: '학생',
-  office: '회사원',
-  professional: '전문직',
-  public: '공직',
-  freelance: '사업/프리랜서',
-  other_job: '기타',
-};
 
 type PageProps = {
   params: Promise<{ uid: string }>;
@@ -93,23 +76,16 @@ export default async function PartnerCastPage({ params }: PageProps) {
     throw err;
   }
 
-  // partner page 의 'candidate' = owner (의뢰인) — 소개받는 사람에게 보여줄 대상.
-  const ownerCandidate = buildOwnerCandidate(report);
+  // partner page 의 'candidate' = owner (의뢰인). 소개받는 사람에게 보여줄 대상.
+  const ownerCandidate = adaptOwnerCandidate(report);
   const ownerPersonContent = report.owner.person_content;
-  // partner.source=insta 면 partner(이 페이지를 받는 사람)는 설문 답변한 적이 없음 — ApplicationSummary 생략.
-  const showApplicationSummary = report.partner.profile.source !== 'insta';
-  // chapter 2 분기: internal partner 면 radar 6축 차트(Chapter3V2), insta 면 4축 양극 막대.
   const isInstaPartner = report.partner.profile.source === 'insta';
-  // viewerInsight (partner 본인 분석) — 첫 단락에 "당신은 이런 분이에요" 톤 명시.
-  // PERSON LLM 출력이 3인칭 호칭 없는 분석이라 prefix 로 "당신" 시점 강제.
-  const partnerInsight = isInstaPartner
-    ? `AI가 인스타그램에서 분석한 모습으로는, 당신은 이렇게 비춰져요.\n\n${report.partner.person_content.personality}`
-    : `당신이 남겨주신 답변을 보면, 당신은 이런 분으로 분석돼요.\n\n${report.partner.person_content.personality}`;
+  // partner.source=insta 면 partner 는 설문 답변한 적 없음 → ApplicationSummary 생략.
+  const showApplicationSummary = !isInstaPartner;
+  const partnerInsight = adaptViewerInsight(report, 'partner');
   const bipolarAxes = adaptBipolarAxes(report);
   const spectrumNotes = adaptSpectrumNotes(report);
   const match = adaptMatchAnalysis(report);
-  // ApplicationSummary 는 owner 의 답변을 의뢰인 톤으로 보여준다 (case 1 과 동일).
-  // partner+insta 면 ApplicationSummary 자체 생략.
   const ownerAnswers = adaptUserAnswers(report);
 
   const publishedAt = formatPublishedAt(report.meta.generated_at);
@@ -198,46 +174,6 @@ export default async function PartnerCastPage({ params }: PageProps) {
       </ReportShell>
     </main>
   );
-}
-
-function buildOwnerCandidate(report: ConnectionReport): Candidate {
-  const ownerProfile = report.owner.profile;
-  const ownerPC = report.owner.person_content;
-  const basics = ownerProfile.basics;
-
-  const realPhoto = ownerProfile.photos?.[0]?.url;
-  const fallback =
-    basics.gender === 'female'
-      ? DEFAULT_PHOTO_BY_GENDER.female
-      : DEFAULT_PHOTO_BY_GENDER.male;
-  const photoUrl = realPhoto ?? fallback;
-
-  return {
-    nickname: '○○○',
-    faceType: ownerPC.faceType,
-    ageRange: basics.age_band || (basics.age ? `${basics.age}세` : ''),
-    ageDetail: '',
-    occupation:
-      basics.job_detail ||
-      (basics.occupation ? OCCUPATION_LABEL[basics.occupation] ?? basics.occupation : '') ||
-      basics.occupation_band ||
-      '',
-    occupationDetail: basics.job_detail || '',
-    personality: '',
-    location: basics.region_code || '',
-    foundAt: '내부 POOL',
-    hobbies: { visible: [], hidden: 0 },
-    daySchedule: [],
-    background: ownerPC.personality,
-    secretAppeal: '',
-    teaserPhoto: photoUrl,
-    detailPhoto: photoUrl,
-    mbti: basics.mbti || undefined,
-    height: basics.height_cm
-      ? `${basics.height_cm}cm`
-      : basics.height_band || undefined,
-    recommendation: ownerPC.casterHeadline,
-  };
 }
 
 function formatPublishedAt(iso: string | null | undefined): string {

@@ -42,18 +42,13 @@ import {
   adaptReadingCard,
   adaptSpectrumNotes,
   adaptUserAnswers,
+  defaultPhotoFor,
 } from '@/lib/casting/connection-adapter';
 
 const INSTA_RECOMMENDATION_FOOTNOTE =
   '*인스타그램에서 찾아온 분이라 일부는 추정값이지만, 정확도는 약 73%에 달해요.';
 const INSTA_CTA_STEP1_NOTE =
   '인스타그램에서 엄선해서 찾아온 분에요! 저희가 스토리 태그·DM 등 가능한 모든 경로로 연락 시도할 예정입니다! 최선을 다해 연락망 확보해서 꼭 연결해드릴게요.';
-
-// partner.source=insta 시 실제 사진 노출 X — 성별별 default 강제.
-const INSTA_DEFAULT_PHOTO_BY_GENDER = {
-  male: '/images/casting/casting_man.webp',
-  female: '/images/casting/casting_woman_1.webp',
-} as const;
 
 type PageProps = {
   params: Promise<{ uid: string }>;
@@ -76,11 +71,10 @@ export default async function OwnerCastingPage({ params }: PageProps) {
   const candidate = adaptCandidate(report);
   // insta 케이스는 사진 무조건 default (실제 인스타 사진 노출 X)
   const finalCandidate: Candidate = isInsta
-    ? {
-        ...candidate,
-        teaserPhoto: defaultPhotoFor(report.partner.profile.basics.gender),
-        detailPhoto: defaultPhotoFor(report.partner.profile.basics.gender),
-      }
+    ? (() => {
+        const photo = defaultPhotoFor(report.partner.profile.basics.gender);
+        return { ...candidate, teaserPhoto: photo, detailPhoto: photo };
+      })()
     : candidate;
   const casterNote = adaptCasterNote(report);
   const huntStats = adaptHuntStats(report);
@@ -185,12 +179,6 @@ export default async function OwnerCastingPage({ params }: PageProps) {
       </ReportShell>
     </main>
   );
-}
-
-function defaultPhotoFor(gender: 'male' | 'female' | null | undefined): string {
-  return gender === 'female'
-    ? INSTA_DEFAULT_PHOTO_BY_GENDER.female
-    : INSTA_DEFAULT_PHOTO_BY_GENDER.male;
 }
 
 function formatPublishedAt(iso: string | null | undefined): string {

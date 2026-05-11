@@ -62,14 +62,14 @@
 ─────────              ────────────────────             ──────────────────             ────────────────             ────────────────                    ──────────────────
 internal 설문   ──►   전화번호 들어옴 → ready                                                                       ┌─ PAIR_FOR_OWNER ─►              ConnectionReport
                                                        internal_adapter                                            │  (perspective='owner')           perspective='owner'
-                                                       (코드, deterministic)                                       │                                  ← /connection/{uid}/casting
+                                                       (코드, deterministic)                                       │                                  ← /connection/casting/{uid}
                                                           ↓                                                        │
                                                        Profile  ─►  PERSON 프롬프트  ─►  PersonContent  ──┐         │
                                                        (공통)       (source-agnostic)   (공통)            ├──►     │
                                                           ↑                                              │         │
 인스타 raw      ──►   FILTER_INSTA (LLM)   ──ready──►                                                     │         └─ PAIR_FOR_PARTNER ─►            ConnectionReport
                      (★ 매칭 가능 후보)                                                                    │            (perspective='partner')         perspective='partner'
-                                                       PROFILE_INSTA (LLM, vision)                       │                                          ← /connection/{uid}/cast
+                                                       PROFILE_INSTA (LLM, vision)                       │                                          ← /connection/cast/{uid}
 ```
 
 ### 2.3 핵심 결정: trait_axes 정량값은 Profile 단계 확정

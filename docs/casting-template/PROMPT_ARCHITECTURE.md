@@ -366,9 +366,9 @@ PR 2 commit 1 에서 박힌 결정. 매칭 풀 쿼리 / 리포트 발간 / FILTE
 2. `casting_external_profiles.status` 신규 컬럼 추가 + `filter_status` 에서 backfill
 3. `casting_profiles.status` 신규 컬럼 추가 + `profile_status='ready'` 는 신규 `status='active'` 로 backfill
 4. `casting_profiles.profile_json LONGTEXT NULL` 신규 컬럼 추가
-5. rolling 배포 중 old/new 코드가 같이 떠도 깨지지 않도록 legacy 컬럼과 신규 `status` 컬럼을 trigger 로 dual-write
+5. backend 배포 직전 재실행해 old code 가 그 사이 쓴 legacy 컬럼 값을 신규 `status` 컬럼에 다시 동기화
 
-Phase 1 에서는 DB 를 먼저 올려도 기존 배포본이 깨지지 않도록 `profile_status` / `filter_status` 를 rename/drop 하지 않는다. `casting_match_reports.status='ready'` 와 `casting_preview_reports.status='ready'` 값도 즉시 바꾸지 않고, 새 코드가 `ready` / `published` 를 둘 다 읽을 수 있게 한 뒤 별도 contract 단계에서 `published` 로 정리한다.
+Phase 1 에서는 DB 를 먼저 올려도 기존 배포본이 깨지지 않도록 `profile_status` / `filter_status` 를 rename/drop 하지 않는다. production RDS 는 현재 backend 계정으로 trigger 생성이 불가능하므로, dual-write trigger 대신 배포 직전 SQL 재실행으로 drift 를 닫는다. `casting_match_reports.status='ready'` 와 `casting_preview_reports.status='ready'` 값도 즉시 바꾸지 않고, 새 코드가 `ready` / `published` 를 둘 다 읽을 수 있게 한 뒤 별도 contract 단계에서 `published` 로 정리한다.
 
 SQL 은 idempotent (information_schema 가드 + 조건부 UPDATE). 한 번 더 실행해도 안전.
 

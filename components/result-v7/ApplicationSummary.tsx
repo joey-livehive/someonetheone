@@ -1,4 +1,5 @@
 import type { UserAnswers } from '@/lib/personalization/types';
+import { formatAnswerLabel } from '@/lib/casting/answer-labels';
 
 const idealTypeQuestions: { q: string; k: keyof UserAnswers['idealType'] }[] = [
   { q: '어떤 사람이 끌려?', k: 'attractionFactor' },
@@ -40,7 +41,7 @@ export function ApplicationSummary({ userAnswers }: { userAnswers: UserAnswers }
         {idealTypeQuestions.map((row) => (
           <div key={row.k} className="as-row">
             <div className="as-q">{row.q}</div>
-            <div className="as-a">{userAnswers.idealType[row.k]}</div>
+            <div className="as-a">{formatAnswerLabel(userAnswers.idealType[row.k])}</div>
           </div>
         ))}
       </div>
@@ -51,7 +52,7 @@ export function ApplicationSummary({ userAnswers }: { userAnswers: UserAnswers }
           {selfRows.map((row) => (
             <div key={row.k} className="as-row">
               <div className="as-q">{row.q}</div>
-              <div className="as-a">{row.v}</div>
+              <div className="as-a">{formatAnswerLabel(row.v)}</div>
             </div>
           ))}
         </div>

@@ -66,7 +66,7 @@ const COPY_BY_MODE: Record<Mode, ModeCopy> = {
       { text: '패스하시면 그 분께 정중히 전달해드릴게요.' },
     ],
     meetButton: '가볍게 대화하기',
-    passButton: { main: '이번엔 패스할래', sub: '(같은 사람을 두 번 만날 순 없어요🥺)' },
+    passButton: { main: '이번엔 패스할래', sub: '(선택하면 되돌릴 수는 없어요🥺)' },
     afterMeetHeading: '연결되면 문자드릴게요!',
     afterMeetSub: '이 분께 만나고 싶다는 의사를 전해드릴게요. 곧 후속 안내드릴게요!',
     afterPassHeading: '의견 잘 받았어요!',

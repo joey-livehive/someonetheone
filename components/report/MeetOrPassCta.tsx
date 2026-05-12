@@ -68,7 +68,7 @@ const COPY_BY_MODE: Record<Mode, ModeCopy> = {
     meetButton: '가볍게 대화하기',
     passButton: { main: '이번엔 패스할래', sub: '(같은 사람을 두 번 만날 순 없어요🥺)' },
     afterMeetHeading: '연결되면 문자드릴게요!',
-    afterMeetSub: '상대의 수락 여부를 확인해, 문자로 안내드릴게요!',
+    afterMeetSub: '이 분께 만나고 싶다는 의사를 전해드릴게요. 곧 후속 안내드릴게요!',
     afterPassHeading: '의견 잘 받았어요!',
     afterPassSub: '발신자에게 정중히 전달드릴게요🥺',
     feedbackHeadingMeet: '한 마디 남겨줄래요?',
@@ -96,14 +96,19 @@ function tokenFromUrl(): string | null {
   return sp.get('t') || sp.get('token');
 }
 
-async function postCta(reportId: string, action: ApiActionType, feedback?: string): Promise<void> {
+async function postCta(
+  reportId: string,
+  action: ApiActionType,
+  feedback?: string,
+  phone?: string,
+): Promise<void> {
   const token = tokenFromUrl();
   const url = new URL(`${API_BASE}/casting/reports/${reportId}/public-cta`);
   if (token) url.searchParams.set('token', token);
   const res = await fetch(url.toString(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action_type: action, feedback }),
+    body: JSON.stringify({ action_type: action, feedback, phone }),
     keepalive: true,
   });
   if (!res.ok) {
@@ -120,9 +125,11 @@ interface Props {
   step1Note?: string;
   /** caster(기본) = 의뢰인이 후보 카드 결정. receiver = like 받은 사람이 만남 결정. */
   mode?: Mode;
+  /** connection 페이지에서 전화번호 gate 통과 후 CTA 직접 호출 방지용으로 전달. */
+  phone?: string;
 }
 
-export function MeetOrPassCta({ reportId, initialCta, step1Note, mode = 'caster' }: Props) {
+export function MeetOrPassCta({ reportId, initialCta, step1Note, mode = 'caster', phone }: Props) {
   const [stage, setStage] = useState<Stage>(() => stageFromCta(initialCta));
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -137,7 +144,7 @@ export function MeetOrPassCta({ reportId, initialCta, step1Note, mode = 'caster'
     setError(null);
     try {
       const action = next === 'meet_done' ? copy.apiAction.meet : copy.apiAction.pass;
-      await postCta(reportId, action);
+      await postCta(reportId, action, undefined, phone);
       setStage(next);
     } catch {
       setError('네트워크 오류가 났어요. 잠시 뒤 다시 시도해주세요.');
@@ -231,7 +238,7 @@ export function MeetOrPassCta({ reportId, initialCta, step1Note, mode = 'caster'
     setError(null);
     try {
       const action = isMeet ? copy.apiAction.meet : copy.apiAction.pass;
-      await postCta(reportId, action, feedback.trim());
+      await postCta(reportId, action, feedback.trim(), phone);
       setSubmitted(true);
     } catch {
       setError('전송에 실패했어요. 잠시 뒤 다시 시도해주세요.');

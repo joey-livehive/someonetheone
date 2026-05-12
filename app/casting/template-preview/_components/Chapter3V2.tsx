@@ -41,11 +41,15 @@ export function Chapter3V2({ match, number = 'CHAPTER 3' }: Chapter3V2Props) {
       {/* 레이더 차트 */}
       <RadarChart data={match.radarData} />
 
-      {/* 범례 — 차트 아래 */}
+      {/* 범례 — 차트 아래 (의뢰인 점선 검정 / 상대 주황). RadarChart 의 dataset 색상과 정합. */}
       <div className="flex justify-center gap-5 mt-3 mb-4 text-[13px] text-brand-ink-soft">
         <span className="flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded-[3px] border-2 border-dashed border-brand-ink bg-brand-ink/10" />
+          의뢰인
+        </span>
+        <span className="flex items-center gap-1.5">
           <span className="inline-block w-3 h-3 rounded-[3px] bg-brand-orange" />
-          일치도
+          상대
         </span>
       </div>
 

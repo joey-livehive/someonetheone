@@ -19,22 +19,46 @@ export function RadarChart({ data }: { data: MatchAnalysis['radarData'] }) {
     if (!canvasRef.current) return;
     if (chartRef.current) chartRef.current.destroy();
 
+    // ownerValues/partnerValues 가 있으면 2 dataset (의뢰인 + 상대 겹쳐 그림),
+    // 없으면 옛 단일 values 모드 (backward compat).
+    const datasets =
+      data.ownerValues && data.partnerValues
+        ? [
+            {
+              label: '의뢰인',
+              data: visibleRadarValues(data.ownerValues),
+              backgroundColor: 'rgba(28, 26, 23, 0.10)',
+              borderColor: '#1C1A17',
+              borderWidth: 2,
+              borderDash: [4, 4],
+              pointBackgroundColor: '#1C1A17',
+              pointRadius: 3,
+            },
+            {
+              label: '상대',
+              data: visibleRadarValues(data.partnerValues),
+              backgroundColor: 'rgba(236, 106, 61, 0.3)',
+              borderColor: '#EC6A3D',
+              borderWidth: 2,
+              pointBackgroundColor: '#EC6A3D',
+              pointRadius: 4,
+            },
+          ]
+        : [
+            {
+              label: '일치도',
+              data: visibleRadarValues(data.values ?? []),
+              backgroundColor: 'rgba(236, 106, 61, 0.3)',
+              borderColor: '#EC6A3D',
+              borderWidth: 2,
+              pointBackgroundColor: '#EC6A3D',
+              pointRadius: 4,
+            },
+          ];
+
     chartRef.current = new Chart(canvasRef.current, {
       type: 'radar',
-      data: {
-        labels: data.labels,
-        datasets: [
-          {
-            label: '일치도',
-            data: visibleRadarValues(data.values),
-            backgroundColor: 'rgba(236, 106, 61, 0.3)',
-            borderColor: '#EC6A3D',
-            borderWidth: 2,
-            pointBackgroundColor: '#EC6A3D',
-            pointRadius: 4,
-          },
-        ],
-      },
+      data: { labels: data.labels, datasets },
       options: {
         responsive: true,
         maintainAspectRatio: true,

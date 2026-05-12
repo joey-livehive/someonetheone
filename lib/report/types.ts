@@ -64,8 +64,12 @@ export interface MatchAnalysis {
   topPercent: number;
   radarData: {
     labels: string[];
-    /** 일치도 기반 6축 값 (0~10). max(viewer, candidate) × alignment */
-    values: number[];
+    /** 옛 호환 — 단일 dataset (deprecated, ownerValues/partnerValues 우선) */
+    values?: number[];
+    /** owner(의뢰인) 축 값 (0~10) — 의뢰인이 원하는 사람의 형태 */
+    ownerValues?: number[];
+    /** partner(상대) 축 값 (0~10) — 실제 상대의 형태 */
+    partnerValues?: number[];
   };
   simulation: string;
   notes: string[];

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { track } from '@/lib/report/tracking';
 
 type Mode = 'caster' | 'receiver';
 type Stage = 'idle' | 'meet_done' | 'pass_done';
@@ -145,6 +146,7 @@ export function MeetOrPassCta({ reportId, initialCta, step1Note, mode = 'caster'
     try {
       const action = next === 'meet_done' ? copy.apiAction.meet : copy.apiAction.pass;
       await postCta(reportId, action, undefined, phone);
+      track('casting_cta_decision', { reportId, mode, action });
       setStage(next);
     } catch {
       setError('네트워크 오류가 났어요. 잠시 뒤 다시 시도해주세요.');
@@ -239,6 +241,7 @@ export function MeetOrPassCta({ reportId, initialCta, step1Note, mode = 'caster'
     try {
       const action = isMeet ? copy.apiAction.meet : copy.apiAction.pass;
       await postCta(reportId, action, feedback.trim(), phone);
+      track('casting_cta_feedback', { reportId, mode, action, hasFeedback: true });
       setSubmitted(true);
     } catch {
       setError('전송에 실패했어요. 잠시 뒤 다시 시도해주세요.');

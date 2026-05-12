@@ -1,10 +1,17 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { track } from '@/lib/report/tracking';
-import { castingFetch, getCastingGuestUid, setCastingUserSession } from '@/lib/casting/api';
+import {
+  castingFetch,
+  castingFetchUser,
+  getCastingGuestUid,
+  getCastingUserToken,
+  setCastingUserSession,
+} from '@/lib/casting/api';
 
 type ConfirmStatus = 'confirming' | 'paid' | 'error';
 type SignupStatus = 'idle' | 'sending' | 'completed' | 'error';
@@ -50,7 +57,8 @@ function SuccessInner() {
     }
     setOrderId(orderIdParam);
 
-    castingFetch<{ status: string; order_id: string }>(
+    const confirm = getCastingUserToken() ? castingFetchUser : castingFetch;
+    confirm<{ status: string; order_id: string; signup_required?: boolean; redirect_to?: string | null }>(
       '/casting/payments/toss/confirm',
       {
         method: 'POST',
@@ -63,6 +71,10 @@ function SuccessInner() {
     )
       .then((data) => {
         if (data.status === 'success') {
+          if (data.signup_required === false) {
+            router.replace(data.redirect_to || '/me');
+            return;
+          }
           setConfirmStatus('paid');
           track('purchase_complete', { orderId: orderIdParam, amount: Number(amount) }, {
             pixel: 'Purchase',
@@ -78,7 +90,7 @@ function SuccessInner() {
         }
       })
       .catch(() => setConfirmStatus('error'));
-  }, [params]);
+  }, [params, router]);
 
   useEffect(() => {
     if (!orderId) return;
@@ -274,12 +286,15 @@ function SuccessInner() {
               className="w-full h-12 px-4 rounded-[12px] bg-white border border-[#1C1A17]/15 text-[15px] text-[#1C1A17] placeholder:text-[#8A8275]"
             />
             <input
-              type="password"
-              autoComplete="new-password"
+              type="text"
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
               placeholder="비밀번호 (8자 이상)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               minLength={8}
+              style={{ WebkitTextSecurity: 'disc' } as CSSProperties}
               className="w-full h-12 px-4 rounded-[12px] bg-white border border-[#1C1A17]/15 text-[15px] text-[#1C1A17] placeholder:text-[#8A8275]"
             />
             <input

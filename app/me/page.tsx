@@ -9,7 +9,7 @@ import {
 } from '@/lib/casting/api';
 
 import { C } from './_lib/tokens';
-import { formatPhone } from './_lib/format';
+import { formatPhone, formatWon } from './_lib/format';
 import { isEnded } from './_lib/derive';
 import type { DashboardResponse, Match } from './_lib/types';
 
@@ -24,6 +24,20 @@ const isDev = process.env.NODE_ENV !== 'production';
 const DEV_MOCK_TOKEN = 'mock';
 
 type LoadState = 'loading' | 'ready' | 'unauth' | 'error';
+type RechargeState = 'idle' | 'starting' | 'error';
+type RechargePlan = {
+  id: 'starter' | 'regular' | 'premium';
+  name: string;
+  credits: number;
+  price: number;
+  recommended?: boolean;
+};
+
+const RECHARGE_PLANS: RechargePlan[] = [
+  { id: 'starter', name: '스타터', credits: 5, price: 39_900 },
+  { id: 'regular', name: '레귤러', credits: 10, price: 69_900, recommended: true },
+  { id: 'premium', name: '프리미엄', credits: 20, price: 99_900 },
+];
 
 function MeInner() {
   const router = useRouter();
@@ -37,6 +51,9 @@ function MeInner() {
   const [phoneState, setPhoneState] = useState<PhoneState>('idle');
   const [message, setMessage] = useState('');
   const [usingMock, setUsingMock] = useState(false);
+  const [rechargeOpen, setRechargeOpen] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<RechargePlan['id']>('regular');
+  const [rechargeState, setRechargeState] = useState<RechargeState>('idle');
 
   const applyData = useCallback((next: DashboardResponse) => {
     setData(next);
@@ -142,6 +159,38 @@ function MeInner() {
     }
   }
 
+  async function startRecharge() {
+    if (rechargeState === 'starting') return;
+    const plan = RECHARGE_PLANS.find((item) => item.id === selectedPlanId);
+    if (!plan) return;
+
+    setRechargeState('starting');
+    setMessage('');
+    try {
+      const order = await castingFetchUser<{ order_id: string; amount: number }>('/casting/me/orders', {
+        method: 'POST',
+        body: JSON.stringify({ product_id: plan.id }),
+      });
+      const toss = await castingFetchUser<{ checkout?: { url: string } }>('/casting/payments/toss/start', {
+        method: 'POST',
+        body: JSON.stringify({
+          order_id: order.order_id,
+          amount: order.amount,
+          order_name: `casting ${plan.name}`,
+        }),
+      });
+      if (toss.checkout?.url) {
+        window.location.href = toss.checkout.url;
+        return;
+      }
+      throw new Error('checkout_url_missing');
+    } catch (err) {
+      console.error('[casting_recharge_error]', err);
+      setRechargeState('error');
+      setMessage('결제 준비 중 오류가 발생했어. 잠시 후 다시 시도해줘.');
+    }
+  }
+
   function logout() {
     clearCastingUserSession();
     router.replace('/casting/auth/login');
@@ -222,7 +271,18 @@ function MeInner() {
         )}
 
         <Section title="구매 내역" count={paidOrders(data).length}>
-          <CreditWithRecharge credits={data.credits} />
+          <CreditWithRecharge
+            credits={data.credits}
+            onRecharge={() => {
+              setRechargeOpen(true);
+              setRechargeState('idle');
+            }}
+          />
+          {rechargeState === 'error' && message && (
+            <p className="text-xs" style={{ color: C.bad }}>
+              {message}
+            </p>
+          )}
           {paidOrders(data).length === 0 ? (
             <EmptyHint msg="아직 결제 완료된 구매 내역이 없어요." />
           ) : (
@@ -232,9 +292,87 @@ function MeInner() {
 
         <MatchProgress active={active} ended={ended} phoneVerified={data.phone_verified} />
 
-        <RechargeCta balance={data.credits.balance} />
+        <RechargeCta
+          balance={data.credits.balance}
+          onRecharge={() => {
+            setRechargeOpen(true);
+            setRechargeState('idle');
+          }}
+        />
       </div>
+      <RechargeSheet
+        open={rechargeOpen}
+        selectedPlanId={selectedPlanId}
+        state={rechargeState}
+        onSelect={setSelectedPlanId}
+        onClose={() => setRechargeOpen(false)}
+        onSubmit={startRecharge}
+      />
     </main>
+  );
+}
+
+function RechargeSheet(props: {
+  open: boolean;
+  selectedPlanId: RechargePlan['id'];
+  state: RechargeState;
+  onSelect: (id: RechargePlan['id']) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  if (!props.open) return null;
+  const selected = RECHARGE_PLANS.find((plan) => plan.id === props.selectedPlanId)!;
+  return (
+    <>
+      <div className="fixed inset-0 z-[200] bg-black/45" onClick={props.onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="만남권 충전"
+        className="fixed bottom-0 left-0 right-0 z-[210] mx-auto max-w-xl rounded-t-[28px] px-5 pb-6 pt-4"
+        style={{ background: C.bg, border: `2px solid ${C.ink}`, paddingBottom: 'calc(24px + env(safe-area-inset-bottom))' }}
+      >
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: `${C.ink}33` }} />
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold" style={{ color: C.ink }}>만남권 충전하기</h2>
+          <button type="button" onClick={props.onClose} className="text-2xl" style={{ color: C.ink }} aria-label="닫기">×</button>
+        </div>
+        <div className="space-y-2">
+          {RECHARGE_PLANS.map((plan) => {
+            const active = plan.id === props.selectedPlanId;
+            return (
+              <button
+                key={plan.id}
+                type="button"
+                onClick={() => props.onSelect(plan.id)}
+                className="flex w-full items-center justify-between rounded-2xl bg-white p-4 text-left"
+                style={{ border: `2px solid ${C.ink}`, boxShadow: active ? `3px 3px 0 ${C.ink}` : 'none' }}
+              >
+                <span>
+                  <span className="block text-sm font-bold" style={{ color: C.ink }}>
+                    {plan.name} · {plan.credits}장
+                    {plan.recommended && <span className="ml-2 text-[11px]" style={{ color: C.accent }}>추천</span>}
+                  </span>
+                  <span className="mt-1 block text-xs" style={{ color: C.muted }}>
+                    1장당 {Math.round(plan.price / plan.credits).toLocaleString('ko-KR')}원
+                  </span>
+                </span>
+                <span className="text-sm font-black" style={{ color: C.ink }}>{formatWon(plan.price)}</span>
+              </button>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          onClick={props.onSubmit}
+          disabled={props.state === 'starting'}
+          className="mt-5 h-12 w-full rounded-full text-sm font-black disabled:opacity-60"
+          style={{ background: C.gold, color: C.ink, border: `2px solid ${C.ink}`, boxShadow: `3px 3px 0 ${C.ink}` }}
+        >
+          {props.state === 'starting' ? '결제 준비 중...' : `${selected.credits}장 결제하기`}
+        </button>
+      </div>
+    </>
   );
 }
 

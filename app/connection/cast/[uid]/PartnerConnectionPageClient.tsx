@@ -48,6 +48,7 @@ const RECEIVER_COPY = {
 
 export function PartnerConnectionPageClient({ uid }: { uid: string }) {
   const [report, setReport] = useState<ConnectionReport | null>(null);
+  const [verifiedPhone, setVerifiedPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +61,7 @@ export function PartnerConnectionPageClient({ uid }: { uid: string }) {
     setError(null);
     try {
       setReport(await fetchPartnerConnectionReport(uid, phone));
+      setVerifiedPhone(phone);
     } catch (err) {
       if (err instanceof ConnectionReportFetchError && err.status === 403) {
         setError('전화번호가 일치하지 않아요.');
@@ -171,7 +173,7 @@ export function PartnerConnectionPageClient({ uid }: { uid: string }) {
         </div>
 
         {showApplicationSummary && <ApplicationSummary userAnswers={ownerAnswers} />}
-        <MeetOrPassCta reportId={uid} mode="receiver" />
+        <MeetOrPassCta reportId={uid} mode="receiver" phone={verifiedPhone} />
 
         <div className="px-7 mt-10 mb-2 text-center text-[12px] text-brand-ink-mute">
           문의:{' '}

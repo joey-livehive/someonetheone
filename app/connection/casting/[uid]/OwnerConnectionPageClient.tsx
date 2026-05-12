@@ -44,6 +44,7 @@ const INSTA_CTA_STEP1_NOTE =
 
 export function OwnerConnectionPageClient({ uid }: { uid: string }) {
   const [report, setReport] = useState<ConnectionReport | null>(null);
+  const [verifiedPhone, setVerifiedPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +57,7 @@ export function OwnerConnectionPageClient({ uid }: { uid: string }) {
     setError(null);
     try {
       setReport(await fetchOwnerConnectionReport(uid, phone));
+      setVerifiedPhone(phone);
     } catch (err) {
       if (err instanceof ConnectionReportFetchError && err.status === 403) {
         setError('전화번호가 일치하지 않아요.');
@@ -178,7 +180,7 @@ export function OwnerConnectionPageClient({ uid }: { uid: string }) {
         </div>
 
         <ApplicationSummary userAnswers={userAnswers} />
-        <MeetOrPassCta reportId={uid} />
+        <MeetOrPassCta reportId={uid} phone={verifiedPhone} />
 
         <div className="px-7 mt-10 mb-2 text-center text-[12px] text-brand-ink-mute">
           문의:{' '}

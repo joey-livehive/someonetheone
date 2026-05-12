@@ -52,7 +52,7 @@ const FEMALE_CARDS: CardData[] = [
 type ReportState =
   | { status: 'idle' }
   | { status: 'generating'; reportId: string }
-  | { status: 'ready'; reportId: string; gender: string }
+  | { status: 'published'; reportId: string; gender: string }
   | { status: 'failed'; reportId: string };
 
 type Stage = 'analyzing' | 'phone' | 'waiting' | 'failed';
@@ -87,11 +87,11 @@ export default function LoadingPage() {
         const res = await fetch(`${API_BASE}/casting/preview-reports/${reportId}`);
         if (!res.ok) return;
         const data = await res.json();
-        if (data.status === 'ready') {
+        if (data.status === 'published') {
           stopPolling();
           const rawGender = data.user_answers?.selfInfo?.gender || '';
           const g = (rawGender === '여자' || rawGender === '여성' || rawGender === 'female') ? 'F' : 'M';
-          const state: ReportState = { status: 'ready', reportId, gender: g };
+          const state: ReportState = { status: 'published', reportId, gender: g };
           reportRef.current = state;
           setReportState(state);
         } else if (data.status === 'failed') {
@@ -200,7 +200,7 @@ export default function LoadingPage() {
 
   function navigateToReport() {
     const current = reportRef.current;
-    if (current.status === 'ready') {
+    if (current.status === 'published') {
       router.push(`/report/${current.gender}/${current.reportId}`);
     }
   }
@@ -229,7 +229,7 @@ export default function LoadingPage() {
     trackPhone(digits);
 
     const current = reportRef.current;
-    if (current.status === 'ready') {
+    if (current.status === 'published') {
       navigateToReport();
     } else if (current.status === 'failed') {
       setStage('failed');
@@ -238,9 +238,9 @@ export default function LoadingPage() {
     }
   }
 
-  // report ready 감지 — waiting 상태에서 ready 되면 바로 이동
+  // report published 감지 — waiting 상태에서 published 되면 바로 이동
   useEffect(() => {
-    if (stage === 'waiting' && reportState.status === 'ready') {
+    if (stage === 'waiting' && reportState.status === 'published') {
       navigateToReport();
     } else if (stage === 'waiting' && reportState.status === 'failed') {
       setStage('failed');

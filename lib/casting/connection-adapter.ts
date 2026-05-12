@@ -13,6 +13,7 @@ import type { Candidate, MatchAnalysis } from '@/lib/report/types';
 import type { UserAnswers } from '@/lib/personalization/types';
 import type { BipolarAxis } from '@/app/casting/insta-template-preview/_components/Chapter3InstaSpectrum';
 import type { AxisName, ConnectionReport, Gender, Perspective } from './connection-report';
+import { formatAnswerLabel } from './answer-labels';
 
 export const FIXED_USER_NAME = '의뢰인';
 
@@ -125,7 +126,7 @@ function participantToCandidate(
       basics.job_detail || occupationLabelOf(basics.occupation) || basics.occupation_band || '',
     occupationDetail: basics.job_detail || '',
     personality: '',
-    location: basics.region_code || '',
+    location: formatAnswerLabel(basics.region_code),
     foundAt,
     hobbies: { visible: [], hidden: 0 },
     daySchedule: [],

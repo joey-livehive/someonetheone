@@ -15,10 +15,17 @@ const C = {
 type Mode = 'password' | 'magic';
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
+/** `?next=` open-redirect 가드 — 내부 path 만 허용 (외부 URL `//evil.com`, `https://evil.com` 차단). */
+function safeNext(raw: string | null): string {
+  if (!raw) return '/me';
+  if (!raw.startsWith('/') || raw.startsWith('//')) return '/me';
+  return raw;
+}
+
 function LoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get('next') || '/me';
+  const nextPath = safeNext(searchParams.get('next'));
 
   const [mode, setMode] = useState<Mode>('password');
   const [email, setEmail] = useState('');

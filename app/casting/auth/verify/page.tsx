@@ -41,7 +41,7 @@ function VerifyInner() {
     })
       .then((data) => {
         setCastingUserSession(data.user_uid, data.auth_token);
-        const target = data.redirect_to || '/casting/me';
+        const target = data.redirect_to || '/me';
         router.replace(target);
       })
       .catch((err: Error) => {

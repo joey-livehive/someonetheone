@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { castingFetch, setCastingUserSession } from '@/lib/casting/api';
 
@@ -187,6 +188,37 @@ function LoginInner() {
             </button>
           </form>
         )}
+        <section
+          className="mt-6 rounded-2xl p-5"
+          style={{
+            background: '#FFFFFF',
+            border: `2px solid ${C.ink}`,
+          }}
+        >
+          <p className="text-sm font-bold" style={{ color: C.ink }}>
+            처음이거나 결제했던 기록을 찾고 싶나요?
+          </p>
+          <p className="mt-2 text-xs" style={{ color: C.muted, lineHeight: 1.6 }}>
+            새로 시작하려면 가입 설문을 진행해 주세요. 이미 결제나 매칭 기록이 있으면 로그인 후
+            마이페이지에서 전화번호 인증으로 기존 기록을 연결할 수 있어요.
+          </p>
+          <div className="mt-4 flex gap-2">
+            <Link
+              href="/start"
+              className="flex-1 rounded-full px-4 py-3 text-center text-sm font-bold"
+              style={{ color: C.ink, background: C.gold, border: `2px solid ${C.ink}` }}
+            >
+              새로 시작
+            </Link>
+            <Link
+              href="/me"
+              className="flex-1 rounded-full px-4 py-3 text-center text-sm font-bold"
+              style={{ color: C.ink, background: '#FFFFFF', border: `2px solid ${C.ink}` }}
+            >
+              기록 연결
+            </Link>
+          </div>
+        </section>
       </div>
     </main>
   );

@@ -53,6 +53,18 @@ export function MatchCard({ match }: { match: Match }) {
           )}
         </div>
 
+        {match.partner_image_url && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={match.partner_image_url}
+              alt=""
+              className="mt-4 h-56 w-full rounded-2xl object-cover"
+              style={{ border: `2px solid ${C.ink}` }}
+            />
+          </>
+        )}
+
         {(match.partner_job || match.partner_age) && (
           <p className="mt-2 text-base font-bold" style={{ color: C.ink }}>
             {match.partner_job ?? '직업 미상'}

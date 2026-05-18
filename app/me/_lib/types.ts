@@ -20,16 +20,39 @@ export type Stage = 'preparing' | 'ready' | 'contact_requested' | 'connected' | 
 export type ReportStatus = 'queued' | 'generating' | 'published' | 'failed';
 
 export type DashboardMatch = {
-  report_uid: string;
-  status: ReportStatus | string;
+  matching_uid?: string | null;
+  matching_status?: string | null;
+  report_uid: string | null;
+  owner_report_uid?: string | null;
+  partner_report_uid?: string | null;
+  status: ReportStatus | string | null;
   stage: Stage | string;
   partner_source: string | null;
+  partner_uid?: string | null;
   score: number | null;
   order_id: string | null;
   report_url: string | null;
+  viewer_action?: 'none' | 'like' | 'pass' | 'contact_request' | 'receiver_accept' | 'receiver_decline' | 'block' | 'report';
   contact_requested_at: string | null;
   mutual_match_at: string | null;
   outreach_status: string | null;
+  matched_at?: string | null;
+  owner_notified_at?: string | null;
+  story_tagged_at?: string | null;
+  asked_at?: string | null;
+  partner_replied_at?: string | null;
+  partner_accepted_at?: string | null;
+  partner_declined_at?: string | null;
+  signed_up_at?: string | null;
+  contacts_shared_at?: string | null;
+  owner_notified_declined_at?: string | null;
+  cancelled_at?: string | null;
+  partner_nickname?: string | null;
+  partner_age?: number | null;
+  partner_region?: string | null;
+  partner_job?: string | null;
+  partner_tagline?: string | null;
+  partner_image_url?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -60,7 +83,6 @@ export type MockMatchExtras = {
   partner_region?: string;
   partner_job?: string;
   partner_tagline?: string;
-  viewer_action?: 'none' | 'like' | 'pass' | 'contact_request' | 'block' | 'report';
   ended_at?: string;
 };
 

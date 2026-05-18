@@ -53,7 +53,7 @@ export function deriveStatusLabel(m: Match): { label: string; tone: Tone } {
     case 'ready':
       return { label: '아직 결정 안 함', tone: 'pending' };
     case 'contact_requested':
-      return m.mutual_match_at
+      return m.partner_accepted_at || m.mutual_match_at
         ? { label: '상대 수락 · 연락처 공유 임박', tone: 'good' }
         : { label: '상대에게 연락 중', tone: 'progress' };
     case 'connected':
@@ -94,10 +94,19 @@ function addMs(iso: string, ms: number): string {
   return new Date(new Date(iso).getTime() + ms).toISOString();
 }
 
+function pushEvent(
+  events: TimelineEvent[],
+  at: string | null | undefined,
+  label: string,
+  by: TimelineEvent['by'],
+) {
+  if (at) events.push({ at, label, by });
+}
+
 /** DashboardMatch 의 timestamp 필드들로 사람이 읽는 진행 이벤트 줄을 만든다. */
 export function deriveTimeline(m: Match): TimelineEvent[] {
   const events: TimelineEvent[] = [
-    { at: m.created_at, label: '매칭 리포트 발급', by: 'system' },
+    { at: m.matched_at ?? m.created_at, label: '매칭 카드 생성', by: 'system' },
   ];
 
   if (m.viewer_action === 'pass') {
@@ -105,22 +114,37 @@ export function deriveTimeline(m: Match): TimelineEvent[] {
     return events;
   }
 
+  pushEvent(events, m.owner_notified_at, '카드 안내 발송', 'operator');
+
   if (m.contact_requested_at) {
     events.push({ at: m.contact_requested_at, label: '의뢰인님이 연결 요청', by: 'me' });
     const operatorLabel = isExternalSource(m.partner_source)
       ? '운영자가 상대에게 DM 시도'
       : '운영자가 상대에게 연락 시작';
-    events.push({ at: addMs(m.contact_requested_at, 4 * HOURS), label: operatorLabel, by: 'operator' });
+    events.push({
+      at: m.asked_at ?? addMs(m.contact_requested_at, 4 * HOURS),
+      label: operatorLabel,
+      by: 'operator',
+    });
   }
 
-  if (m.mutual_match_at) {
-    events.push({ at: m.mutual_match_at, label: '상대가 연결 수락', by: 'partner' });
-  }
+  pushEvent(events, m.story_tagged_at, '스토리 태그 완료', 'operator');
+  pushEvent(events, m.partner_replied_at, '상대가 응답', 'partner');
+  pushEvent(events, m.partner_accepted_at ?? m.mutual_match_at, '상대가 연결 수락', 'partner');
+  pushEvent(events, m.signed_up_at, '상대가 가입 완료', 'partner');
+  pushEvent(events, m.partner_declined_at, '상대가 거절', 'partner');
+  pushEvent(events, m.owner_notified_declined_at, '거절 안내 발송', 'operator');
+  pushEvent(events, m.cancelled_at, '매칭 종료', 'system');
 
-  if (m.stage === 'connected') {
-    events.push({ at: m.updated_at, label: '연락처 공유 완료', by: 'system' });
+  if (m.contacts_shared_at || m.stage === 'connected') {
+    events.push({ at: m.contacts_shared_at ?? m.updated_at, label: '연락처 공유 완료', by: 'system' });
   } else if (m.stage === 'failed') {
-    events.push({ at: m.updated_at, label: '상대가 응답 없음 / 거절', by: 'partner' });
+    const alreadyHasFailure = events.some(
+      (event) => event.label === '상대가 거절' || event.label === '매칭 종료',
+    );
+    if (!alreadyHasFailure) {
+      events.push({ at: m.updated_at, label: '상대가 응답 없음 / 거절', by: 'partner' });
+    }
   }
 
   return events;
